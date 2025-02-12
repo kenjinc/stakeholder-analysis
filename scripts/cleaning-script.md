@@ -1,6 +1,6 @@
 Cleaning Script
 ================
-Last Updated: February 11, 2025
+Last Updated: February 12, 2025
 
 ## Package Loading
 
@@ -36,7 +36,7 @@ library(maps)
 
 ``` r
 survey_data <- read.csv("/Users/kenjinchang/github/stakeholder-analysis/data/parent-files/survey-data.csv")
-extraction_data <-read.csv("/Users/kenjinchang/github/stakeholder-analysis/data/parent-files/extraction-data.csv")
+extraction_data <- read.csv("/Users/kenjinchang/github/stakeholder-analysis/data/parent-files/extraction-data.csv")
 ```
 
 ## Data Cleaning: Scoping Review
@@ -70,24 +70,64 @@ range for each of the 42 originally extracted variables:
   investigation (single-site for study’s localized to one
   treatment-receiving university or multi-site for study’s implemented
   across multiple treatment-receiving universities).
-- `nation_list`: a duplicate-allowing list pairing the ISO
-  (International Organization for Standardization) country associated
-  with each participating treatment-receiving university.
-- `nation_list_count`: the total number of countries listed.
-- `nation_var`:
-- `nation_var_count`:
-- `us_state_list`:
-- `us_state_list_count`:
-- `us_state_var`:
-- `us_state_var_count`:
-- `uk_country`:
-- `strategy_list`:
-- `approach_cat`:
-- `target_list`:
-- `breadth_cat`:
-- `design`:
-- `principal_indicator_list`:
-- `principal_indicator_list_count`:
+- `nation_list`: a duplicate-allowing list pairing the participating
+  treatment-receiving universities mentioned in each study with the ISO
+  (International Organization for Standardization) countries in which
+  they are located.
+- `nation_list_count`: the total number of unique and duplicate ISO
+  countries associated with the participating treatment-receiving
+  universities mentioned in each study.
+- `nation_var`: a non-duplicate-allowing list pairing the participating
+  treatment-receiving universities mentioned in each study with the ISO
+  countries in which they are located.
+- `nation_var_count`: the total number of unique ISO countries
+  associated with the participating treatment-receiving universities
+  mentioned in each study.
+- `us_state_list`: a conditional, duplicate-allowing list pairing the
+  participating treatment-receiving universities mentioned in each study
+  with the U.S. state in which they are located.
+- `us_state_list_count`: the total number of unique and duplicate U.S.
+  states associated with the participating treatment-receiving
+  universities mentioned in each study.
+- `us_state_var`: a conditional, non-duplicate-allowing list pairing the
+  participating treatment-receiving universities mentioned in each study
+  with the U.S. states in which they are located.
+- `us_state_var_count`: the total number of unique U.S. states
+  associated with the participating treatment-receiving universities
+  mentioned in each study.
+- `uk_country_list`: a conditional, duplicate-allowing list pairing the
+  participating treatment-receiving universities mentioned in each study
+  with the U.K. country in which they are located.
+- `uk_country_list_count`: the total number of unique and duplicate U.K.
+  countries associated with the participating treatment-receiving
+  universities mentioned each study.
+- `uk_country_var`: a conditional, non-duplicate allowing list pairing
+  the participating treatment-receiving universities mentioned in each
+  study with the U.K. countries in which they are located.
+- `uk_country_var_count`: the total number of unique U.K. countries
+  associated with the participating treatment-receiving universities
+  mentioned in each study.
+- `strategy_list`: a duplicate-allowing list pairing the reported
+  intervention components mentioned in each study with the specific
+  behavioral strategies being leveraged.
+- `approach_cat`: the diagnosed behavioral approach associated with each
+  study, based on the strategies mapping on to each study’s reported
+  intervention components.
+- `target_list`: a duplicate-allowing list pairing the reported
+  intervention components mentioned in each study with the specific
+  socio-ecological tiers being targeted.
+- `breadth_cat`: the diagnosed breadth of change associated each study,
+  based on the socio-ecological tiers mapping on to each study’s
+  reported intervention components.
+- `design`: the research design of the included study, as determined by
+  the nature of comparison being made (between, within, or between and
+  within).
+- `principal_indicator_list`: a duplicate-allowing list outlining the
+  primary outcome measures being used to document changes to food
+  selection or food service in response to the study’s reported
+  intervention.
+- `principal_indicator_list_count`: the total number of unique and
+  duplicate primary outcome measures being
 - `principal_indicator_var`:
 - `principal_indicator_var_count`:
 - `accessory_indicator_list`:
@@ -317,17 +357,82 @@ national_frequencies
 
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
+``` r
+usa_shapefile <- map_data("state") %>%
+  rename(state=region)
+```
+
+``` r
+extraction_data %>%
+  select(us_state_var,university_count) %>%
+  rename(region=us_state_var) %>%
+  group_by(region) %>%
+  summarise(count=sum(university_count)) %>%
+  separate_longer_delim(c(region,count),delim=";") 
+```
+
+    ## # A tibble: 43 × 2
+    ##    region          count
+    ##    <chr>           <chr>
+    ##  1 "Alabama"       8    
+    ##  2 " Maine"        8    
+    ##  3 " Michigan"     8    
+    ##  4 " New York"     8    
+    ##  5 " Pennsylvania" 8    
+    ##  6 " Rhode Island" 8    
+    ##  7 " South Dakota" 8    
+    ##  8 " Wisconsin"    8    
+    ##  9 "Arizona"       1    
+    ## 10 "Arkansas"      1    
+    ## # ℹ 33 more rows
+
 ### Primary Performance Indicators
 
+``` r
+extraction_data %>%
+  select(principal_indicator_var) %>%
+  str_count("Self-Reported Food Choice")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 67
+
+``` r
+extraction_data %>%
+  select(principal_indicator_var) %>%
+  str_count("Observed Food Choice")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 54
+
+``` r
+extraction_data %>%
+  select(principal_indicator_var) %>%
+  str_count("Intended Food Choice")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 35
+
+``` r
+extraction_data %>%
+  select(principal_indicator_var) %>%
+  str_count("Observed Food Service")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 2
+
 ### Accessory Performance Indicators
-
-### Performance Qualifiers
-
-### Gap Monitoring
-
-#### Spillover
-
-#### Intention-Behavior Asymmetries
 
 variety
 
@@ -508,5 +613,57 @@ extraction_data %>%
     ## argument is not an atomic vector; coercing
 
     ## [1] 1
+
+### Performance Qualifiers
+
+``` r
+extraction_data %>%
+  select(qualifying_indicator_var) %>%
+  str_count("Demographics")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 87
+
+``` r
+extraction_data %>%
+  select(qualifying_indicator_var) %>%
+  str_count("Lifestyle")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 46
+
+``` r
+extraction_data %>%
+  select(qualifying_indicator_var) %>%
+  str_count("Program Reception")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 39
+
+``` r
+extraction_data %>%
+  select(qualifying_indicator_var) %>%
+  str_count("Situational")
+```
+
+    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
+    ## argument is not an atomic vector; coercing
+
+    ## [1] 29
+
+### Gap Monitoring
+
+#### Spillover
+
+#### Intention-Behavior Asymmetries
 
 ## Data Cleaning: Stakeholder Analysis
