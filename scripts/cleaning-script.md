@@ -215,7 +215,8 @@ temporal_frequencies_plot <- temporal_frequencies %>%
   scale_color_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
   xlab("Publication Year") + 
   ylab("Frequency") + 
-  ylim(0,115) +
+  scale_y_continuous(limits=c(0,120)) +
+  scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
   labs(caption="   ") + 
   theme(legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
@@ -225,14 +226,26 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   geom_col() + 
   xlab("Publication Year") + 
   ylab("Cumulative Frequency") + 
+  scale_y_continuous(limits=c(0,120)) +
+  scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
   labs(caption="Adjusted R-Squared: 0.985 (3sf)") + 
   theme(legend.title.position="none",legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.width=unit(50,"pt"),legend.key.height=unit(7.5,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
-ggarrange(temporal_frequencies_plot,temporal_cumulative_frequencies_plot,
+temporal_plots <- ggarrange(temporal_frequencies_plot,temporal_cumulative_frequencies_plot,
           nrow=2,
           labels=c("A","B"))
+```
+
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_col()`).
+    ## Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_col()`).
+
+``` r
+ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=20,units="cm",dpi=150,limitsize=TRUE)
+temporal_plots
 ```
 
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
@@ -300,7 +313,7 @@ spatial_frequencies <- extraction_data %>%
   mutate(across(country,str_replace,"USA","United States")) %>%
   mutate(across(country,str_replace,"UK","United Kingdom")) %>%
   group_by(country) %>%
-  summarise(count=sum(university_count)) 
+  summarise(frequency=sum(university_count)) 
 ```
 
     ## Warning: There was 1 warning in `mutate()`.
@@ -317,45 +330,49 @@ spatial_frequencies <- extraction_data %>%
 
 ``` r
 spatial_frequencies %>%
-  arrange(desc(count))
+  arrange(desc(frequency))
 ```
 
     ## # A tibble: 17 × 2
-    ##    country          count
-    ##    <chr>            <int>
-    ##  1 "United States"     74
-    ##  2 "United Kingdom"    16
-    ##  3 "Canada"            13
-    ##  4 "Portugal"           7
-    ##  5 "Italy"              6
-    ##  6 "Germany"            4
-    ##  7 "China"              3
-    ##  8 "Sweden"             3
-    ##  9 "Australia"          2
-    ## 10 "Belgium "           2
-    ## 11 "Brazil"             2
-    ## 12 "Netherlands"        2
-    ## 13 "France"             1
-    ## 14 "India"              1
-    ## 15 "Norway"             1
-    ## 16 "Switzerland"        1
-    ## 17 "Thailand"           1
+    ##    country          frequency
+    ##    <chr>                <int>
+    ##  1 "United States"         74
+    ##  2 "United Kingdom"        16
+    ##  3 "Canada"                13
+    ##  4 "Portugal"               7
+    ##  5 "Italy"                  6
+    ##  6 "Germany"                4
+    ##  7 "China"                  3
+    ##  8 "Sweden"                 3
+    ##  9 "Australia"              2
+    ## 10 "Belgium "               2
+    ## 11 "Brazil"                 2
+    ## 12 "Netherlands"            2
+    ## 13 "France"                 1
+    ## 14 "India"                  1
+    ## 15 "Norway"                 1
+    ## 16 "Switzerland"            1
+    ## 17 "Thailand"               1
 
 ``` r
 spatial_frequencies_joined <- left_join(global_shapefile,spatial_frequencies,by="country")
 national_frequencies <- spatial_frequencies_joined %>%
-  ggplot(aes(x=long,y=lat,fill=count,group=group)) + 
-  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
-  scale_y_continuous(limits=c(-60,90)) + 
+  ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
+  geom_polygon(color="black",linewidth=0.125,alpha=0.60) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,title.position="top",title.hjust=0.5,limits=c(1,74))) +
   xlab("") + 
   ylab("") +
+  scale_y_continuous(limits=c(-55,85)) +
   labs(caption="") +
-  theme(legend.key.width=unit(3,"lines"),legend.position="bottom",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 national_frequencies
 ```
 
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+scale_fill_gradient(name=“Count”,low=“lavender”,high=“slateblue4”,limits=c(1,116),na.value=“lavender”,breaks=c(1,29,58,87,116)) +
+scale_color_gradient(name=“Count”,low=“lavender”,high=“slateblue4”,limits=c(1,116),na.value=“lavender”,breaks=c(1,29,58,87,116))
++
 
 ``` r
 usa_shapefile <- map_data("state") %>%
@@ -363,28 +380,120 @@ usa_shapefile <- map_data("state") %>%
 ```
 
 ``` r
-extraction_data %>%
+state_frequencies <- extraction_data %>%
   select(us_state_var,university_count) %>%
   rename(region=us_state_var) %>%
+  separate_longer_delim(c(region,university_count),delim=";") %>%
+  mutate(university_count=as.numeric(university_count)) %>%
   group_by(region) %>%
-  summarise(count=sum(university_count)) %>%
-  separate_longer_delim(c(region,count),delim=";") 
+  summarise(frequency=sum(university_count)) %>%
+  arrange(desc(frequency)) %>%
+  mutate(region=tolower(region)) %>%
+  rename(state=region) 
+state_frequencies
 ```
 
-    ## # A tibble: 43 × 2
-    ##    region          count
-    ##    <chr>           <chr>
-    ##  1 "Alabama"       8    
-    ##  2 " Maine"        8    
-    ##  3 " Michigan"     8    
-    ##  4 " New York"     8    
-    ##  5 " Pennsylvania" 8    
-    ##  6 " Rhode Island" 8    
-    ##  7 " South Dakota" 8    
-    ##  8 " Wisconsin"    8    
-    ##  9 "Arizona"       1    
-    ## 10 "Arkansas"      1    
-    ## # ℹ 33 more rows
+    ## # A tibble: 39 × 2
+    ##    state            frequency
+    ##    <chr>                <dbl>
+    ##  1  <NA>                   65
+    ##  2 "california"            23
+    ##  3 " maine"                 8
+    ##  4 " massachusetts"         8
+    ##  5 " michigan"              8
+    ##  6 " new york"              8
+    ##  7 " pennsylvania"          8
+    ##  8 " rhode island"          8
+    ##  9 " south dakota"          8
+    ## 10 " wisconsin"             8
+    ## # ℹ 29 more rows
+
+Something is wrong with these
+
+``` r
+state_frequencies_joined <- left_join(usa_shapefile,state_frequencies,by="state")
+```
+
+``` r
+usa_frequencies <- state_frequencies_joined %>%
+  ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
+  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
+  xlab("") + 
+  ylab("") +
+  labs(caption="") +
+  coord_map("albers",lat0=45.5,lat1=29.5) +
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+usa_frequencies
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
+uk_shapefile <- map_data("world",region="UK")
+```
+
+``` r
+subnational_frequencies <- extraction_data %>%
+  select(uk_country,university_count) %>%
+  rename(subregion=uk_country) %>%
+  separate_longer_delim(c(subregion,university_count),delim=";") %>%
+  mutate(university_count=as.numeric(university_count)) %>%
+  group_by(subregion) %>%
+  summarise(frequency=sum(university_count)) %>%
+  arrange(desc(frequency)) %>%
+  mutate(across('subregion',str_replace,'England', 'Great Britain'))
+subnational_frequencies
+```
+
+    ## # A tibble: 6 × 2
+    ##   subregion       frequency
+    ##   <chr>               <dbl>
+    ## 1  <NA>                 121
+    ## 2 "Great Britain"        14
+    ## 3 ""                      1
+    ## 4 "Scotland"              1
+    ## 5 "Wales"                 1
+    ## 6 "\\"                    1
+
+``` r
+subnational_frequencies_joined <- left_join(uk_shapefile,subnational_frequencies,by="subregion")
+```
+
+``` r
+uk_frequencies <- subnational_frequencies_joined %>%
+  ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
+  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
+  xlab("") + 
+  ylab("") +
+  labs(caption="") +
+  coord_map() + 
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+uk_frequencies
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+``` r
+subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
+                                         ncol=2,
+                                         widths=c(2,1),
+                                         labels=c("B","C"))
+subnational_frequency_choros
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
+national_frequency_choros <- ggarrange(national_frequencies,
+                                       labels="A")
+national_frequency_choros
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+Something is wrong here too, need to split great britain into parts
 
 ### Primary Performance Indicators
 
