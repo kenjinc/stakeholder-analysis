@@ -229,6 +229,28 @@ usa_shapefile <- map_data("state") %>%
   rename(state=region)
 ```
 
+ppi_frequencies <- extraction_data %>%
+  select(study,principal_indicator_var) %>%
+  separate_longer_delim(c(principal_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(principal_indicator_var) %>%
+  summarise(frequency=sum(count))
+ppi_frequencies 
+
+```{r}
+state_frequencies <- extraction_data %>%
+  select(study,us_state_var) %>%
+  separate_longer_delim(c(us_state_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(us_state_var) %>%
+  summarise(frequency=sum(count)) %>%
+  arrange(desc(frequency)) %>%
+  mutate(us_state_var=tolower(us_state_var)) %>%
+  rename(state=us_state_var)
+state_frequencies 
+```
+
+
 ```{r}
 state_frequencies <- extraction_data %>%
   select(us_state_var,university_count) %>%
@@ -313,7 +335,7 @@ national_frequency_choros
 ```
 
 
-Something is wrong here too, need to split great britain into parts
+Something is wrong here, too, need to split great britain into parts
 
 could try: 
 
@@ -343,6 +365,16 @@ https://bookdown.org/yann_ryan/r-for-newspaper-data/mapping-with-r-geocode-and-m
 ### Primary Performance Indicators
 
 ```{r}
+ppi_frequencies <- extraction_data %>%
+  select(study,principal_indicator_var) %>%
+  separate_longer_delim(c(principal_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(principal_indicator_var) %>%
+  summarise(frequency=sum(count))
+ppi_frequencies 
+```
+
+```{r}
 extraction_data %>%
   select(principal_indicator_var) %>%
   str_count("Self-Reported Food Choice")
@@ -367,6 +399,20 @@ extraction_data %>%
 ```
 
 ### Accessory Performance Indicators
+
+```{r}
+api_frequencies <- extraction_data %>%
+  select(study,accessory_indicator_var) %>%
+  separate_longer_delim(c(accessory_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(accessory_indicator_var) %>%
+  summarise(frequency=sum(count))
+api_frequencies
+```
+
+
+not sure why this isn't collapsing correctly
+
 
 variety
 
@@ -469,6 +515,23 @@ extraction_data %>%
 ```
 
 ### Performance Qualifiers 
+
+api_frequencies <- extraction_data %>%
+  select(study,accessory_indicator_var) %>%
+  separate_longer_delim(c(accessory_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(accessory_indicator_var) %>%
+  summarise(frequency=sum(count))
+api_frequencies
+```{r}
+qpi_frequencies <- extraction_data %>%
+  select(study,qualifying_indicator_var) %>%
+  separate_longer_delim(c(qualifying_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(qualifying_indicator_var) %>%
+  summarise(frequency=sum(count))
+qpi_frequencies
+```
 
 ```{r}
 extraction_data %>%

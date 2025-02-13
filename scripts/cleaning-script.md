@@ -379,6 +379,40 @@ usa_shapefile <- map_data("state") %>%
   rename(state=region)
 ```
 
+ppi_frequencies \<- extraction_data %\>%
+select(study,principal_indicator_var) %\>%
+separate_longer_delim(c(principal_indicator_var),delim=“;”) %\>%
+add_column(count=1) %\>% group_by(principal_indicator_var) %\>%
+summarise(frequency=sum(count)) ppi_frequencies
+
+``` r
+state_frequencies <- extraction_data %>%
+  select(study,us_state_var) %>%
+  separate_longer_delim(c(us_state_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(us_state_var) %>%
+  summarise(frequency=sum(count)) %>%
+  arrange(desc(frequency)) %>%
+  mutate(us_state_var=tolower(us_state_var)) %>%
+  rename(state=us_state_var)
+state_frequencies 
+```
+
+    ## # A tibble: 39 × 2
+    ##    state            frequency
+    ##    <chr>                <dbl>
+    ##  1  <NA>                   61
+    ##  2 "california"            15
+    ##  3 "illinois"               4
+    ##  4 "michigan"               3
+    ##  5 "new york"               3
+    ##  6 "pennsylvania"           3
+    ##  7 "utah"                   3
+    ##  8 " massachusetts"         2
+    ##  9 "arkansas"               2
+    ## 10 "florida"                2
+    ## # ℹ 29 more rows
+
 ``` r
 state_frequencies <- extraction_data %>%
   select(us_state_var,university_count) %>%
@@ -427,7 +461,7 @@ usa_frequencies <- state_frequencies_joined %>%
 usa_frequencies
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 uk_shapefile <- map_data("world",region="UK")
@@ -473,7 +507,7 @@ uk_frequencies <- subnational_frequencies_joined %>%
 uk_frequencies
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
@@ -483,7 +517,7 @@ subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
 subnational_frequency_choros
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
 national_frequency_choros <- ggarrange(national_frequencies,
@@ -491,11 +525,54 @@ national_frequency_choros <- ggarrange(national_frequencies,
 national_frequency_choros
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
-Something is wrong here too, need to split great britain into parts
+Something is wrong here, too, need to split great britain into parts
+
+could try:
+
+library(ukgeog)
+
+sf \<- read_sf(“NAT”, year = 2021)
+
+population \<- data.frame( country = c(“England”, “Wales”, “Scotland”,
+“Northern Ireland”), `Population Density` = as.numeric(c(“432”, “152”,
+“70”, “137”)), check.names = FALSE )
+
+sf \<- dplyr::left_join(sf, population, by = “country”)
+
+library(ggplot2)
+
+ggplot(sf) + geom_sf(aes(fill = `Population Density`)) + theme_void()
+
+or this:
+
+<https://bookdown.org/yann_ryan/r-for-newspaper-data/mapping-with-r-geocode-and-map-the-british-librarys-newspaper-collection.html>
 
 ### Primary Performance Indicators
+
+``` r
+ppi_frequencies <- extraction_data %>%
+  select(study,principal_indicator_var) %>%
+  separate_longer_delim(c(principal_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(principal_indicator_var) %>%
+  summarise(frequency=sum(count))
+ppi_frequencies 
+```
+
+    ## # A tibble: 9 × 2
+    ##   principal_indicator_var      frequency
+    ##   <chr>                            <dbl>
+    ## 1 "  Observed Food Choice"             1
+    ## 2 " Observed Food Choice"             11
+    ## 3 " Observed Food Service"             1
+    ## 4 " Self-Reported Food Choice"        30
+    ## 5 "Food Choice Intentions"             1
+    ## 6 "Intended Food Choice"              35
+    ## 7 "Observed Food Choice"              42
+    ## 8 "Observed Food Service"              1
+    ## 9 "Self-Reported Food Choice"         37
 
 ``` r
 extraction_data %>%
@@ -542,6 +619,38 @@ extraction_data %>%
     ## [1] 2
 
 ### Accessory Performance Indicators
+
+``` r
+api_frequencies <- extraction_data %>%
+  select(study,accessory_indicator_var) %>%
+  separate_longer_delim(c(accessory_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(accessory_indicator_var) %>%
+  summarise(frequency=sum(count))
+api_frequencies
+```
+
+    ## # A tibble: 16 × 2
+    ##    accessory_indicator_var                 frequency
+    ##    <chr>                                       <dbl>
+    ##  1 " Campus Culture"                               2
+    ##  2 " Dietary Health"                              18
+    ##  3 " Food Pricing"                                 1
+    ##  4 " Guest Dining Experience"                      4
+    ##  5 " Guest Food Choices"                           1
+    ##  6 " Institutional Sustainability"                 2
+    ##  7 " Operating Costs"                             12
+    ##  8 " Staff Satisfaction"                           1
+    ##  9 " Sustainability of Guest Food Choices"         9
+    ## 10 "Campus Culture"                               80
+    ## 11 "Dietary Health"                                9
+    ## 12 "Food Pricing"                                  3
+    ## 13 "Guest Dining Experience"                       1
+    ## 14 "Operating Costs"                               2
+    ## 15 "Sustainability of Guest Food Choices"          3
+    ## 16  <NA>                                          18
+
+not sure why this isn’t collapsing correctly
 
 variety
 
@@ -724,6 +833,35 @@ extraction_data %>%
     ## [1] 1
 
 ### Performance Qualifiers
+
+api_frequencies \<- extraction_data %\>%
+select(study,accessory_indicator_var) %\>%
+separate_longer_delim(c(accessory_indicator_var),delim=“;”) %\>%
+add_column(count=1) %\>% group_by(accessory_indicator_var) %\>%
+summarise(frequency=sum(count)) api_frequencies
+
+``` r
+qpi_frequencies <- extraction_data %>%
+  select(study,qualifying_indicator_var) %>%
+  separate_longer_delim(c(qualifying_indicator_var),delim=";") %>%
+  add_column(count=1) %>%
+  group_by(qualifying_indicator_var) %>%
+  summarise(frequency=sum(count))
+qpi_frequencies
+```
+
+    ## # A tibble: 9 × 2
+    ##   qualifying_indicator_var frequency
+    ##   <chr>                        <dbl>
+    ## 1 " Lifestyle"                    37
+    ## 2 " Lifestyle "                    6
+    ## 3 " Program Reception"            34
+    ## 4 " Situational"                  21
+    ## 5 "Demographics"                  87
+    ## 6 "Lifestyle"                      3
+    ## 7 "Program Reception"              5
+    ## 8 "Situational"                    8
+    ## 9  <NA>                           13
 
 ``` r
 extraction_data %>%
