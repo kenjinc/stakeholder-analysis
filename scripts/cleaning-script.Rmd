@@ -315,6 +315,31 @@ national_frequency_choros
 
 Something is wrong here too, need to split great britain into parts
 
+could try: 
+
+library(ukgeog)
+
+sf <- read_sf("NAT", year = 2021)
+
+population <- data.frame(
+                country = c("England", "Wales", "Scotland", "Northern Ireland"),
+                `Population Density` = as.numeric(c("432", "152", "70", "137")),
+                check.names = FALSE
+              )
+
+sf <- dplyr::left_join(sf, population, by = "country")
+
+library(ggplot2)
+
+ggplot(sf) + 
+  geom_sf(aes(fill = `Population Density`)) +
+  theme_void()
+
+or this: 
+
+https://bookdown.org/yann_ryan/r-for-newspaper-data/mapping-with-r-geocode-and-map-the-british-librarys-newspaper-collection.html
+
+
 ### Primary Performance Indicators
 
 ```{r}
