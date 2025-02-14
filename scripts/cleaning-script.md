@@ -308,12 +308,13 @@ global_shapefile <- global_shapefile %>%
 
 ``` r
 spatial_frequencies <- extraction_data %>%
-  select(nation_var,university_count) %>%
+  select(nation_var,nation_var_count) %>%
   rename(country=nation_var) %>%
   mutate(across(country,str_replace,"USA","United States")) %>%
   mutate(across(country,str_replace,"UK","United Kingdom")) %>%
   group_by(country) %>%
-  summarise(frequency=sum(university_count)) 
+  summarise(frequency=sum(nation_var_count)) %>%
+  arrange(desc(frequency))
 ```
 
     ## Warning: There was 1 warning in `mutate()`.
@@ -329,20 +330,19 @@ spatial_frequencies <- extraction_data %>%
     ##   across(a:b, \(x) mean(x, na.rm = TRUE))
 
 ``` r
-spatial_frequencies %>%
-  arrange(desc(frequency))
+spatial_frequencies
 ```
 
     ## # A tibble: 17 × 2
     ##    country          frequency
     ##    <chr>                <int>
-    ##  1 "United States"         74
+    ##  1 "United States"         55
     ##  2 "United Kingdom"        16
     ##  3 "Canada"                13
-    ##  4 "Portugal"               7
-    ##  5 "Italy"                  6
-    ##  6 "Germany"                4
-    ##  7 "China"                  3
+    ##  4 "Italy"                  6
+    ##  5 "Germany"                4
+    ##  6 "China"                  3
+    ##  7 "Portugal"               3
     ##  8 "Sweden"                 3
     ##  9 "Australia"              2
     ## 10 "Belgium "               2
@@ -353,6 +353,16 @@ spatial_frequencies %>%
     ## 15 "Norway"                 1
     ## 16 "Switzerland"            1
     ## 17 "Thailand"               1
+
+``` r
+spatial_frequencies %>%
+  summarise(sum(frequency))
+```
+
+    ## # A tibble: 1 × 1
+    ##   `sum(frequency)`
+    ##              <int>
+    ## 1              116
 
 ``` r
 spatial_frequencies_joined <- left_join(global_shapefile,spatial_frequencies,by="country")
@@ -379,12 +389,6 @@ usa_shapefile <- map_data("state") %>%
   rename(state=region)
 ```
 
-ppi_frequencies \<- extraction_data %\>%
-select(study,principal_indicator_var) %\>%
-separate_longer_delim(c(principal_indicator_var),delim=“;”) %\>%
-add_column(count=1) %\>% group_by(principal_indicator_var) %\>%
-summarise(frequency=sum(count)) ppi_frequencies
-
 ``` r
 state_frequencies <- extraction_data %>%
   select(study,us_state_var) %>%
@@ -394,55 +398,34 @@ state_frequencies <- extraction_data %>%
   summarise(frequency=sum(count)) %>%
   arrange(desc(frequency)) %>%
   mutate(us_state_var=tolower(us_state_var)) %>%
-  rename(state=us_state_var)
+  rename(state=us_state_var) %>%
+  drop_na()
 state_frequencies 
 ```
 
-    ## # A tibble: 39 × 2
+    ## # A tibble: 38 × 2
     ##    state            frequency
     ##    <chr>                <dbl>
-    ##  1  <NA>                   61
-    ##  2 "california"            15
-    ##  3 "illinois"               4
-    ##  4 "michigan"               3
-    ##  5 "new york"               3
-    ##  6 "pennsylvania"           3
-    ##  7 "utah"                   3
-    ##  8 " massachusetts"         2
-    ##  9 "arkansas"               2
-    ## 10 "florida"                2
-    ## # ℹ 29 more rows
+    ##  1 "california"            15
+    ##  2 "illinois"               4
+    ##  3 "michigan"               3
+    ##  4 "new york"               3
+    ##  5 "pennsylvania"           3
+    ##  6 "utah"                   3
+    ##  7 " massachusetts"         2
+    ##  8 "arkansas"               2
+    ##  9 "florida"                2
+    ## 10 "indiana"                2
+    ## # ℹ 28 more rows
 
 ``` r
-state_frequencies <- extraction_data %>%
-  select(us_state_var,university_count) %>%
-  rename(region=us_state_var) %>%
-  separate_longer_delim(c(region,university_count),delim=";") %>%
-  mutate(university_count=as.numeric(university_count)) %>%
-  group_by(region) %>%
-  summarise(frequency=sum(university_count)) %>%
-  arrange(desc(frequency)) %>%
-  mutate(region=tolower(region)) %>%
-  rename(state=region) 
-state_frequencies
+state_frequencies %>% summarise(sum(frequency))
 ```
 
-    ## # A tibble: 39 × 2
-    ##    state            frequency
-    ##    <chr>                <dbl>
-    ##  1  <NA>                   65
-    ##  2 "california"            23
-    ##  3 " maine"                 8
-    ##  4 " massachusetts"         8
-    ##  5 " michigan"              8
-    ##  6 " new york"              8
-    ##  7 " pennsylvania"          8
-    ##  8 " rhode island"          8
-    ##  9 " south dakota"          8
-    ## 10 " wisconsin"             8
-    ## # ℹ 29 more rows
-
-Something is wrong with these
+    ## # A tibble: 1 × 1
+    ##   `sum(frequency)`
+    ##              <dbl>
+    ## 1               69
 
 ``` r
 state_frequencies_joined <- left_join(usa_shapefile,state_frequencies,by="state")
@@ -469,26 +452,24 @@ uk_shapefile <- map_data("world",region="UK")
 
 ``` r
 subnational_frequencies <- extraction_data %>%
-  select(uk_country,university_count) %>%
-  rename(subregion=uk_country) %>%
-  separate_longer_delim(c(subregion,university_count),delim=";") %>%
-  mutate(university_count=as.numeric(university_count)) %>%
+  select(uk_country_var,uk_country_var_count) %>%
+  rename(subregion=uk_country_var) %>%
+  separate_longer_delim(c(subregion,uk_country_var_count),delim=";") %>%
+  mutate(uk_country_var_count=as.numeric(uk_country_var_count)) %>%
   group_by(subregion) %>%
-  summarise(frequency=sum(university_count)) %>%
+  summarise(frequency=sum(uk_country_var_count)) %>%
   arrange(desc(frequency)) %>%
-  mutate(across('subregion',str_replace,'England', 'Great Britain'))
+  mutate(across("subregion",str_replace,"England","Great Britain")) %>%
+  drop_na()
 subnational_frequencies
 ```
 
-    ## # A tibble: 6 × 2
-    ##   subregion       frequency
-    ##   <chr>               <dbl>
-    ## 1  <NA>                 121
-    ## 2 "Great Britain"        14
-    ## 3 ""                      1
-    ## 4 "Scotland"              1
-    ## 5 "Wales"                 1
-    ## 6 "\\"                    1
+    ## # A tibble: 3 × 2
+    ##   subregion     frequency
+    ##   <chr>             <dbl>
+    ## 1 Great Britain        14
+    ## 2 Scotland              1
+    ## 3 Wales                 1
 
 ``` r
 subnational_frequencies_joined <- left_join(uk_shapefile,subnational_frequencies,by="subregion")
@@ -510,24 +491,79 @@ uk_frequencies
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
-subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
-                                         ncol=2,
-                                         widths=c(2,1),
-                                         labels=c("B","C"))
-subnational_frequency_choros
+library(sf)
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+    ## Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
 
 ``` r
-national_frequency_choros <- ggarrange(national_frequencies,
-                                       labels="A")
-national_frequency_choros
+library(rnaturalearth)
+library(rnaturalearthhires)
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+``` r
+uk_sf <- ne_states(country="united kingdom",returnclass="sf")
+```
 
-Something is wrong here, too, need to split great britain into parts
+``` r
+uk_sf %>% as.tibble()
+```
+
+    ## Warning: `as.tibble()` was deprecated in tibble 2.0.0.
+    ## ℹ Please use `as_tibble()` instead.
+    ## ℹ The signature and semantics have changed, see `?as_tibble`.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## # A tibble: 232 × 122
+    ##    featurecla    scalerank adm1_code diss_me iso_3166_2 wikipedia iso_a2 adm0_sr
+    ##    <chr>             <int> <chr>       <int> <chr>      <chr>     <chr>    <int>
+    ##  1 Admin-1 stat…         8 GBR-2083     2083 GB-DRY     <NA>      GB           1
+    ##  2 Admin-1 stat…         8 GBR-2135     2135 GB-STB     <NA>      GB           1
+    ##  3 Admin-1 stat…         8 GBR-2136     2136 GB-FER     <NA>      GB           1
+    ##  4 Admin-1 stat…         8 GBR-2089     2089 GB-DGN     <NA>      GB           1
+    ##  5 Admin-1 stat…         8 GBR-2085     2085 GB-ARM     <NA>      GB           1
+    ##  6 Admin-1 stat…         8 GBR-2086     2086 GB-NYM     <NA>      GB           1
+    ##  7 Admin-1 stat…         8 GBR-2126     2126 GB-FLN     <NA>      GB           1
+    ##  8 Admin-1 stat…         8 GBR-5707     5707 GB-CHW     <NA>      GB           1
+    ##  9 Admin-1 stat…         8 GBR-2127     2127 GB-WRX     <NA>      GB           1
+    ## 10 Admin-1 stat…         8 GBR-2779     2779 GB-SHR     <NA>      GB           1
+    ## # ℹ 222 more rows
+    ## # ℹ 114 more variables: name <chr>, name_alt <chr>, name_local <chr>,
+    ## #   type <chr>, type_en <chr>, code_local <chr>, code_hasc <chr>, note <chr>,
+    ## #   hasc_maybe <chr>, region <chr>, region_cod <chr>, provnum_ne <int>,
+    ## #   gadm_level <int>, check_me <int>, datarank <int>, abbrev <chr>,
+    ## #   postal <chr>, area_sqkm <int>, sameascity <int>, labelrank <int>,
+    ## #   name_len <int>, mapcolor9 <int>, mapcolor13 <int>, fips <chr>, …
+
+``` r
+subnational_frequencies <- subnational_frequencies %>%
+  mutate(across('subregion',str_replace,"Great Britain","England")) %>%
+  rename(region=subregion)
+```
+
+``` r
+subnational_frequencies_joined <- left_join(uk_sf,subnational_frequencies,by="region")
+```
+
+``` r
+subnational_frequencies_joined %>%
+ggplot() + 
+  geom_sf(aes(fill=geonunit)) +
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+ggplot(aes(x=long,y=lat,fill=frequency,group=group)) +
+geom_polygon(color=“black”,linewidth=0.125,alpha=0.75) +
+scale_fill_gradient(low=“lavender”,high=“slateblue4”,na.value=“white”,name=“Intervention-Receiving
+Institutions”,guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position=“top”,title.hjust=0.5,limits=c(1,74))) +
+xlab(““) + ylab(”“) + labs(caption=”“) +
+coord_map(”albers”,lat0=45.5,lat1=29.5) +
+theme(legend.key.width=unit(3,“lines”),legend.position=“none”,legend.justification=“center”,legend.box.spacing=unit(-15,“pt”),legend.key.size=unit(10,“pt”),panel.grid=element_blank(),panel.background=element_rect(fill=“white”),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+usa_frequencies
 
 could try:
 
@@ -548,6 +584,26 @@ ggplot(sf) + geom_sf(aes(fill = `Population Density`)) + theme_void()
 or this:
 
 <https://bookdown.org/yann_ryan/r-for-newspaper-data/mapping-with-r-geocode-and-map-the-british-librarys-newspaper-collection.html>
+
+``` r
+subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
+                                         ncol=2,
+                                         widths=c(2,1),
+                                         labels=c("B","C"))
+subnational_frequency_choros
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+``` r
+national_frequency_choros <- ggarrange(national_frequencies,
+                                       labels="A")
+national_frequency_choros
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+Something is wrong here, too, need to split great britain into parts
 
 ### Primary Performance Indicators
 

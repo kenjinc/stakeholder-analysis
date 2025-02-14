@@ -194,17 +194,19 @@ global_shapefile <- global_shapefile %>%
 
 ```{r}
 spatial_frequencies <- extraction_data %>%
-  select(nation_var,university_count) %>%
+  select(nation_var,nation_var_count) %>%
   rename(country=nation_var) %>%
   mutate(across(country,str_replace,"USA","United States")) %>%
   mutate(across(country,str_replace,"UK","United Kingdom")) %>%
   group_by(country) %>%
-  summarise(frequency=sum(university_count)) 
+  summarise(frequency=sum(nation_var_count)) %>%
+  arrange(desc(frequency))
+spatial_frequencies
 ```
 
 ```{r}
 spatial_frequencies %>%
-  arrange(desc(frequency))
+  summarise(sum(frequency))
 ```
 
 ```{r}
@@ -229,14 +231,6 @@ usa_shapefile <- map_data("state") %>%
   rename(state=region)
 ```
 
-ppi_frequencies <- extraction_data %>%
-  select(study,principal_indicator_var) %>%
-  separate_longer_delim(c(principal_indicator_var),delim=";") %>%
-  add_column(count=1) %>%
-  group_by(principal_indicator_var) %>%
-  summarise(frequency=sum(count))
-ppi_frequencies 
-
 ```{r}
 state_frequencies <- extraction_data %>%
   select(study,us_state_var) %>%
@@ -246,26 +240,14 @@ state_frequencies <- extraction_data %>%
   summarise(frequency=sum(count)) %>%
   arrange(desc(frequency)) %>%
   mutate(us_state_var=tolower(us_state_var)) %>%
-  rename(state=us_state_var)
+  rename(state=us_state_var) %>%
+  drop_na()
 state_frequencies 
 ```
 
-
 ```{r}
-state_frequencies <- extraction_data %>%
-  select(us_state_var,university_count) %>%
-  rename(region=us_state_var) %>%
-  separate_longer_delim(c(region,university_count),delim=";") %>%
-  mutate(university_count=as.numeric(university_count)) %>%
-  group_by(region) %>%
-  summarise(frequency=sum(university_count)) %>%
-  arrange(desc(frequency)) %>%
-  mutate(region=tolower(region)) %>%
-  rename(state=region) 
-state_frequencies
+state_frequencies %>% summarise(sum(frequency))
 ```
-
-Something is wrong with these
 
 ```{r}
 state_frequencies_joined <- left_join(usa_shapefile,state_frequencies,by="state")
@@ -284,21 +266,21 @@ usa_frequencies <- state_frequencies_joined %>%
 usa_frequencies
 ```
 
-
 ```{r}
 uk_shapefile <- map_data("world",region="UK")
 ```
 
 ```{r}
 subnational_frequencies <- extraction_data %>%
-  select(uk_country,university_count) %>%
-  rename(subregion=uk_country) %>%
-  separate_longer_delim(c(subregion,university_count),delim=";") %>%
-  mutate(university_count=as.numeric(university_count)) %>%
+  select(uk_country_var,uk_country_var_count) %>%
+  rename(subregion=uk_country_var) %>%
+  separate_longer_delim(c(subregion,uk_country_var_count),delim=";") %>%
+  mutate(uk_country_var_count=as.numeric(uk_country_var_count)) %>%
   group_by(subregion) %>%
-  summarise(frequency=sum(university_count)) %>%
+  summarise(frequency=sum(uk_country_var_count)) %>%
   arrange(desc(frequency)) %>%
-  mutate(across('subregion',str_replace,'England', 'Great Britain'))
+  mutate(across("subregion",str_replace,"England","Great Britain")) %>%
+  drop_na()
 subnational_frequencies
 ```
 
@@ -320,22 +302,46 @@ uk_frequencies
 ```
 
 ```{r}
-subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
-                                         ncol=2,
-                                         widths=c(2,1),
-                                         labels=c("B","C"))
-subnational_frequency_choros
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthhires)
+```
+
+```{r}
+uk_sf <- ne_states(country="united kingdom",returnclass="sf")
 ```
 
 
 ```{r}
-national_frequency_choros <- ggarrange(national_frequencies,
-                                       labels="A")
-national_frequency_choros
+uk_sf %>% as.tibble()
+```
+```{r}
+subnational_frequencies <- subnational_frequencies %>%
+  mutate(across('subregion',str_replace,"Great Britain","England")) %>%
+  rename(region=subregion)
+```
+
+```{r}
+subnational_frequencies_joined <- left_join(uk_sf,subnational_frequencies,by="region")
 ```
 
 
-Something is wrong here, too, need to split great britain into parts
+```{r}
+subnational_frequencies_joined %>%
+ggplot() + 
+  geom_sf(aes(fill=geonunit)) +
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
+  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
+  xlab("") + 
+  ylab("") +
+  labs(caption="") +
+  coord_map("albers",lat0=45.5,lat1=29.5) +
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+usa_frequencies
 
 could try: 
 
@@ -360,6 +366,26 @@ ggplot(sf) +
 or this: 
 
 https://bookdown.org/yann_ryan/r-for-newspaper-data/mapping-with-r-geocode-and-map-the-british-librarys-newspaper-collection.html
+
+
+
+```{r}
+subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
+                                         ncol=2,
+                                         widths=c(2,1),
+                                         labels=c("B","C"))
+subnational_frequency_choros
+```
+
+
+```{r}
+national_frequency_choros <- ggarrange(national_frequencies,
+                                       labels="A")
+national_frequency_choros
+```
+
+
+Something is wrong here, too, need to split great britain into parts
 
 
 ### Primary Performance Indicators
