@@ -15,6 +15,9 @@ library(tidyverse)
 library(ggpubr)
 library(ggsignif)
 library(maps)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthhires)
 ```
 
 ## Data Loading 
@@ -208,26 +211,34 @@ spatial_frequencies
 spatial_frequencies %>%
   summarise(sum(frequency))
 ```
+scale_fill_gradient(low='white', high='grey20', limits=c(1, 10))
+
+scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,title.position="top",title.hjust=0.5,limits=c(1,116))) +
+
+```{r}
+crs_robin <- "+proj=robin +lat_0=0 +lon_0=0 +x0=0 +y0=0"
+```
+
 
 ```{r}
 spatial_frequencies_joined <- left_join(global_shapefile,spatial_frequencies,by="country")
 national_frequencies <- spatial_frequencies_joined %>%
   ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
   geom_polygon(color="black",linewidth=0.125,alpha=0.60) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,title.position="top",title.hjust=0.5,limits=c(1,74))) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
+  coord_sf(crs=crs_robin) +
   xlab("") + 
   ylab("") +
   scale_y_continuous(limits=c(-55,85)) +
   labs(caption="") +
   theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-national_frequencies
 ```
 
 scale_fill_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
   scale_color_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
 
 ```{r}
-usa_shapefile <- map_data("state") %>%
+usa_shapefile <- map_data("county") %>%
   rename(state=region)
 ```
 
@@ -256,18 +267,13 @@ state_frequencies_joined <- left_join(usa_shapefile,state_frequencies,by="state"
 ```{r}
 usa_frequencies <- state_frequencies_joined %>%
   ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
-  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
+  geom_polygon(color="black",linewidth=0.125) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
   xlab("") + 
   ylab("") +
   labs(caption="") +
   coord_map("albers",lat0=45.5,lat1=29.5) +
   theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-usa_frequencies
-```
-
-```{r}
-uk_shapefile <- map_data("world",region="UK")
 ```
 
 ```{r}
@@ -285,108 +291,43 @@ subnational_frequencies
 ```
 
 ```{r}
-subnational_frequencies_joined <- left_join(uk_shapefile,subnational_frequencies,by="subregion")
+uk_shapefile <- ne_states(country="united kingdom",returnclass="sf")
+```
+
+```{r}
+subnational_frequencies <- subnational_frequencies %>%
+  mutate(across('subregion',str_replace,"Great Britain","England")) %>%
+  rename(geonunit=subregion)
+subnational_frequencies
+```
+
+```{r}
+subnational_frequencies_joined <- left_join(uk_shapefile,subnational_frequencies,by="geonunit")
 ```
 
 ```{r}
 uk_frequencies <- subnational_frequencies_joined %>%
-  ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
-  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
-  xlab("") + 
-  ylab("") +
-  labs(caption="") +
-  coord_map() + 
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-uk_frequencies
-```
-
-```{r}
-library(sf)
-library(rnaturalearth)
-library(rnaturalearthhires)
-```
-
-```{r}
-uk_sf <- ne_states(country="united kingdom",returnclass="sf")
-```
-
-
-```{r}
-uk_sf %>% as.tibble()
-```
-```{r}
-subnational_frequencies <- subnational_frequencies %>%
-  mutate(across('subregion',str_replace,"Great Britain","England")) %>%
-  rename(region=subregion)
-```
-
-```{r}
-subnational_frequencies_joined <- left_join(uk_sf,subnational_frequencies,by="region")
-```
-
-
-```{r}
-subnational_frequencies_joined %>%
-ggplot() + 
-  geom_sf(aes(fill=geonunit)) +
+ggplot(aes(fill=frequency,group=geonunit)) + 
+  geom_sf(aes(fill=frequency),color="black",linewidth=0.125) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
   theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
-
-ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
-  geom_polygon(color="black",linewidth=0.125,alpha=0.75) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",name="Intervention-Receiving Institutions",guide=guide_colourbar(reverse=FALSE,alpha=0.75,title.position="top",title.hjust=0.5,limits=c(1,74))) +
-  xlab("") + 
-  ylab("") +
-  labs(caption="") +
-  coord_map("albers",lat0=45.5,lat1=29.5) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-usa_frequencies
-
-could try: 
-
-library(ukgeog)
-
-sf <- read_sf("NAT", year = 2021)
-
-population <- data.frame(
-                country = c("England", "Wales", "Scotland", "Northern Ireland"),
-                `Population Density` = as.numeric(c("432", "152", "70", "137")),
-                check.names = FALSE
-              )
-
-sf <- dplyr::left_join(sf, population, by = "country")
-
-library(ggplot2)
-
-ggplot(sf) + 
-  geom_sf(aes(fill = `Population Density`)) +
-  theme_void()
-
-or this: 
-
-https://bookdown.org/yann_ryan/r-for-newspaper-data/mapping-with-r-geocode-and-map-the-british-librarys-newspaper-collection.html
-
-
 
 ```{r}
 subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
                                          ncol=2,
-                                         widths=c(2,1),
                                          labels=c("B","C"))
-subnational_frequency_choros
+national_frequency_choros <- ggarrange(national_frequencies,
+                                       labels="A")
 ```
 
 
 ```{r}
-national_frequency_choros <- ggarrange(national_frequencies,
-                                       labels="A")
-national_frequency_choros
+spatial_plots <- ggarrange(national_frequency_choros,subnational_frequency_choros,
+          nrow=2)
+ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=20,units="cm",dpi=150,limitsize=TRUE)
+spatial_plots
 ```
-
-
-Something is wrong here, too, need to split great britain into parts
-
 
 ### Primary Performance Indicators
 
