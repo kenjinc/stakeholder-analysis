@@ -396,7 +396,7 @@ national_frequencies <- spatial_frequencies_joined %>%
   ylab("") +
   scale_y_continuous(limits=c(-55,85)) +
   labs(caption="") +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=.48,legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 scale_fill_gradient(name=“Count”,low=“lavender”,high=“slateblue4”,limits=c(1,116),na.value=“lavender”,breaks=c(1,29,58,87,116)) +
@@ -459,7 +459,7 @@ usa_frequencies <- state_frequencies_joined %>%
   ylab("") +
   labs(caption="") +
   coord_map("albers",lat0=45.5,lat1=29.5) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
@@ -510,7 +510,7 @@ uk_frequencies <- subnational_frequencies_joined %>%
 ggplot(aes(fill=frequency,group=geonunit)) + 
   geom_sf(aes(fill=frequency),color="black",linewidth=0.125) +
   scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
@@ -538,66 +538,67 @@ ppi_frequencies <- extraction_data %>%
   separate_longer_delim(c(principal_indicator_var),delim=";") %>%
   add_column(count=1) %>%
   group_by(principal_indicator_var) %>%
-  summarise(frequency=sum(count))
+  summarise(frequency=sum(count)) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Observed Food Choice","Food Choice, Observed")) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Observed Food Service","Food Service, Observed")) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Self-Reported Food Choice","Food Choice, Self-Reported")) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Intended Food Choice","Food Choice, Intended")) 
 ppi_frequencies 
 ```
 
-    ## # A tibble: 9 × 2
-    ##   principal_indicator_var      frequency
-    ##   <chr>                            <dbl>
-    ## 1 "  Observed Food Choice"             1
-    ## 2 " Observed Food Choice"             11
-    ## 3 " Observed Food Service"             1
-    ## 4 " Self-Reported Food Choice"        30
-    ## 5 "Food Choice Intentions"             1
-    ## 6 "Intended Food Choice"              35
-    ## 7 "Observed Food Choice"              42
-    ## 8 "Observed Food Service"              1
-    ## 9 "Self-Reported Food Choice"         37
+    ## # A tibble: 8 × 2
+    ##   principal_indicator_var       frequency
+    ##   <chr>                             <dbl>
+    ## 1 "  Food Choice, Observed"             1
+    ## 2 " Food Choice, Observed"             11
+    ## 3 " Food Service, Observed"             1
+    ## 4 " Food Choice, Self-Reported"        30
+    ## 5 "Food Choice, Intended"              36
+    ## 6 "Food Choice, Observed"              42
+    ## 7 "Food Service, Observed"              1
+    ## 8 "Food Choice, Self-Reported"         37
 
 ``` r
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Self-Reported Food Choice")
+principal_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
+frequency_manual <- c(36,67,54,2)
+ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
+  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
+                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
+                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
+                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
+ppi_frequencies_manual 
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
+    ## # A tibble: 4 × 3
+    ##   principal_indicator_var_manual frequency_manual mode_manual  
+    ##   <chr>                                     <dbl> <chr>        
+    ## 1 Food Choice                                  36 Intended     
+    ## 2 Food Choice                                  67 Self-Reported
+    ## 3 Food Choice                                  54 Observed     
+    ## 4 Food Service                                  2 Observed
 
-    ## [1] 67
+need to run chisq.test 36,54,67. 2
 
 ``` r
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Observed Food Choice")
+ppi_frequencies_plot <- ppi_frequencies_manual %>%
+  ggplot(aes(x=principal_indicator_var_manual,y=frequency_manual,fill=mode_manual,color=mode_manual)) + 
+  geom_col() +
+  scale_fill_brewer(palette="Pastel1") +
+  scale_color_brewer(palette="Pastel1") +
+  xlab("Indicator") +
+  ylab("Frequency") +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  geom_signif(comparisons=list(c("Food Choice","Food Service")),color="black",size=0.25,annotation="***",y_position=158,tip_length=0.02,vjust=0) +
+  theme(aspect.ratio=1,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="primary-performance-indicators.png",plot=ppi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=20,units="cm",dpi=150,limitsize=TRUE)
+ppi_frequencies_plot
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 54
-
-``` r
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Intended Food Choice")
-```
-
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 35
-
-``` r
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Observed Food Service")
-```
-
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 2
+![](cleaning-script_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ### Accessory Performance Indicators
 
@@ -611,25 +612,47 @@ api_frequencies <- extraction_data %>%
 api_frequencies
 ```
 
-    ## # A tibble: 16 × 2
+    ## # A tibble: 15 × 2
     ##    accessory_indicator_var                 frequency
     ##    <chr>                                       <dbl>
     ##  1 " Campus Culture"                               2
     ##  2 " Dietary Health"                              18
     ##  3 " Food Pricing"                                 1
     ##  4 " Guest Dining Experience"                      4
-    ##  5 " Guest Food Choices"                           1
-    ##  6 " Institutional Sustainability"                 2
-    ##  7 " Operating Costs"                             12
-    ##  8 " Staff Satisfaction"                           1
-    ##  9 " Sustainability of Guest Food Choices"         9
-    ## 10 "Campus Culture"                               80
-    ## 11 "Dietary Health"                                9
-    ## 12 "Food Pricing"                                  3
-    ## 13 "Guest Dining Experience"                       1
-    ## 14 "Operating Costs"                               2
-    ## 15 "Sustainability of Guest Food Choices"          3
-    ## 16  <NA>                                          18
+    ##  5 " Institutional Sustainability"                 2
+    ##  6 " Operating Costs"                             12
+    ##  7 " Staff Satisfaction"                           1
+    ##  8 " Sustainability of Guest Food Choices"        10
+    ##  9 "Campus Culture"                               80
+    ## 10 "Dietary Health"                                9
+    ## 11 "Food Pricing"                                  3
+    ## 12 "Guest Dining Experience"                       1
+    ## 13 "Operating Costs"                               2
+    ## 14 "Sustainability of Guest Food Choices"          3
+    ## 15  <NA>                                          18
+
+``` r
+accessory_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
+frequency_manual <- c(36,67,54,2)
+ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
+  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
+                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
+                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
+                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
+ppi_frequencies_manual 
+```
+
+    ## # A tibble: 4 × 3
+    ##   principal_indicator_var_manual frequency_manual mode_manual  
+    ##   <chr>                                     <dbl> <chr>        
+    ## 1 Food Choice                                  36 Intended     
+    ## 2 Food Choice                                  67 Self-Reported
+    ## 3 Food Choice                                  54 Observed     
+    ## 4 Food Service                                  2 Observed
 
 not sure why this isn’t collapsing correctly
 
@@ -677,7 +700,7 @@ extraction_data %>%
     ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
     ## argument is not an atomic vector; coercing
 
-    ## [1] 12
+    ## [1] 13
 
 ``` r
 extraction_data %>%

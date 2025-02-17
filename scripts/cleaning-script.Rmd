@@ -231,7 +231,7 @@ national_frequencies <- spatial_frequencies_joined %>%
   ylab("") +
   scale_y_continuous(limits=c(-55,85)) +
   labs(caption="") +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=.48,legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 scale_fill_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
@@ -273,7 +273,7 @@ usa_frequencies <- state_frequencies_joined %>%
   ylab("") +
   labs(caption="") +
   coord_map("albers",lat0=45.5,lat1=29.5) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ```{r}
@@ -310,7 +310,7 @@ uk_frequencies <- subnational_frequencies_joined %>%
 ggplot(aes(fill=frequency,group=geonunit)) + 
   geom_sf(aes(fill=frequency),color="black",linewidth=0.125) +
   scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ```{r}
@@ -337,32 +337,46 @@ ppi_frequencies <- extraction_data %>%
   separate_longer_delim(c(principal_indicator_var),delim=";") %>%
   add_column(count=1) %>%
   group_by(principal_indicator_var) %>%
-  summarise(frequency=sum(count))
+  summarise(frequency=sum(count)) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Observed Food Choice","Food Choice, Observed")) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Observed Food Service","Food Service, Observed")) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Self-Reported Food Choice","Food Choice, Self-Reported")) %>%
+  mutate(across(principal_indicator_var,str_replace_all,"Intended Food Choice","Food Choice, Intended")) 
 ppi_frequencies 
 ```
 
 ```{r}
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Self-Reported Food Choice")
+principal_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
+frequency_manual <- c(36,67,54,2)
+ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
+  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
+                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
+                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
+                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
+ppi_frequencies_manual 
 ```
 
-```{r}
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Observed Food Choice")
-```
+need to run chisq.test
+36,54,67.  2
+
 
 ```{r}
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Intended Food Choice")
-```
-
-```{r}
-extraction_data %>%
-  select(principal_indicator_var) %>%
-  str_count("Observed Food Service")
+ppi_frequencies_plot <- ppi_frequencies_manual %>%
+  ggplot(aes(x=principal_indicator_var_manual,y=frequency_manual,fill=mode_manual,color=mode_manual)) + 
+  geom_col() +
+  scale_fill_brewer(palette="Pastel1") +
+  scale_color_brewer(palette="Pastel1") +
+  xlab("Indicator") +
+  ylab("Frequency") +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  geom_signif(comparisons=list(c("Food Choice","Food Service")),color="black",size=0.25,annotation="***",y_position=158,tip_length=0.02,vjust=0) +
+  theme(aspect.ratio=1,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="primary-performance-indicators.png",plot=ppi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=20,units="cm",dpi=150,limitsize=TRUE)
+ppi_frequencies_plot
 ```
 
 ### Accessory Performance Indicators
@@ -377,6 +391,20 @@ api_frequencies <- extraction_data %>%
 api_frequencies
 ```
 
+```{r}
+accessory_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
+frequency_manual <- c(36,67,54,2)
+ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
+  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
+                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
+                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
+                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
+  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
+ppi_frequencies_manual 
+```
 
 not sure why this isn't collapsing correctly
 
