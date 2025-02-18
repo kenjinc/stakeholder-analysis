@@ -1,7 +1,7 @@
 ---
 title: "Cleaning Script"
 output: github_document
-date: "Last Updated: February 12, 2025"
+date: "Last Updated: February 18, 2025"
 ---
 
 ```{r setup, include=FALSE}
@@ -127,7 +127,7 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   ylab("Cumulative Frequency") + 
   scale_y_continuous(limits=c(0,120)) +
   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
-  labs(caption="Adjusted R-Squared: 0.985 (3sf)") + 
+  labs(caption="Adjusted R-Squared: 0.985 (3sf); p-value < 0.001") + 
   theme(legend.title.position="none",legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.width=unit(50,"pt"),legend.key.height=unit(7.5,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
@@ -360,6 +360,9 @@ ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual
 ppi_frequencies_manual 
 ```
 
+
+
+
 need to run chisq.test
 36,54,67.  2
 
@@ -370,11 +373,11 @@ ppi_frequencies_plot <- ppi_frequencies_manual %>%
   geom_col() +
   scale_fill_brewer(palette="Pastel1") +
   scale_color_brewer(palette="Pastel1") +
-  xlab("Indicator") +
+  xlab("Primary Indicator") +
   ylab("Frequency") +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   geom_signif(comparisons=list(c("Food Choice","Food Service")),color="black",size=0.25,annotation="***",y_position=158,tip_length=0.02,vjust=0) +
-  theme(aspect.ratio=1,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ggsave(filename="primary-performance-indicators.png",plot=ppi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=20,units="cm",dpi=150,limitsize=TRUE)
 ppi_frequencies_plot
 ```
@@ -392,72 +395,99 @@ api_frequencies
 ```
 
 ```{r}
-accessory_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
-frequency_manual <- c(36,67,54,2)
-ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
-  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
-                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
-                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
-                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
-ppi_frequencies_manual 
-```
-
-not sure why this isn't collapsing correctly
-
-
-variety
-
-```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Campus Culture")
+accessory_indicator_var_manual <- c("Campus Culture","Dietary Health","Food Pricing","Guest Dining Experience","Institutional Sustainability","Operating Costs","Staff Satisfaction","Sustainability of Guest Food Choices")
+frequency_manual <- c(82,27,4,5,2,14,1,13)
+api_frequencies_manual <- tibble(accessory_indicator_var_manual,frequency_manual) %>%
+  arrange(desc(frequency_manual))
+api_frequencies_manual 
 ```
 
 ```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Dietary Health")
+api_contigency_table <- api_frequencies_manual %>%
+  rename(present=frequency_manual) %>%
+  mutate(absent=116-present)
+api_contigency_table
 ```
 
 ```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Operating Costs")
+api_contigency_table_alt <- api_contigency_table %>%
+  pivot_longer(!accessory_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
+  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="present"~62.97,
+    accessory_indicator_var_manual=="Campus Culture"&appearance=="absent"~13.71,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="present"~0.66,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="absent"~0.14,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="present"~0.76,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="absent"~0.17,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="present"~1.00,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="absent"~0.22,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="present"~4.15,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="absent"~0.90,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="present"~0.16,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="absent"~0.03,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="present"~5.89,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="absent"~1.28,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="present"~6.53,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="absent"~1.42)) %>%
+  mutate(label_y=case_when(appearance=="present"~118,
+                           appearance=="absent"~-2))
+api_contigency_table_alt
 ```
 
 ```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Sustainability of Guest Food Choices")
+api_frequencies_plot <- api_contigency_table_alt %>%
+  ggplot(aes(x=accessory_indicator_var_manual,y=frequency_manual,fill=appearance,color=appearance)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Campus Culture","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
+  xlab("Accessory Indicator") +
+  ylab("Frequency") +
+  scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture")) + 
+  scale_y_continuous(breaks=c(0,29,58,87,116)) +
+  scale_fill_manual(values=c("aliceblue","lightsteelblue")) +
+  scale_color_manual(values=c("aliceblue","lightsteelblue")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
+  theme(aspect.ratio=0.6,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="accessory-performance-indicators.png",plot=api_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=42,height=25,units="cm",dpi=150,limitsize=TRUE)
+api_frequencies_plot
 ```
 
 ```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Guest Dining Experience")
+api_contigency_table <- as.table(rbind(c(82,27,14,13,5,4,2,1),c(34,89,102,103,111,12,114,115)))
+dimnames(api_contigency_table) <- list(dichotomy=c("present","absent"),
+                                       indicators=c("Campus Culture","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Guest Dining Experience","Food Pricing","Institutional Sustainability","Staff Satisfaction"))
+api_chisq_test <- chisq.test(api_contigency_table)
+api_chisq_test
+```
+
+Significant association between the type of accessory performance indicator and its likelihood of appearance (chi-square test interpretation (https://www.datacamp.com/tutorial/chi-square-test-r))
+
+```{r}
+api_observed_counts <- api_chisq_test$observed
+print(api_chisq_test)
+```
+```{r}
+api_expected_counts <- api_chisq_test$expected
+print(round(api_expected_counts,2))
+```
+```{r}
+api_pearson_residuals <- api_chisq_test$residuals
+print(round(api_pearson_residuals,2))
+```
+```{r}
+api_contributions <- (api_observed_counts-api_expected_counts)^2/api_expected_counts
+api_total_chi_square <- api_chisq_test$statistic
+api_percentage_contributions <- 100*api_contributions/api_total_chi_square
+print("Percentage Contributions:")
+print(round(api_percentage_contributions,2))
 ```
 
 ```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Food Pricing")
+library(pheatmap)
+pheatmap(api_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Institutional Sustainability")
-```
-
-```{r}
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Staff Satisfaction")
-```
+Rerun this using list class instead of variety class
 
 list
 
@@ -511,13 +541,6 @@ extraction_data %>%
 
 ### Performance Qualifiers 
 
-api_frequencies <- extraction_data %>%
-  select(study,accessory_indicator_var) %>%
-  separate_longer_delim(c(accessory_indicator_var),delim=";") %>%
-  add_column(count=1) %>%
-  group_by(accessory_indicator_var) %>%
-  summarise(frequency=sum(count))
-api_frequencies
 ```{r}
 qpi_frequencies <- extraction_data %>%
   select(study,qualifying_indicator_var) %>%
@@ -529,30 +552,107 @@ qpi_frequencies
 ```
 
 ```{r}
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Demographics")
+qualifying_indicator_var_manual <- c("Demographics","Lifestyle","Program Reception","Situational")
+frequency_manual <- c(87,46,39,29)
+qpi_frequencies_manual <- tibble(qualifying_indicator_var_manual,frequency_manual) %>%
+  arrange(desc(frequency_manual))
+qpi_frequencies_manual 
 ```
 
 ```{r}
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Lifestyle")
+qpi_contingency_table <- qpi_frequencies_manual %>%
+  rename(present=frequency_manual) %>%
+  mutate(absent=116-present)
+qpi_contingency_table
+```
+
+
+```{r}
+qpi_contingency_table_alt <- qpi_contingency_table %>%
+  pivot_longer(!qualifying_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
+  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="present"~39.32,
+    qualifying_indicator_var_manual=="Demographics"&appearance=="absent"~30.05,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="present"~0.53,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="absent"~0.40,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="present"~3.68,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="absent"~2.82,
+    qualifying_indicator_var_manual=="Situational"&appearance=="present"~13.15,
+    qualifying_indicator_var_manual=="Situational"&appearance=="absent"~10.05)) %>%
+  mutate(label_y=case_when(appearance=="present"~118,
+                           appearance=="absent"~-2))
+api_contigency_table_alt
 ```
 
 ```{r}
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Program Reception")
+qpi_frequencies_plot <- qpi_contingency_table_alt %>%
+  ggplot(aes(x=qualifying_indicator_var_manual,y=frequency_manual,fill=appearance,color=appearance)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Demographics","Situational")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
+  xlab("Qualifying Indicator") +
+  ylab("Frequency") +
+  scale_x_discrete(limits=c("Situational","Program Reception","Lifestyle","Demographics")) + 
+  scale_y_continuous(breaks=c(0,29,58,87,116)) +
+  scale_fill_manual(values=c("mistyrose","lightcoral")) +
+  scale_color_manual(values=c("mistyrose","lightcoral")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 68.35 (2dp); p-value < 0.001") + 
+  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="qualifying-performance-indicators.png",plot=qpi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=25,units="cm",dpi=150,limitsize=TRUE)
+qpi_frequencies_plot
 ```
 
 ```{r}
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Situational")
+qpi_contingency_table <- as.table(rbind(c(87,46,39,29),c(29,70,77,87)))
+dimnames(qpi_contingency_table) <- list(dichomoty=c("present","absent"),
+                                        indicators=c("Demographics","Lifestyle","Program Reception","Situational"))
+qpi_chisq_test <- chisq.test(qpi_contingency_table)
+qpi_chisq_test
 ```
+Significant association between the type of qualifying performance indicator and its likelihood of appearance
+
+```{r}
+qpi_observed_counts <- qpi_chisq_test$observed
+print(qpi_chisq_test)
+```
+```{r}
+qpi_expected_counts <- qpi_chisq_test$expected
+print(round(qpi_expected_counts,2))
+```
+
+```{r}
+qpi_pearson_residuals <- qpi_chisq_test$residuals
+print(round(qpi_pearson_residuals,2))
+```
+```{r}
+qpi_contributions <- (qpi_observed_counts-qpi_expected_counts)^2/qpi_expected_counts
+qpi_total_chi_square <- qpi_chisq_test$statistic
+qpi_percentage_contributions <- 100*qpi_contributions/qpi_total_chi_square
+print("Percentage Contributions:")
+```
+
+```{r}
+print(round(qpi_percentage_contributions,2))
+```
+
+```{r}
+pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
+```
+
+
+```{r}
+combined_indicators <- ggarrange(api_frequencies_plot,qpi_frequencies_plot,
+          nrow=2,
+          labels=c("A","B"))
+ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=48,height=48,units="cm",dpi=150,limitsize=TRUE)
+combined_indicators
+```
+
+  geom_signif(comparisons=list(c("Food Choice","Food Service")),color="black",size=0.25,annotation="***",y_position=158,tip_length=0.02,vjust=0) +
+
 
 ### Gap Monitoring
+
 
 #### Spillover 
 

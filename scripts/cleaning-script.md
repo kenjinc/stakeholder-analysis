@@ -1,6 +1,6 @@
 Cleaning Script
 ================
-Last Updated: February 12, 2025
+Last Updated: February 18, 2025
 
 ## Package Loading
 
@@ -239,7 +239,7 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   ylab("Cumulative Frequency") + 
   scale_y_continuous(limits=c(0,120)) +
   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
-  labs(caption="Adjusted R-Squared: 0.985 (3sf)") + 
+  labs(caption="Adjusted R-Squared: 0.985 (3sf); p-value < 0.001") + 
   theme(legend.title.position="none",legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.width=unit(50,"pt"),legend.key.height=unit(7.5,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
@@ -589,11 +589,11 @@ ppi_frequencies_plot <- ppi_frequencies_manual %>%
   geom_col() +
   scale_fill_brewer(palette="Pastel1") +
   scale_color_brewer(palette="Pastel1") +
-  xlab("Indicator") +
+  xlab("Primary Indicator") +
   ylab("Frequency") +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   geom_signif(comparisons=list(c("Food Choice","Food Service")),color="black",size=0.25,annotation="***",y_position=158,tip_length=0.02,vjust=0) +
-  theme(aspect.ratio=1,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ggsave(filename="primary-performance-indicators.png",plot=ppi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=20,units="cm",dpi=150,limitsize=TRUE)
 ppi_frequencies_plot
 ```
@@ -632,119 +632,215 @@ api_frequencies
     ## 15  <NA>                                          18
 
 ``` r
-accessory_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
-frequency_manual <- c(36,67,54,2)
-ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
-  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
-                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
-                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
-                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
-ppi_frequencies_manual 
+accessory_indicator_var_manual <- c("Campus Culture","Dietary Health","Food Pricing","Guest Dining Experience","Institutional Sustainability","Operating Costs","Staff Satisfaction","Sustainability of Guest Food Choices")
+frequency_manual <- c(82,27,4,5,2,14,1,13)
+api_frequencies_manual <- tibble(accessory_indicator_var_manual,frequency_manual) %>%
+  arrange(desc(frequency_manual))
+api_frequencies_manual 
 ```
 
-    ## # A tibble: 4 × 3
-    ##   principal_indicator_var_manual frequency_manual mode_manual  
-    ##   <chr>                                     <dbl> <chr>        
-    ## 1 Food Choice                                  36 Intended     
-    ## 2 Food Choice                                  67 Self-Reported
-    ## 3 Food Choice                                  54 Observed     
-    ## 4 Food Service                                  2 Observed
-
-not sure why this isn’t collapsing correctly
-
-variety
+    ## # A tibble: 8 × 2
+    ##   accessory_indicator_var_manual       frequency_manual
+    ##   <chr>                                           <dbl>
+    ## 1 Campus Culture                                     82
+    ## 2 Dietary Health                                     27
+    ## 3 Operating Costs                                    14
+    ## 4 Sustainability of Guest Food Choices               13
+    ## 5 Guest Dining Experience                             5
+    ## 6 Food Pricing                                        4
+    ## 7 Institutional Sustainability                        2
+    ## 8 Staff Satisfaction                                  1
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Campus Culture")
+api_contigency_table <- api_frequencies_manual %>%
+  rename(present=frequency_manual) %>%
+  mutate(absent=116-present)
+api_contigency_table
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 82
+    ## # A tibble: 8 × 3
+    ##   accessory_indicator_var_manual       present absent
+    ##   <chr>                                  <dbl>  <dbl>
+    ## 1 Campus Culture                            82     34
+    ## 2 Dietary Health                            27     89
+    ## 3 Operating Costs                           14    102
+    ## 4 Sustainability of Guest Food Choices      13    103
+    ## 5 Guest Dining Experience                    5    111
+    ## 6 Food Pricing                               4    112
+    ## 7 Institutional Sustainability               2    114
+    ## 8 Staff Satisfaction                         1    115
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Dietary Health")
+api_contigency_table_alt <- api_contigency_table %>%
+  pivot_longer(!accessory_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
+  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="present"~62.97,
+    accessory_indicator_var_manual=="Campus Culture"&appearance=="absent"~13.71,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="present"~0.66,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="absent"~0.14,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="present"~0.76,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="absent"~0.17,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="present"~1.00,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="absent"~0.22,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="present"~4.15,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="absent"~0.90,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="present"~0.16,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="absent"~0.03,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="present"~5.89,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="absent"~1.28,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="present"~6.53,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="absent"~1.42)) %>%
+  mutate(label_y=case_when(appearance=="present"~118,
+                           appearance=="absent"~-2))
+api_contigency_table_alt
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 27
+    ## # A tibble: 16 × 5
+    ##    accessory_indicator_var_ma…¹ appearance frequency_manual contribution label_y
+    ##    <chr>                        <chr>                 <dbl>        <dbl>   <dbl>
+    ##  1 Campus Culture               present                  82        63.0      118
+    ##  2 Campus Culture               absent                   34        13.7       -2
+    ##  3 Dietary Health               present                  27         0.66     118
+    ##  4 Dietary Health               absent                   89         0.14      -2
+    ##  5 Operating Costs              present                  14         0.76     118
+    ##  6 Operating Costs              absent                  102         0.17      -2
+    ##  7 Sustainability of Guest Foo… present                  13         1        118
+    ##  8 Sustainability of Guest Foo… absent                  103         0.22      -2
+    ##  9 Guest Dining Experience      present                   5         4.15     118
+    ## 10 Guest Dining Experience      absent                  111         0.9       -2
+    ## 11 Food Pricing                 present                   4         0.16     118
+    ## 12 Food Pricing                 absent                  112         0.03      -2
+    ## 13 Institutional Sustainability present                   2         5.89     118
+    ## 14 Institutional Sustainability absent                  114         1.28      -2
+    ## 15 Staff Satisfaction           present                   1         6.53     118
+    ## 16 Staff Satisfaction           absent                  115         1.42      -2
+    ## # ℹ abbreviated name: ¹​accessory_indicator_var_manual
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Operating Costs")
+api_frequencies_plot <- api_contigency_table_alt %>%
+  ggplot(aes(x=accessory_indicator_var_manual,y=frequency_manual,fill=appearance,color=appearance)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Campus Culture","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
+  xlab("Accessory Indicator") +
+  ylab("Frequency") +
+  scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture")) + 
+  scale_y_continuous(breaks=c(0,29,58,87,116)) +
+  scale_fill_manual(values=c("aliceblue","lightsteelblue")) +
+  scale_color_manual(values=c("aliceblue","lightsteelblue")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
+  theme(aspect.ratio=0.6,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="accessory-performance-indicators.png",plot=api_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=42,height=25,units="cm",dpi=150,limitsize=TRUE)
+api_frequencies_plot
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 14
+![](cleaning-script_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Sustainability of Guest Food Choices")
+api_contigency_table <- as.table(rbind(c(82,27,14,13,5,4,2,1),c(34,89,102,103,111,12,114,115)))
+dimnames(api_contigency_table) <- list(dichotomy=c("present","absent"),
+                                       indicators=c("Campus Culture","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Guest Dining Experience","Food Pricing","Institutional Sustainability","Staff Satisfaction"))
+api_chisq_test <- chisq.test(api_contigency_table)
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 13
+    ## Warning in chisq.test(api_contigency_table): Chi-squared approximation may be
+    ## incorrect
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Guest Dining Experience")
+api_chisq_test
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  api_contigency_table
+    ## X-squared = 287.48, df = 7, p-value < 2.2e-16
 
-    ## [1] 5
+Significant association between the type of accessory performance
+indicator and its likelihood of appearance (chi-square test
+interpretation (<https://www.datacamp.com/tutorial/chi-square-test-r>))
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Food Pricing")
+api_observed_counts <- api_chisq_test$observed
+print(api_chisq_test)
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 4
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  api_contigency_table
+    ## X-squared = 287.48, df = 7, p-value < 2.2e-16
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Institutional Sustainability")
+api_expected_counts <- api_chisq_test$expected
+print(round(api_expected_counts,2))
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 2
+    ##          indicators
+    ## dichotomy Campus Culture Dietary Health Operating Costs
+    ##   present          20.73          20.73           20.73
+    ##   absent           95.27          95.27           95.27
+    ##          indicators
+    ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
+    ##   present                                20.73                   20.73
+    ##   absent                                 95.27                   95.27
+    ##          indicators
+    ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
+    ##   present         2.86                        20.73              20.73
+    ##   absent         13.14                        95.27              95.27
 
 ``` r
-extraction_data %>%
-  select(accessory_indicator_var) %>%
-  str_count("Staff Satisfaction")
+api_pearson_residuals <- api_chisq_test$residuals
+print(round(api_pearson_residuals,2))
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
+    ##          indicators
+    ## dichotomy Campus Culture Dietary Health Operating Costs
+    ##   present          13.45           1.38           -1.48
+    ##   absent           -6.28          -0.64            0.69
+    ##          indicators
+    ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
+    ##   present                                -1.70                   -3.46
+    ##   absent                                  0.79                    1.61
+    ##          indicators
+    ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
+    ##   present         0.67                        -4.11              -4.33
+    ##   absent         -0.31                         1.92               2.02
 
-    ## [1] 1
+``` r
+api_contributions <- (api_observed_counts-api_expected_counts)^2/api_expected_counts
+api_total_chi_square <- api_chisq_test$statistic
+api_percentage_contributions <- 100*api_contributions/api_total_chi_square
+print("Percentage Contributions:")
+```
+
+    ## [1] "Percentage Contributions:"
+
+``` r
+print(round(api_percentage_contributions,2))
+```
+
+    ##          indicators
+    ## dichotomy Campus Culture Dietary Health Operating Costs
+    ##   present          62.97           0.66            0.76
+    ##   absent           13.71           0.14            0.17
+    ##          indicators
+    ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
+    ##   present                                 1.00                    4.15
+    ##   absent                                  0.22                    0.90
+    ##          indicators
+    ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
+    ##   present         0.16                         5.89               6.53
+    ##   absent          0.03                         1.28               1.42
+
+``` r
+library(pheatmap)
+pheatmap(api_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+
+Rerun this using list class instead of variety class
 
 list
 
@@ -838,12 +934,6 @@ extraction_data %>%
 
 ### Performance Qualifiers
 
-api_frequencies \<- extraction_data %\>%
-select(study,accessory_indicator_var) %\>%
-separate_longer_delim(c(accessory_indicator_var),delim=“;”) %\>%
-add_column(count=1) %\>% group_by(accessory_indicator_var) %\>%
-summarise(frequency=sum(count)) api_frequencies
-
 ``` r
 qpi_frequencies <- extraction_data %>%
   select(study,qualifying_indicator_var) %>%
@@ -868,48 +958,179 @@ qpi_frequencies
     ## 9  <NA>                           13
 
 ``` r
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Demographics")
+qualifying_indicator_var_manual <- c("Demographics","Lifestyle","Program Reception","Situational")
+frequency_manual <- c(87,46,39,29)
+qpi_frequencies_manual <- tibble(qualifying_indicator_var_manual,frequency_manual) %>%
+  arrange(desc(frequency_manual))
+qpi_frequencies_manual 
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 87
+    ## # A tibble: 4 × 2
+    ##   qualifying_indicator_var_manual frequency_manual
+    ##   <chr>                                      <dbl>
+    ## 1 Demographics                                  87
+    ## 2 Lifestyle                                     46
+    ## 3 Program Reception                             39
+    ## 4 Situational                                   29
 
 ``` r
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Lifestyle")
+qpi_contingency_table <- qpi_frequencies_manual %>%
+  rename(present=frequency_manual) %>%
+  mutate(absent=116-present)
+qpi_contingency_table
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 46
+    ## # A tibble: 4 × 3
+    ##   qualifying_indicator_var_manual present absent
+    ##   <chr>                             <dbl>  <dbl>
+    ## 1 Demographics                         87     29
+    ## 2 Lifestyle                            46     70
+    ## 3 Program Reception                    39     77
+    ## 4 Situational                          29     87
 
 ``` r
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Program Reception")
+qpi_contingency_table_alt <- qpi_contingency_table %>%
+  pivot_longer(!qualifying_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
+  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="present"~39.32,
+    qualifying_indicator_var_manual=="Demographics"&appearance=="absent"~30.05,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="present"~0.53,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="absent"~0.40,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="present"~3.68,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="absent"~2.82,
+    qualifying_indicator_var_manual=="Situational"&appearance=="present"~13.15,
+    qualifying_indicator_var_manual=="Situational"&appearance=="absent"~10.05)) %>%
+  mutate(label_y=case_when(appearance=="present"~118,
+                           appearance=="absent"~-2))
+api_contigency_table_alt
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
-
-    ## [1] 39
+    ## # A tibble: 16 × 5
+    ##    accessory_indicator_var_ma…¹ appearance frequency_manual contribution label_y
+    ##    <chr>                        <chr>                 <dbl>        <dbl>   <dbl>
+    ##  1 Campus Culture               present                  82        63.0      118
+    ##  2 Campus Culture               absent                   34        13.7       -2
+    ##  3 Dietary Health               present                  27         0.66     118
+    ##  4 Dietary Health               absent                   89         0.14      -2
+    ##  5 Operating Costs              present                  14         0.76     118
+    ##  6 Operating Costs              absent                  102         0.17      -2
+    ##  7 Sustainability of Guest Foo… present                  13         1        118
+    ##  8 Sustainability of Guest Foo… absent                  103         0.22      -2
+    ##  9 Guest Dining Experience      present                   5         4.15     118
+    ## 10 Guest Dining Experience      absent                  111         0.9       -2
+    ## 11 Food Pricing                 present                   4         0.16     118
+    ## 12 Food Pricing                 absent                  112         0.03      -2
+    ## 13 Institutional Sustainability present                   2         5.89     118
+    ## 14 Institutional Sustainability absent                  114         1.28      -2
+    ## 15 Staff Satisfaction           present                   1         6.53     118
+    ## 16 Staff Satisfaction           absent                  115         1.42      -2
+    ## # ℹ abbreviated name: ¹​accessory_indicator_var_manual
 
 ``` r
-extraction_data %>%
-  select(qualifying_indicator_var) %>%
-  str_count("Situational")
+qpi_frequencies_plot <- qpi_contingency_table_alt %>%
+  ggplot(aes(x=qualifying_indicator_var_manual,y=frequency_manual,fill=appearance,color=appearance)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Demographics","Situational")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
+  xlab("Qualifying Indicator") +
+  ylab("Frequency") +
+  scale_x_discrete(limits=c("Situational","Program Reception","Lifestyle","Demographics")) + 
+  scale_y_continuous(breaks=c(0,29,58,87,116)) +
+  scale_fill_manual(values=c("mistyrose","lightcoral")) +
+  scale_color_manual(values=c("mistyrose","lightcoral")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 68.35 (2dp); p-value < 0.001") + 
+  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="qualifying-performance-indicators.png",plot=qpi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=25,units="cm",dpi=150,limitsize=TRUE)
+qpi_frequencies_plot
 ```
 
-    ## Warning in stri_count_regex(string, pattern, opts_regex = opts(pattern)):
-    ## argument is not an atomic vector; coercing
+![](cleaning-script_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
-    ## [1] 29
+``` r
+qpi_contingency_table <- as.table(rbind(c(87,46,39,29),c(29,70,77,87)))
+dimnames(qpi_contingency_table) <- list(dichomoty=c("present","absent"),
+                                        indicators=c("Demographics","Lifestyle","Program Reception","Situational"))
+qpi_chisq_test <- chisq.test(qpi_contingency_table)
+qpi_chisq_test
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  qpi_contingency_table
+    ## X-squared = 68.35, df = 3, p-value = 9.629e-15
+
+Significant association between the type of qualifying performance
+indicator and its likelihood of appearance
+
+``` r
+qpi_observed_counts <- qpi_chisq_test$observed
+print(qpi_chisq_test)
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  qpi_contingency_table
+    ## X-squared = 68.35, df = 3, p-value = 9.629e-15
+
+``` r
+qpi_expected_counts <- qpi_chisq_test$expected
+print(round(qpi_expected_counts,2))
+```
+
+    ##          indicators
+    ## dichomoty Demographics Lifestyle Program Reception Situational
+    ##   present        50.25     50.25             50.25       50.25
+    ##   absent         65.75     65.75             65.75       65.75
+
+``` r
+qpi_pearson_residuals <- qpi_chisq_test$residuals
+print(round(qpi_pearson_residuals,2))
+```
+
+    ##          indicators
+    ## dichomoty Demographics Lifestyle Program Reception Situational
+    ##   present         5.18     -0.60             -1.59       -3.00
+    ##   absent         -4.53      0.52              1.39        2.62
+
+``` r
+qpi_contributions <- (qpi_observed_counts-qpi_expected_counts)^2/qpi_expected_counts
+qpi_total_chi_square <- qpi_chisq_test$statistic
+qpi_percentage_contributions <- 100*qpi_contributions/qpi_total_chi_square
+print("Percentage Contributions:")
+```
+
+    ## [1] "Percentage Contributions:"
+
+``` r
+print(round(qpi_percentage_contributions,2))
+```
+
+    ##          indicators
+    ## dichomoty Demographics Lifestyle Program Reception Situational
+    ##   present        39.32      0.53              3.68       13.15
+    ##   absent         30.05      0.40              2.82       10.05
+
+``` r
+pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
+
+``` r
+combined_indicators <- ggarrange(api_frequencies_plot,qpi_frequencies_plot,
+          nrow=2,
+          labels=c("A","B"))
+ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=48,height=48,units="cm",dpi=150,limitsize=TRUE)
+combined_indicators
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
+
+geom_signif(comparisons=list(c(“Food Choice”,“Food
+Service”)),color=“black”,size=0.25,annotation=“\*\*\*“,y_position=158,tip_length=0.02,vjust=0)
++
 
 ### Gap Monitoring
 
