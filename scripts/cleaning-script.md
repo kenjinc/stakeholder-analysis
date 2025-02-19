@@ -222,8 +222,8 @@ summary(exponential_model)
 temporal_frequencies_plot <- temporal_frequencies %>%
   ggplot(aes(x=pub_year,y=frequency,color=frequency,fill=frequency)) + 
   geom_col() +
-  scale_fill_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
-  scale_color_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
+  scale_fill_gradient(name="Count",low="lavender",high="lightslateblue",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
+  scale_color_gradient(name="Count",low="lavender",high="lightslateblue",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
   xlab("Publication Year") + 
   ylab("Frequency") + 
   scale_y_continuous(limits=c(0,120)) +
@@ -232,8 +232,8 @@ temporal_frequencies_plot <- temporal_frequencies %>%
   theme(legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   ggplot(aes(x=pub_year,y=cumulative_frequency,color=cumulative_frequency,fill=cumulative_frequency)) +
-  scale_fill_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
-  scale_color_gradient(name="Count",low="lavender",high="slateblue4",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
+  scale_fill_gradient(name="Count",low="lavender",high="lightslateblue",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
+  scale_color_gradient(name="Count",low="lavender",high="lightslateblue",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
   geom_col() + 
   xlab("Publication Year") + 
   ylab("Cumulative Frequency") + 
@@ -390,7 +390,7 @@ spatial_frequencies_joined <- left_join(global_shapefile,spatial_frequencies,by=
 national_frequencies <- spatial_frequencies_joined %>%
   ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
   geom_polygon(color="black",linewidth=0.125) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(0,55),breaks=c(0,11,22,33,44,55)) +
+  scale_fill_gradient(low="lavender",high="lightslateblue",na.value="white",limits=c(0,55),breaks=c(0,11,22,33,44,55)) +
   coord_sf(crs=crs_robin) +
   xlab("") + 
   ylab("") +
@@ -450,7 +450,7 @@ state_frequencies_joined <- left_join(usa_shapefile,state_frequencies,by="state"
 usa_frequencies <- state_frequencies_joined %>%
   ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
   geom_polygon(color="black",linewidth=0.125) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
+  scale_fill_gradient(low="lavender",high="lightslateblue",na.value="white",limits=c(1,55)) +
   xlab("") + 
   ylab("") +
   labs(caption="") +
@@ -505,7 +505,7 @@ subnational_frequencies_joined <- left_join(uk_shapefile,subnational_frequencies
 uk_frequencies <- subnational_frequencies_joined %>%
 ggplot(aes(fill=frequency,group=geonunit)) + 
   geom_sf(aes(fill=frequency),color="black",linewidth=0.125) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
+  scale_fill_gradient(low="lavender",high="lightslateblue",na.value="white",limits=c(1,55)) +
   theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
@@ -558,43 +558,163 @@ ppi_frequencies
 principal_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
 frequency_manual <- c(36,67,54,2)
 ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
-  mutate(mode_manual=case_when(principal_indicator_var_manual=="Food Choice, Intended"~"Intended",
-                        principal_indicator_var_manual=="Food Choice, Self-Reported"~"Self-Reported",
-                        principal_indicator_var_manual=="Food Choice, Observed"~"Observed",
-                        principal_indicator_var_manual=="Food Service, Observed"~"Observed")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Observed","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Intended","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Choice, Self-Reported","Food Choice")) %>%
-  mutate(across(principal_indicator_var_manual,str_replace_all,"Food Service, Observed","Food Service"))
+  arrange(desc(frequency_manual))
 ppi_frequencies_manual 
 ```
 
-    ## # A tibble: 4 × 3
-    ##   principal_indicator_var_manual frequency_manual mode_manual  
-    ##   <chr>                                     <dbl> <chr>        
-    ## 1 Food Choice                                  36 Intended     
-    ## 2 Food Choice                                  67 Self-Reported
-    ## 3 Food Choice                                  54 Observed     
-    ## 4 Food Service                                  2 Observed
-
-need to run chisq.test 36,54,67. 2
+    ## # A tibble: 4 × 2
+    ##   principal_indicator_var_manual frequency_manual
+    ##   <chr>                                     <dbl>
+    ## 1 Food Choice, Self-Reported                   67
+    ## 2 Food Choice, Observed                        54
+    ## 3 Food Choice, Intended                        36
+    ## 4 Food Service, Observed                        2
 
 ``` r
-ppi_frequencies_plot <- ppi_frequencies_manual %>%
-  ggplot(aes(x=principal_indicator_var_manual,y=frequency_manual,fill=mode_manual,color=mode_manual)) + 
-  geom_col() +
-  scale_fill_manual(values=c("lavender","lightslateblue","slateblue4")) +
-  scale_color_manual(values=c("lavender","lightslateblue","slateblue4")) +
-  xlab("Primary Indicator") +
-  ylab("Frequency") +
-  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
-  geom_signif(comparisons=list(c("Food Choice","Food Service")),color="black",size=0.25,annotation="***",y_position=158,tip_length=0.02,vjust=0) +
-  theme(aspect.ratio=2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-ggsave(filename="primary-performance-indicators.png",plot=ppi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=20,units="cm",dpi=150,limitsize=TRUE)
-ppi_frequencies_plot
+ppi_contingency_table <- ppi_frequencies_manual %>%
+  rename(Present=frequency_manual) %>%
+  mutate(Absent=116-Present)
+ppi_contingency_table
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+    ## # A tibble: 4 × 3
+    ##   principal_indicator_var_manual Present Absent
+    ##   <chr>                            <dbl>  <dbl>
+    ## 1 Food Choice, Self-Reported          67     49
+    ## 2 Food Choice, Observed               54     62
+    ## 3 Food Choice, Intended               36     80
+    ## 4 Food Service, Observed               2    114
+
+``` r
+ppi_contigency_table <- as.table(rbind(c(67,54,36,2),c(49,62,80,114)))
+dimnames(ppi_contigency_table) <- list(dichotomy=c("Present","Absent"),
+                                       indicators=c("Food Choice, Self-Reported","Food Choice, Observed","Food Choice, Intended","Food Service, Observed"))
+ppi_chisq_test <- chisq.test(ppi_contigency_table)
+ppi_chisq_test
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  ppi_contigency_table
+    ## X-squared = 91.269, df = 3, p-value < 2.2e-16
+
+Significant associated between the type of principal performance
+indicator and its likelihood of appearance
+
+``` r
+ppi_observed_counts <- ppi_chisq_test$observed
+print(ppi_chisq_test)
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  ppi_contigency_table
+    ## X-squared = 91.269, df = 3, p-value < 2.2e-16
+
+``` r
+ppi_expected_counts <- ppi_chisq_test$expected
+print(round(ppi_expected_counts,2))
+```
+
+    ##          indicators
+    ## dichotomy Food Choice, Self-Reported Food Choice, Observed
+    ##   Present                      39.75                 39.75
+    ##   Absent                       76.25                 76.25
+    ##          indicators
+    ## dichotomy Food Choice, Intended Food Service, Observed
+    ##   Present                 39.75                  39.75
+    ##   Absent                  76.25                  76.25
+
+``` r
+ppi_pearson_residuals <- ppi_chisq_test$residuals
+print(round(ppi_pearson_residuals,2))
+```
+
+    ##          indicators
+    ## dichotomy Food Choice, Self-Reported Food Choice, Observed
+    ##   Present                       4.32                  2.26
+    ##   Absent                       -3.12                 -1.63
+    ##          indicators
+    ## dichotomy Food Choice, Intended Food Service, Observed
+    ##   Present                 -0.59                  -5.99
+    ##   Absent                   0.43                   4.32
+
+``` r
+ppi_contributions <- (ppi_observed_counts-ppi_expected_counts)^2/ppi_expected_counts
+ppi_total_chi_square <- ppi_chisq_test$statistic
+ppi_percentage_contributions <- 100*ppi_contributions/ppi_total_chi_square
+print("Percentage Contributions:")
+```
+
+    ## [1] "Percentage Contributions:"
+
+``` r
+print(round(ppi_percentage_contributions,2))
+```
+
+    ##          indicators
+    ## dichotomy Food Choice, Self-Reported Food Choice, Observed
+    ##   Present                      20.47                  5.60
+    ##   Absent                       10.67                  2.92
+    ##          indicators
+    ## dichotomy Food Choice, Intended Food Service, Observed
+    ##   Present                  0.39                  39.28
+    ##   Absent                   0.20                  20.48
+
+``` r
+library(pheatmap)
+pheatmap(ppi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+
+``` r
+ppi_contingency_table_alt <- ppi_contingency_table %>%
+  pivot_longer(!principal_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
+  mutate(contribution=case_when(principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Present"~20.47,
+    principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Absent"~10.67,
+    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Present"~5.60,
+    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Absent"~2.92,
+    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Present"~0.39,
+    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Absent"~0.20,
+    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Present"~39.28,
+    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Absent"~20.48)) %>%
+  mutate(label_y=case_when(appearance=="Present"~118,
+                           appearance=="Absent"~-2))
+ppi_contingency_table_alt
+```
+
+    ## # A tibble: 8 × 5
+    ##   principal_indicator_var_man…¹ appearance frequency_manual contribution label_y
+    ##   <chr>                         <chr>                 <dbl>        <dbl>   <dbl>
+    ## 1 Food Choice, Self-Reported    Present                  67        20.5      118
+    ## 2 Food Choice, Self-Reported    Absent                   49        10.7       -2
+    ## 3 Food Choice, Observed         Present                  54         5.6      118
+    ## 4 Food Choice, Observed         Absent                   62         2.92      -2
+    ## 5 Food Choice, Intended         Present                  36         0.39     118
+    ## 6 Food Choice, Intended         Absent                   80         0.2       -2
+    ## 7 Food Service, Observed        Present                   2        39.3      118
+    ## 8 Food Service, Observed        Absent                  114        20.5       -2
+    ## # ℹ abbreviated name: ¹​principal_indicator_var_manual
+
+``` r
+ppi_frequencies_plot <- ppi_contingency_table_alt %>%
+  ggplot(aes(x=principal_indicator_var_manual,y=frequency_manual,fill=appearance,color=appearance)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Food Choice, Self-Reported","Food Service, Observed")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
+  xlab("Principal Indicator") +
+  ylab("Frequency") +
+  scale_x_discrete(limits=c("Food Service, Observed","Food Choice, Intended","Food Choice, Observed","Food Choice, Self-Reported")) + 
+  scale_y_continuous(breaks=c(0,29,58,87,116)) +
+  scale_fill_manual(values=c("lavender","lightslateblue")) +
+  scale_color_manual(values=c("lavender","lightslateblue")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 91.3 (3sf); p-value < 0.001") + 
+  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
 
 ### Accessory Performance Indicators
 
@@ -830,7 +950,7 @@ library(pheatmap)
 pheatmap(api_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 Rerun this using list class instead of variety class
 
@@ -1104,17 +1224,24 @@ print(round(qpi_percentage_contributions,2))
 pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
 
 ``` r
-combined_indicators <- ggarrange(api_frequencies_plot,qpi_frequencies_plot,
-          nrow=2,
-          labels=c("A","B"))
-ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=48,height=48,units="cm",dpi=150,limitsize=TRUE)
+principal_qualifying_indicator_plots <- ggarrange(ppi_frequencies_plot,qpi_frequencies_plot,
+          ncol=2,
+          labels=c("A","C"))
+accessory_indicator_plots <- ggarrange(api_frequencies_plot,
+          labels="B")
+```
+
+``` r
+combined_indicators <- ggarrange(principal_qualifying_indicator_plots,accessory_indicator_plots,
+          nrow=2)
+ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=50,height=50,units="cm",dpi=150,limitsize=TRUE)
 combined_indicators
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
 
 ### Gap Monitoring
 
