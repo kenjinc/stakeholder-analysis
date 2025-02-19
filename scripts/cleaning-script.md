@@ -1,6 +1,6 @@
 Cleaning Script
 ================
-Last Updated: February 18, 2025
+Last Updated: February 19, 2025
 
 ## Package Loading
 
@@ -389,19 +389,15 @@ crs_robin <- "+proj=robin +lat_0=0 +lon_0=0 +x0=0 +y0=0"
 spatial_frequencies_joined <- left_join(global_shapefile,spatial_frequencies,by="country")
 national_frequencies <- spatial_frequencies_joined %>%
   ggplot(aes(x=long,y=lat,fill=frequency,group=group)) + 
-  geom_polygon(color="black",linewidth=0.125,alpha=0.60) +
-  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(1,55)) +
+  geom_polygon(color="black",linewidth=0.125) +
+  scale_fill_gradient(low="lavender",high="slateblue4",na.value="white",limits=c(0,55),breaks=c(0,11,22,33,44,55)) +
   coord_sf(crs=crs_robin) +
   xlab("") + 
   ylab("") +
   scale_y_continuous(limits=c(-55,85)) +
-  labs(caption="") +
-  theme(aspect.ratio=.48,legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  labs(fill="Frequency") +
+  theme(aspect.ratio=.48,legend.position="bottom",legend.title.position="top",legend.box.spacing=unit(-10,"pt"),legend.key.width=unit(100,"pt"),legend.key.height=unit(5,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
-
-scale_fill_gradient(name=“Count”,low=“lavender”,high=“slateblue4”,limits=c(1,116),na.value=“lavender”,breaks=c(1,29,58,87,116)) +
-scale_color_gradient(name=“Count”,low=“lavender”,high=“slateblue4”,limits=c(1,116),na.value=“lavender”,breaks=c(1,29,58,87,116))
-+
 
 ``` r
 usa_shapefile <- map_data("county") %>%
@@ -587,8 +583,8 @@ need to run chisq.test 36,54,67. 2
 ppi_frequencies_plot <- ppi_frequencies_manual %>%
   ggplot(aes(x=principal_indicator_var_manual,y=frequency_manual,fill=mode_manual,color=mode_manual)) + 
   geom_col() +
-  scale_fill_brewer(palette="Pastel1") +
-  scale_color_brewer(palette="Pastel1") +
+  scale_fill_manual(values=c("lavender","lightslateblue","slateblue4")) +
+  scale_color_manual(values=c("lavender","lightslateblue","slateblue4")) +
   xlab("Primary Indicator") +
   ylab("Frequency") +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
@@ -653,13 +649,13 @@ api_frequencies_manual
 
 ``` r
 api_contigency_table <- api_frequencies_manual %>%
-  rename(present=frequency_manual) %>%
-  mutate(absent=116-present)
+  rename(Present=frequency_manual) %>%
+  mutate(Absent=116-Present)
 api_contigency_table
 ```
 
     ## # A tibble: 8 × 3
-    ##   accessory_indicator_var_manual       present absent
+    ##   accessory_indicator_var_manual       Present Absent
     ##   <chr>                                  <dbl>  <dbl>
     ## 1 Campus Culture                            82     34
     ## 2 Dietary Health                            27     89
@@ -673,46 +669,46 @@ api_contigency_table
 ``` r
 api_contigency_table_alt <- api_contigency_table %>%
   pivot_longer(!accessory_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="present"~62.97,
-    accessory_indicator_var_manual=="Campus Culture"&appearance=="absent"~13.71,
-    accessory_indicator_var_manual=="Dietary Health"&appearance=="present"~0.66,
-    accessory_indicator_var_manual=="Dietary Health"&appearance=="absent"~0.14,
-    accessory_indicator_var_manual=="Operating Costs"&appearance=="present"~0.76,
-    accessory_indicator_var_manual=="Operating Costs"&appearance=="absent"~0.17,
-    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="present"~1.00,
-    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="absent"~0.22,
-    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="present"~4.15,
-    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="absent"~0.90,
-    accessory_indicator_var_manual=="Food Pricing"&appearance=="present"~0.16,
-    accessory_indicator_var_manual=="Food Pricing"&appearance=="absent"~0.03,
-    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="present"~5.89,
-    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="absent"~1.28,
-    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="present"~6.53,
-    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="absent"~1.42)) %>%
-  mutate(label_y=case_when(appearance=="present"~118,
-                           appearance=="absent"~-2))
+  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="Present"~62.97,
+    accessory_indicator_var_manual=="Campus Culture"&appearance=="Absent"~13.71,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="Present"~0.66,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="Absent"~0.14,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="Present"~0.76,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="Absent"~0.17,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Present"~1.00,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Absent"~0.22,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Present"~4.15,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Absent"~0.90,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="Present"~0.16,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="Absent"~0.03,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Present"~5.89,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Absent"~1.28,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Present"~6.53,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Absent"~1.42)) %>%
+  mutate(label_y=case_when(appearance=="Present"~118,
+                           appearance=="Absent"~-2))
 api_contigency_table_alt
 ```
 
     ## # A tibble: 16 × 5
     ##    accessory_indicator_var_ma…¹ appearance frequency_manual contribution label_y
     ##    <chr>                        <chr>                 <dbl>        <dbl>   <dbl>
-    ##  1 Campus Culture               present                  82        63.0      118
-    ##  2 Campus Culture               absent                   34        13.7       -2
-    ##  3 Dietary Health               present                  27         0.66     118
-    ##  4 Dietary Health               absent                   89         0.14      -2
-    ##  5 Operating Costs              present                  14         0.76     118
-    ##  6 Operating Costs              absent                  102         0.17      -2
-    ##  7 Sustainability of Guest Foo… present                  13         1        118
-    ##  8 Sustainability of Guest Foo… absent                  103         0.22      -2
-    ##  9 Guest Dining Experience      present                   5         4.15     118
-    ## 10 Guest Dining Experience      absent                  111         0.9       -2
-    ## 11 Food Pricing                 present                   4         0.16     118
-    ## 12 Food Pricing                 absent                  112         0.03      -2
-    ## 13 Institutional Sustainability present                   2         5.89     118
-    ## 14 Institutional Sustainability absent                  114         1.28      -2
-    ## 15 Staff Satisfaction           present                   1         6.53     118
-    ## 16 Staff Satisfaction           absent                  115         1.42      -2
+    ##  1 Campus Culture               Present                  82        63.0      118
+    ##  2 Campus Culture               Absent                   34        13.7       -2
+    ##  3 Dietary Health               Present                  27         0.66     118
+    ##  4 Dietary Health               Absent                   89         0.14      -2
+    ##  5 Operating Costs              Present                  14         0.76     118
+    ##  6 Operating Costs              Absent                  102         0.17      -2
+    ##  7 Sustainability of Guest Foo… Present                  13         1        118
+    ##  8 Sustainability of Guest Foo… Absent                  103         0.22      -2
+    ##  9 Guest Dining Experience      Present                   5         4.15     118
+    ## 10 Guest Dining Experience      Absent                  111         0.9       -2
+    ## 11 Food Pricing                 Present                   4         0.16     118
+    ## 12 Food Pricing                 Absent                  112         0.03      -2
+    ## 13 Institutional Sustainability Present                   2         5.89     118
+    ## 14 Institutional Sustainability Absent                  114         1.28      -2
+    ## 15 Staff Satisfaction           Present                   1         6.53     118
+    ## 16 Staff Satisfaction           Absent                  115         1.42      -2
     ## # ℹ abbreviated name: ¹​accessory_indicator_var_manual
 
 ``` r
@@ -730,15 +726,11 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
   theme(aspect.ratio=0.6,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-ggsave(filename="accessory-performance-indicators.png",plot=api_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=42,height=25,units="cm",dpi=150,limitsize=TRUE)
-api_frequencies_plot
 ```
-
-![](cleaning-script_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
 api_contigency_table <- as.table(rbind(c(82,27,14,13,5,4,2,1),c(34,89,102,103,111,12,114,115)))
-dimnames(api_contigency_table) <- list(dichotomy=c("present","absent"),
+dimnames(api_contigency_table) <- list(dichotomy=c("Present","Absent"),
                                        indicators=c("Campus Culture","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Guest Dining Experience","Food Pricing","Institutional Sustainability","Staff Satisfaction"))
 api_chisq_test <- chisq.test(api_contigency_table)
 ```
@@ -778,16 +770,16 @@ print(round(api_expected_counts,2))
 
     ##          indicators
     ## dichotomy Campus Culture Dietary Health Operating Costs
-    ##   present          20.73          20.73           20.73
-    ##   absent           95.27          95.27           95.27
+    ##   Present          20.73          20.73           20.73
+    ##   Absent           95.27          95.27           95.27
     ##          indicators
     ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
-    ##   present                                20.73                   20.73
-    ##   absent                                 95.27                   95.27
+    ##   Present                                20.73                   20.73
+    ##   Absent                                 95.27                   95.27
     ##          indicators
     ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
-    ##   present         2.86                        20.73              20.73
-    ##   absent         13.14                        95.27              95.27
+    ##   Present         2.86                        20.73              20.73
+    ##   Absent         13.14                        95.27              95.27
 
 ``` r
 api_pearson_residuals <- api_chisq_test$residuals
@@ -796,16 +788,16 @@ print(round(api_pearson_residuals,2))
 
     ##          indicators
     ## dichotomy Campus Culture Dietary Health Operating Costs
-    ##   present          13.45           1.38           -1.48
-    ##   absent           -6.28          -0.64            0.69
+    ##   Present          13.45           1.38           -1.48
+    ##   Absent           -6.28          -0.64            0.69
     ##          indicators
     ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
-    ##   present                                -1.70                   -3.46
-    ##   absent                                  0.79                    1.61
+    ##   Present                                -1.70                   -3.46
+    ##   Absent                                  0.79                    1.61
     ##          indicators
     ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
-    ##   present         0.67                        -4.11              -4.33
-    ##   absent         -0.31                         1.92               2.02
+    ##   Present         0.67                        -4.11              -4.33
+    ##   Absent         -0.31                         1.92               2.02
 
 ``` r
 api_contributions <- (api_observed_counts-api_expected_counts)^2/api_expected_counts
@@ -822,16 +814,16 @@ print(round(api_percentage_contributions,2))
 
     ##          indicators
     ## dichotomy Campus Culture Dietary Health Operating Costs
-    ##   present          62.97           0.66            0.76
-    ##   absent           13.71           0.14            0.17
+    ##   Present          62.97           0.66            0.76
+    ##   Absent           13.71           0.14            0.17
     ##          indicators
     ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
-    ##   present                                 1.00                    4.15
-    ##   absent                                  0.22                    0.90
+    ##   Present                                 1.00                    4.15
+    ##   Absent                                  0.22                    0.90
     ##          indicators
     ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
-    ##   present         0.16                         5.89               6.53
-    ##   absent          0.03                         1.28               1.42
+    ##   Present         0.16                         5.89               6.53
+    ##   Absent          0.03                         1.28               1.42
 
 ``` r
 library(pheatmap)
@@ -975,13 +967,13 @@ qpi_frequencies_manual
 
 ``` r
 qpi_contingency_table <- qpi_frequencies_manual %>%
-  rename(present=frequency_manual) %>%
-  mutate(absent=116-present)
+  rename(Present=frequency_manual) %>%
+  mutate(Absent=116-Present)
 qpi_contingency_table
 ```
 
     ## # A tibble: 4 × 3
-    ##   qualifying_indicator_var_manual present absent
+    ##   qualifying_indicator_var_manual Present Absent
     ##   <chr>                             <dbl>  <dbl>
     ## 1 Demographics                         87     29
     ## 2 Lifestyle                            46     70
@@ -991,38 +983,38 @@ qpi_contingency_table
 ``` r
 qpi_contingency_table_alt <- qpi_contingency_table %>%
   pivot_longer(!qualifying_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="present"~39.32,
-    qualifying_indicator_var_manual=="Demographics"&appearance=="absent"~30.05,
-    qualifying_indicator_var_manual=="Lifestyle"&appearance=="present"~0.53,
-    qualifying_indicator_var_manual=="Lifestyle"&appearance=="absent"~0.40,
-    qualifying_indicator_var_manual=="Program Reception"&appearance=="present"~3.68,
-    qualifying_indicator_var_manual=="Program Reception"&appearance=="absent"~2.82,
-    qualifying_indicator_var_manual=="Situational"&appearance=="present"~13.15,
-    qualifying_indicator_var_manual=="Situational"&appearance=="absent"~10.05)) %>%
-  mutate(label_y=case_when(appearance=="present"~118,
-                           appearance=="absent"~-2))
+  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="Present"~39.32,
+    qualifying_indicator_var_manual=="Demographics"&appearance=="Absent"~30.05,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Present"~0.53,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Absent"~0.40,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="Present"~3.68,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="Absent"~2.82,
+    qualifying_indicator_var_manual=="Situational"&appearance=="Present"~13.15,
+    qualifying_indicator_var_manual=="Situational"&appearance=="Absent"~10.05)) %>%
+  mutate(label_y=case_when(appearance=="Present"~118,
+                           appearance=="Absent"~-2))
 api_contigency_table_alt
 ```
 
     ## # A tibble: 16 × 5
     ##    accessory_indicator_var_ma…¹ appearance frequency_manual contribution label_y
     ##    <chr>                        <chr>                 <dbl>        <dbl>   <dbl>
-    ##  1 Campus Culture               present                  82        63.0      118
-    ##  2 Campus Culture               absent                   34        13.7       -2
-    ##  3 Dietary Health               present                  27         0.66     118
-    ##  4 Dietary Health               absent                   89         0.14      -2
-    ##  5 Operating Costs              present                  14         0.76     118
-    ##  6 Operating Costs              absent                  102         0.17      -2
-    ##  7 Sustainability of Guest Foo… present                  13         1        118
-    ##  8 Sustainability of Guest Foo… absent                  103         0.22      -2
-    ##  9 Guest Dining Experience      present                   5         4.15     118
-    ## 10 Guest Dining Experience      absent                  111         0.9       -2
-    ## 11 Food Pricing                 present                   4         0.16     118
-    ## 12 Food Pricing                 absent                  112         0.03      -2
-    ## 13 Institutional Sustainability present                   2         5.89     118
-    ## 14 Institutional Sustainability absent                  114         1.28      -2
-    ## 15 Staff Satisfaction           present                   1         6.53     118
-    ## 16 Staff Satisfaction           absent                  115         1.42      -2
+    ##  1 Campus Culture               Present                  82        63.0      118
+    ##  2 Campus Culture               Absent                   34        13.7       -2
+    ##  3 Dietary Health               Present                  27         0.66     118
+    ##  4 Dietary Health               Absent                   89         0.14      -2
+    ##  5 Operating Costs              Present                  14         0.76     118
+    ##  6 Operating Costs              Absent                  102         0.17      -2
+    ##  7 Sustainability of Guest Foo… Present                  13         1        118
+    ##  8 Sustainability of Guest Foo… Absent                  103         0.22      -2
+    ##  9 Guest Dining Experience      Present                   5         4.15     118
+    ## 10 Guest Dining Experience      Absent                  111         0.9       -2
+    ## 11 Food Pricing                 Present                   4         0.16     118
+    ## 12 Food Pricing                 Absent                  112         0.03      -2
+    ## 13 Institutional Sustainability Present                   2         5.89     118
+    ## 14 Institutional Sustainability Absent                  114         1.28      -2
+    ## 15 Staff Satisfaction           Present                   1         6.53     118
+    ## 16 Staff Satisfaction           Absent                  115         1.42      -2
     ## # ℹ abbreviated name: ¹​accessory_indicator_var_manual
 
 ``` r
@@ -1040,15 +1032,11 @@ qpi_frequencies_plot <- qpi_contingency_table_alt %>%
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 68.35 (2dp); p-value < 0.001") + 
   theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
-ggsave(filename="qualifying-performance-indicators.png",plot=qpi_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=25,units="cm",dpi=150,limitsize=TRUE)
-qpi_frequencies_plot
 ```
-
-![](cleaning-script_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 ``` r
 qpi_contingency_table <- as.table(rbind(c(87,46,39,29),c(29,70,77,87)))
-dimnames(qpi_contingency_table) <- list(dichomoty=c("present","absent"),
+dimnames(qpi_contingency_table) <- list(dichomoty=c("Present","Absent"),
                                         indicators=c("Demographics","Lifestyle","Program Reception","Situational"))
 qpi_chisq_test <- chisq.test(qpi_contingency_table)
 qpi_chisq_test
@@ -1081,8 +1069,8 @@ print(round(qpi_expected_counts,2))
 
     ##          indicators
     ## dichomoty Demographics Lifestyle Program Reception Situational
-    ##   present        50.25     50.25             50.25       50.25
-    ##   absent         65.75     65.75             65.75       65.75
+    ##   Present        50.25     50.25             50.25       50.25
+    ##   Absent         65.75     65.75             65.75       65.75
 
 ``` r
 qpi_pearson_residuals <- qpi_chisq_test$residuals
@@ -1091,8 +1079,8 @@ print(round(qpi_pearson_residuals,2))
 
     ##          indicators
     ## dichomoty Demographics Lifestyle Program Reception Situational
-    ##   present         5.18     -0.60             -1.59       -3.00
-    ##   absent         -4.53      0.52              1.39        2.62
+    ##   Present         5.18     -0.60             -1.59       -3.00
+    ##   Absent         -4.53      0.52              1.39        2.62
 
 ``` r
 qpi_contributions <- (qpi_observed_counts-qpi_expected_counts)^2/qpi_expected_counts
@@ -1109,8 +1097,8 @@ print(round(qpi_percentage_contributions,2))
 
     ##          indicators
     ## dichomoty Demographics Lifestyle Program Reception Situational
-    ##   present        39.32      0.53              3.68       13.15
-    ##   absent         30.05      0.40              2.82       10.05
+    ##   Present        39.32      0.53              3.68       13.15
+    ##   Absent         30.05      0.40              2.82       10.05
 
 ``` r
 pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
@@ -1127,10 +1115,6 @@ combined_indicators
 ```
 
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
-
-geom_signif(comparisons=list(c(“Food Choice”,“Food
-Service”)),color=“black”,size=0.25,annotation=“\*\*\*“,y_position=158,tip_length=0.02,vjust=0)
-+
 
 ### Gap Monitoring
 
