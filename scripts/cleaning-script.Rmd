@@ -29,8 +29,6 @@ extraction_data <- read.csv("/Users/kenjinchang/github/stakeholder-analysis/data
 
 ## Data Cleaning: Scoping Review
 
-Below, we list, operationalize, and—where applicable—provide the input range for each of the 42 originally extracted variables:
-
 * `study_id`: the unique numeral identifier assigned to each independently eligible study included within our scoping review (1-116).
 * `study`: the parenthetical, in-text citation for each independently eligible study's corresponding record of reference. 
 * `study_no`: the assigned number specifying the order in which the independently eligible study appears within the corresponding record of reference.
@@ -135,7 +133,7 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
 temporal_plots <- ggarrange(temporal_frequencies_plot,temporal_cumulative_frequencies_plot,
           nrow=2,
           labels=c("A","B"))
-ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=20,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=40,units="cm",dpi=150,limitsize=TRUE)
 temporal_plots
 ```
 
@@ -322,7 +320,7 @@ national_frequency_choros <- ggarrange(national_frequencies,
 ```{r}
 spatial_plots <- ggarrange(national_frequency_choros,subnational_frequency_choros,
           nrow=2)
-ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=20,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=48,height=48,units="cm",dpi=150,limitsize=TRUE)
 spatial_plots
 ```
 
@@ -701,13 +699,48 @@ combined_indicators
 
 ### Gap Monitoring
 
-
 #### Spillover 
 
 #### Intention-Behavior Asymmetries
 
-
-
 ## Data Cleaning: Stakeholder Analysis
+
+* `date`: the 
+* `completion`: the 
+* `channel`: the 
+* `consent`: the 
+* `involvement`: the 
+* `involvement_other`: the 
+* `stakeholder_type`: the 
+* `stakeholder_type_other`: the 
+* `role_title`: the 
+* `role_duration``: the 
+* `dietary_health_ranking`: the 
+* `dietary_sustainability_ranking`: the 
+* `institutional_sustainability_ranking`: the 
+* `food_pricing_ranking`: the 
+* `operating_costs_ranking`: the 
+* `guest_experience_ranking`: the 
+* `staff_satisfaction_ranking`: the 
+* `campus_culture_ranking`: the 
+* `other_ranking`: the 
+* `other_ranking_other`: the 
+
+```{r}
+survey_data %>%
+  select(RecordedDate,Progress,DistributionChannel,Q1,Q2,Q2_4_TEXT,Q6,Q6_10_TEXT,Q3,Q5_1,Q2_1,Q2_2,Q2_3,Q2_4,Q2_5,Q2_6,Q2_7,Q2_8,Q2_9,Q2_9_TEXT) %>%
+  rename(date=RecordedDate,completion=Progress,mode=DistributionChannel,consent=Q1,role=Q2,role_other=Q2_4_TEXT,stakeholder_type=Q6,stakeholder_type_other=Q6_10_TEXT,position_title=Q3,position_duration=Q5_1,dietary_health_ranking=Q2_1,dietary_sustainability_ranking=Q2_2,institutional_sustainability_ranking=Q2_3,food_pricing_ranking=Q2_4,operating_costs_ranking=Q2_5,guest_experience_ranking=Q2_6,staff_satisfaction_ranking=Q2_7,campus_culture_ranking=Q2_8,other_ranking=Q2_9,other_ranking_other=Q2_9_TEXT) %>%
+  slice(3:n()) %>%
+  mutate(dietary_health_ranking=as.numeric(dietary_health_ranking)) %>%
+  mutate(dietary_sustainability_ranking=as.numeric(dietary_sustainability_ranking)) %>%
+  mutate(institutional_sustainability_ranking=as.numeric(institutional_sustainability_ranking)) %>%
+  mutate(food_pricing_ranking=as.numeric(food_pricing_ranking)) %>%
+  mutate(operating_costs_ranking=as.numeric(operating_costs_ranking)) %>%
+  mutate(guest_experience_ranking=as.numeric(guest_experience_ranking)) %>%
+  mutate(staff_satisfaction_ranking=as.numeric(staff_satisfaction_ranking)) %>%
+  mutate(campus_culture_ranking=as.numeric(campus_culture_ranking)) %>%
+  mutate(other_ranking=as.numeric(other_ranking)) %>%
+  mutate(id=row_number()) 
+```
 
 
