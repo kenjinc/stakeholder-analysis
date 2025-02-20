@@ -252,7 +252,7 @@ temporal_plots <- ggarrange(temporal_frequencies_plot,temporal_cumulative_freque
     ## (`geom_col()`).
 
 ``` r
-ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=40,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=30,units="cm",dpi=150,limitsize=TRUE)
 temporal_plots
 ```
 
@@ -517,7 +517,7 @@ national_frequency_choros <- ggarrange(national_frequencies,
 ``` r
 spatial_plots <- ggarrange(national_frequency_choros,subnational_frequency_choros,
           nrow=2)
-ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=48,height=48,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=40,units="cm",dpi=150,limitsize=TRUE)
 spatial_plots
 ```
 
@@ -569,22 +569,22 @@ ppi_frequencies_manual
 
 ``` r
 ppi_contingency_table <- ppi_frequencies_manual %>%
-  rename(Present=frequency_manual) %>%
-  mutate(Absent=116-Present)
+  rename(Reported=frequency_manual) %>%
+  mutate(Omitted=116-Reported)
 ppi_contingency_table
 ```
 
     ## # A tibble: 4 × 3
-    ##   principal_indicator_var_manual Present Absent
-    ##   <chr>                            <dbl>  <dbl>
-    ## 1 Food Choice, Self-Reported          67     49
-    ## 2 Food Choice, Observed               54     62
-    ## 3 Food Choice, Intended               36     80
-    ## 4 Food Service, Observed               2    114
+    ##   principal_indicator_var_manual Reported Omitted
+    ##   <chr>                             <dbl>   <dbl>
+    ## 1 Food Choice, Self-Reported           67      49
+    ## 2 Food Choice, Observed                54      62
+    ## 3 Food Choice, Intended                36      80
+    ## 4 Food Service, Observed                2     114
 
 ``` r
 ppi_contigency_table <- as.table(rbind(c(67,54,36,2),c(49,62,80,114)))
-dimnames(ppi_contigency_table) <- list(dichotomy=c("Present","Absent"),
+dimnames(ppi_contigency_table) <- list(dichotomy=c("Reported","Omitted"),
                                        indicators=c("Food Choice, Self-Reported","Food Choice, Observed","Food Choice, Intended","Food Service, Observed"))
 ppi_chisq_test <- chisq.test(ppi_contigency_table)
 ppi_chisq_test
@@ -615,28 +615,28 @@ ppi_expected_counts <- ppi_chisq_test$expected
 print(round(ppi_expected_counts,2))
 ```
 
-    ##          indicators
-    ## dichotomy Food Choice, Self-Reported Food Choice, Observed
-    ##   Present                      39.75                 39.75
-    ##   Absent                       76.25                 76.25
-    ##          indicators
-    ## dichotomy Food Choice, Intended Food Service, Observed
-    ##   Present                 39.75                  39.75
-    ##   Absent                  76.25                  76.25
+    ##           indicators
+    ## dichotomy  Food Choice, Self-Reported Food Choice, Observed
+    ##   Reported                      39.75                 39.75
+    ##   Omitted                       76.25                 76.25
+    ##           indicators
+    ## dichotomy  Food Choice, Intended Food Service, Observed
+    ##   Reported                 39.75                  39.75
+    ##   Omitted                  76.25                  76.25
 
 ``` r
 ppi_pearson_residuals <- ppi_chisq_test$residuals
 print(round(ppi_pearson_residuals,2))
 ```
 
-    ##          indicators
-    ## dichotomy Food Choice, Self-Reported Food Choice, Observed
-    ##   Present                       4.32                  2.26
-    ##   Absent                       -3.12                 -1.63
-    ##          indicators
-    ## dichotomy Food Choice, Intended Food Service, Observed
-    ##   Present                 -0.59                  -5.99
-    ##   Absent                   0.43                   4.32
+    ##           indicators
+    ## dichotomy  Food Choice, Self-Reported Food Choice, Observed
+    ##   Reported                       4.32                  2.26
+    ##   Omitted                       -3.12                 -1.63
+    ##           indicators
+    ## dichotomy  Food Choice, Intended Food Service, Observed
+    ##   Reported                 -0.59                  -5.99
+    ##   Omitted                   0.43                   4.32
 
 ``` r
 ppi_contributions <- (ppi_observed_counts-ppi_expected_counts)^2/ppi_expected_counts
@@ -651,14 +651,14 @@ print("Percentage Contributions:")
 print(round(ppi_percentage_contributions,2))
 ```
 
-    ##          indicators
-    ## dichotomy Food Choice, Self-Reported Food Choice, Observed
-    ##   Present                      20.47                  5.60
-    ##   Absent                       10.67                  2.92
-    ##          indicators
-    ## dichotomy Food Choice, Intended Food Service, Observed
-    ##   Present                  0.39                  39.28
-    ##   Absent                   0.20                  20.48
+    ##           indicators
+    ## dichotomy  Food Choice, Self-Reported Food Choice, Observed
+    ##   Reported                      20.47                  5.60
+    ##   Omitted                       10.67                  2.92
+    ##           indicators
+    ## dichotomy  Food Choice, Intended Food Service, Observed
+    ##   Reported                  0.39                  39.28
+    ##   Omitted                   0.20                  20.48
 
 ``` r
 library(pheatmap)
@@ -670,30 +670,30 @@ pheatmap(ppi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cl
 ``` r
 ppi_contingency_table_alt <- ppi_contingency_table %>%
   pivot_longer(!principal_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Present"~20.47,
-    principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Absent"~10.67,
-    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Present"~5.60,
-    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Absent"~2.92,
-    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Present"~0.39,
-    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Absent"~0.20,
-    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Present"~39.28,
-    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Absent"~20.48)) %>%
-  mutate(label_y=case_when(appearance=="Present"~118,
-                           appearance=="Absent"~-2))
+  mutate(contribution=case_when(principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Reported"~20.47,
+    principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Omitted"~10.67,
+    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Reported"~5.60,
+    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Omitted"~2.92,
+    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Reported"~0.39,
+    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Omitted"~0.20,
+    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Reported"~39.28,
+    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Omitted"~20.48)) %>%
+  mutate(label_y=case_when(appearance=="Reported"~118,
+                           appearance=="Omitted"~-2))
 ppi_contingency_table_alt
 ```
 
     ## # A tibble: 8 × 5
     ##   principal_indicator_var_man…¹ appearance frequency_manual contribution label_y
     ##   <chr>                         <chr>                 <dbl>        <dbl>   <dbl>
-    ## 1 Food Choice, Self-Reported    Present                  67        20.5      118
-    ## 2 Food Choice, Self-Reported    Absent                   49        10.7       -2
-    ## 3 Food Choice, Observed         Present                  54         5.6      118
-    ## 4 Food Choice, Observed         Absent                   62         2.92      -2
-    ## 5 Food Choice, Intended         Present                  36         0.39     118
-    ## 6 Food Choice, Intended         Absent                   80         0.2       -2
-    ## 7 Food Service, Observed        Present                   2        39.3      118
-    ## 8 Food Service, Observed        Absent                  114        20.5       -2
+    ## 1 Food Choice, Self-Reported    Reported                 67        20.5      118
+    ## 2 Food Choice, Self-Reported    Omitted                  49        10.7       -2
+    ## 3 Food Choice, Observed         Reported                 54         5.6      118
+    ## 4 Food Choice, Observed         Omitted                  62         2.92      -2
+    ## 5 Food Choice, Intended         Reported                 36         0.39     118
+    ## 6 Food Choice, Intended         Omitted                  80         0.2       -2
+    ## 7 Food Service, Observed        Reported                  2        39.3      118
+    ## 8 Food Service, Observed        Omitted                 114        20.5       -2
     ## # ℹ abbreviated name: ¹​principal_indicator_var_manual
 
 ``` r
@@ -710,7 +710,7 @@ ppi_frequencies_plot <- ppi_contingency_table_alt %>%
   scale_color_manual(values=c("lavender","lightslateblue")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 91.3 (3sf); p-value < 0.001") + 
-  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ### Accessory Performance Indicators
@@ -766,66 +766,66 @@ api_frequencies_manual
 
 ``` r
 api_contigency_table <- api_frequencies_manual %>%
-  rename(Present=frequency_manual) %>%
-  mutate(Absent=116-Present)
+  rename(Reported=frequency_manual) %>%
+  mutate(Omitted=116-Reported)
 api_contigency_table
 ```
 
     ## # A tibble: 8 × 3
-    ##   accessory_indicator_var_manual       Present Absent
-    ##   <chr>                                  <dbl>  <dbl>
-    ## 1 Campus Culture                            82     34
-    ## 2 Dietary Health                            27     89
-    ## 3 Operating Costs                           14    102
-    ## 4 Sustainability of Guest Food Choices      13    103
-    ## 5 Guest Dining Experience                    5    111
-    ## 6 Food Pricing                               4    112
-    ## 7 Institutional Sustainability               2    114
-    ## 8 Staff Satisfaction                         1    115
+    ##   accessory_indicator_var_manual       Reported Omitted
+    ##   <chr>                                   <dbl>   <dbl>
+    ## 1 Campus Culture                             82      34
+    ## 2 Dietary Health                             27      89
+    ## 3 Operating Costs                            14     102
+    ## 4 Sustainability of Guest Food Choices       13     103
+    ## 5 Guest Dining Experience                     5     111
+    ## 6 Food Pricing                                4     112
+    ## 7 Institutional Sustainability                2     114
+    ## 8 Staff Satisfaction                          1     115
 
 ``` r
 api_contigency_table_alt <- api_contigency_table %>%
   pivot_longer(!accessory_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="Present"~62.97,
-    accessory_indicator_var_manual=="Campus Culture"&appearance=="Absent"~13.71,
-    accessory_indicator_var_manual=="Dietary Health"&appearance=="Present"~0.66,
-    accessory_indicator_var_manual=="Dietary Health"&appearance=="Absent"~0.14,
-    accessory_indicator_var_manual=="Operating Costs"&appearance=="Present"~0.76,
-    accessory_indicator_var_manual=="Operating Costs"&appearance=="Absent"~0.17,
-    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Present"~1.00,
-    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Absent"~0.22,
-    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Present"~4.15,
-    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Absent"~0.90,
-    accessory_indicator_var_manual=="Food Pricing"&appearance=="Present"~0.16,
-    accessory_indicator_var_manual=="Food Pricing"&appearance=="Absent"~0.03,
-    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Present"~5.89,
-    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Absent"~1.28,
-    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Present"~6.53,
-    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Absent"~1.42)) %>%
-  mutate(label_y=case_when(appearance=="Present"~118,
-                           appearance=="Absent"~-2))
+  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="Reported"~62.97,
+    accessory_indicator_var_manual=="Campus Culture"&appearance=="Omitted"~13.71,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="Reported"~0.66,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="Omitted"~0.14,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="Reported"~0.76,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="Omitted"~0.17,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Reported"~1.00,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Omitted"~0.22,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Reported"~4.15,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Omitted"~0.90,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="Reported"~0.16,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="Omitted"~0.03,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Reported"~5.89,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Omitted"~1.28,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Reported"~6.53,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Omitted"~1.42)) %>%
+  mutate(label_y=case_when(appearance=="Reported"~118,
+                           appearance=="Omitted"~-2))
 api_contigency_table_alt
 ```
 
     ## # A tibble: 16 × 5
     ##    accessory_indicator_var_ma…¹ appearance frequency_manual contribution label_y
     ##    <chr>                        <chr>                 <dbl>        <dbl>   <dbl>
-    ##  1 Campus Culture               Present                  82        63.0      118
-    ##  2 Campus Culture               Absent                   34        13.7       -2
-    ##  3 Dietary Health               Present                  27         0.66     118
-    ##  4 Dietary Health               Absent                   89         0.14      -2
-    ##  5 Operating Costs              Present                  14         0.76     118
-    ##  6 Operating Costs              Absent                  102         0.17      -2
-    ##  7 Sustainability of Guest Foo… Present                  13         1        118
-    ##  8 Sustainability of Guest Foo… Absent                  103         0.22      -2
-    ##  9 Guest Dining Experience      Present                   5         4.15     118
-    ## 10 Guest Dining Experience      Absent                  111         0.9       -2
-    ## 11 Food Pricing                 Present                   4         0.16     118
-    ## 12 Food Pricing                 Absent                  112         0.03      -2
-    ## 13 Institutional Sustainability Present                   2         5.89     118
-    ## 14 Institutional Sustainability Absent                  114         1.28      -2
-    ## 15 Staff Satisfaction           Present                   1         6.53     118
-    ## 16 Staff Satisfaction           Absent                  115         1.42      -2
+    ##  1 Campus Culture               Reported                 82        63.0      118
+    ##  2 Campus Culture               Omitted                  34        13.7       -2
+    ##  3 Dietary Health               Reported                 27         0.66     118
+    ##  4 Dietary Health               Omitted                  89         0.14      -2
+    ##  5 Operating Costs              Reported                 14         0.76     118
+    ##  6 Operating Costs              Omitted                 102         0.17      -2
+    ##  7 Sustainability of Guest Foo… Reported                 13         1        118
+    ##  8 Sustainability of Guest Foo… Omitted                 103         0.22      -2
+    ##  9 Guest Dining Experience      Reported                  5         4.15     118
+    ## 10 Guest Dining Experience      Omitted                 111         0.9       -2
+    ## 11 Food Pricing                 Reported                  4         0.16     118
+    ## 12 Food Pricing                 Omitted                 112         0.03      -2
+    ## 13 Institutional Sustainability Reported                  2         5.89     118
+    ## 14 Institutional Sustainability Omitted                 114         1.28      -2
+    ## 15 Staff Satisfaction           Reported                  1         6.53     118
+    ## 16 Staff Satisfaction           Omitted                 115         1.42      -2
     ## # ℹ abbreviated name: ¹​accessory_indicator_var_manual
 
 ``` r
@@ -842,12 +842,12 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   scale_color_manual(values=c("aliceblue","lightsteelblue")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
-  theme(aspect.ratio=0.6,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
 api_contigency_table <- as.table(rbind(c(82,27,14,13,5,4,2,1),c(34,89,102,103,111,12,114,115)))
-dimnames(api_contigency_table) <- list(dichotomy=c("Present","Absent"),
+dimnames(api_contigency_table) <- list(dichotomy=c("Reported","Omitted"),
                                        indicators=c("Campus Culture","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Guest Dining Experience","Food Pricing","Institutional Sustainability","Staff Satisfaction"))
 api_chisq_test <- chisq.test(api_contigency_table)
 ```
@@ -885,36 +885,36 @@ api_expected_counts <- api_chisq_test$expected
 print(round(api_expected_counts,2))
 ```
 
-    ##          indicators
-    ## dichotomy Campus Culture Dietary Health Operating Costs
-    ##   Present          20.73          20.73           20.73
-    ##   Absent           95.27          95.27           95.27
-    ##          indicators
-    ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
-    ##   Present                                20.73                   20.73
-    ##   Absent                                 95.27                   95.27
-    ##          indicators
-    ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
-    ##   Present         2.86                        20.73              20.73
-    ##   Absent         13.14                        95.27              95.27
+    ##           indicators
+    ## dichotomy  Campus Culture Dietary Health Operating Costs
+    ##   Reported          20.73          20.73           20.73
+    ##   Omitted           95.27          95.27           95.27
+    ##           indicators
+    ## dichotomy  Sustainability of Guest Food Choices Guest Dining Experience
+    ##   Reported                                20.73                   20.73
+    ##   Omitted                                 95.27                   95.27
+    ##           indicators
+    ## dichotomy  Food Pricing Institutional Sustainability Staff Satisfaction
+    ##   Reported         2.86                        20.73              20.73
+    ##   Omitted         13.14                        95.27              95.27
 
 ``` r
 api_pearson_residuals <- api_chisq_test$residuals
 print(round(api_pearson_residuals,2))
 ```
 
-    ##          indicators
-    ## dichotomy Campus Culture Dietary Health Operating Costs
-    ##   Present          13.45           1.38           -1.48
-    ##   Absent           -6.28          -0.64            0.69
-    ##          indicators
-    ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
-    ##   Present                                -1.70                   -3.46
-    ##   Absent                                  0.79                    1.61
-    ##          indicators
-    ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
-    ##   Present         0.67                        -4.11              -4.33
-    ##   Absent         -0.31                         1.92               2.02
+    ##           indicators
+    ## dichotomy  Campus Culture Dietary Health Operating Costs
+    ##   Reported          13.45           1.38           -1.48
+    ##   Omitted           -6.28          -0.64            0.69
+    ##           indicators
+    ## dichotomy  Sustainability of Guest Food Choices Guest Dining Experience
+    ##   Reported                                -1.70                   -3.46
+    ##   Omitted                                  0.79                    1.61
+    ##           indicators
+    ## dichotomy  Food Pricing Institutional Sustainability Staff Satisfaction
+    ##   Reported         0.67                        -4.11              -4.33
+    ##   Omitted         -0.31                         1.92               2.02
 
 ``` r
 api_contributions <- (api_observed_counts-api_expected_counts)^2/api_expected_counts
@@ -929,18 +929,18 @@ print("Percentage Contributions:")
 print(round(api_percentage_contributions,2))
 ```
 
-    ##          indicators
-    ## dichotomy Campus Culture Dietary Health Operating Costs
-    ##   Present          62.97           0.66            0.76
-    ##   Absent           13.71           0.14            0.17
-    ##          indicators
-    ## dichotomy Sustainability of Guest Food Choices Guest Dining Experience
-    ##   Present                                 1.00                    4.15
-    ##   Absent                                  0.22                    0.90
-    ##          indicators
-    ## dichotomy Food Pricing Institutional Sustainability Staff Satisfaction
-    ##   Present         0.16                         5.89               6.53
-    ##   Absent          0.03                         1.28               1.42
+    ##           indicators
+    ## dichotomy  Campus Culture Dietary Health Operating Costs
+    ##   Reported          62.97           0.66            0.76
+    ##   Omitted           13.71           0.14            0.17
+    ##           indicators
+    ## dichotomy  Sustainability of Guest Food Choices Guest Dining Experience
+    ##   Reported                                 1.00                    4.15
+    ##   Omitted                                  0.22                    0.90
+    ##           indicators
+    ## dichotomy  Food Pricing Institutional Sustainability Staff Satisfaction
+    ##   Reported         0.16                         5.89               6.53
+    ##   Omitted          0.03                         1.28               1.42
 
 ``` r
 library(pheatmap)
@@ -1084,54 +1084,54 @@ qpi_frequencies_manual
 
 ``` r
 qpi_contingency_table <- qpi_frequencies_manual %>%
-  rename(Present=frequency_manual) %>%
-  mutate(Absent=116-Present)
+  rename(Reported=frequency_manual) %>%
+  mutate(Omitted=116-Reported)
 qpi_contingency_table
 ```
 
     ## # A tibble: 4 × 3
-    ##   qualifying_indicator_var_manual Present Absent
-    ##   <chr>                             <dbl>  <dbl>
-    ## 1 Demographics                         87     29
-    ## 2 Lifestyle                            46     70
-    ## 3 Program Reception                    39     77
-    ## 4 Situational                          29     87
+    ##   qualifying_indicator_var_manual Reported Omitted
+    ##   <chr>                              <dbl>   <dbl>
+    ## 1 Demographics                          87      29
+    ## 2 Lifestyle                             46      70
+    ## 3 Program Reception                     39      77
+    ## 4 Situational                           29      87
 
 ``` r
 qpi_contingency_table_alt <- qpi_contingency_table %>%
   pivot_longer(!qualifying_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="Present"~39.32,
-    qualifying_indicator_var_manual=="Demographics"&appearance=="Absent"~30.05,
-    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Present"~0.53,
-    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Absent"~0.40,
-    qualifying_indicator_var_manual=="Program Reception"&appearance=="Present"~3.68,
-    qualifying_indicator_var_manual=="Program Reception"&appearance=="Absent"~2.82,
-    qualifying_indicator_var_manual=="Situational"&appearance=="Present"~13.15,
-    qualifying_indicator_var_manual=="Situational"&appearance=="Absent"~10.05)) %>%
-  mutate(label_y=case_when(appearance=="Present"~118,
-                           appearance=="Absent"~-2))
+  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="Reported"~39.32,
+    qualifying_indicator_var_manual=="Demographics"&appearance=="Omitted"~30.05,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Reported"~0.53,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Omitted"~0.40,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="Reported"~3.68,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="Omitted"~2.82,
+    qualifying_indicator_var_manual=="Situational"&appearance=="Reported"~13.15,
+    qualifying_indicator_var_manual=="Situational"&appearance=="Omitted"~10.05)) %>%
+  mutate(label_y=case_when(appearance=="Reported"~118,
+                           appearance=="Omitted"~-2))
 api_contigency_table_alt
 ```
 
     ## # A tibble: 16 × 5
     ##    accessory_indicator_var_ma…¹ appearance frequency_manual contribution label_y
     ##    <chr>                        <chr>                 <dbl>        <dbl>   <dbl>
-    ##  1 Campus Culture               Present                  82        63.0      118
-    ##  2 Campus Culture               Absent                   34        13.7       -2
-    ##  3 Dietary Health               Present                  27         0.66     118
-    ##  4 Dietary Health               Absent                   89         0.14      -2
-    ##  5 Operating Costs              Present                  14         0.76     118
-    ##  6 Operating Costs              Absent                  102         0.17      -2
-    ##  7 Sustainability of Guest Foo… Present                  13         1        118
-    ##  8 Sustainability of Guest Foo… Absent                  103         0.22      -2
-    ##  9 Guest Dining Experience      Present                   5         4.15     118
-    ## 10 Guest Dining Experience      Absent                  111         0.9       -2
-    ## 11 Food Pricing                 Present                   4         0.16     118
-    ## 12 Food Pricing                 Absent                  112         0.03      -2
-    ## 13 Institutional Sustainability Present                   2         5.89     118
-    ## 14 Institutional Sustainability Absent                  114         1.28      -2
-    ## 15 Staff Satisfaction           Present                   1         6.53     118
-    ## 16 Staff Satisfaction           Absent                  115         1.42      -2
+    ##  1 Campus Culture               Reported                 82        63.0      118
+    ##  2 Campus Culture               Omitted                  34        13.7       -2
+    ##  3 Dietary Health               Reported                 27         0.66     118
+    ##  4 Dietary Health               Omitted                  89         0.14      -2
+    ##  5 Operating Costs              Reported                 14         0.76     118
+    ##  6 Operating Costs              Omitted                 102         0.17      -2
+    ##  7 Sustainability of Guest Foo… Reported                 13         1        118
+    ##  8 Sustainability of Guest Foo… Omitted                 103         0.22      -2
+    ##  9 Guest Dining Experience      Reported                  5         4.15     118
+    ## 10 Guest Dining Experience      Omitted                 111         0.9       -2
+    ## 11 Food Pricing                 Reported                  4         0.16     118
+    ## 12 Food Pricing                 Omitted                 112         0.03      -2
+    ## 13 Institutional Sustainability Reported                  2         5.89     118
+    ## 14 Institutional Sustainability Omitted                 114         1.28      -2
+    ## 15 Staff Satisfaction           Reported                  1         6.53     118
+    ## 16 Staff Satisfaction           Omitted                 115         1.42      -2
     ## # ℹ abbreviated name: ¹​accessory_indicator_var_manual
 
 ``` r
@@ -1148,12 +1148,12 @@ qpi_frequencies_plot <- qpi_contingency_table_alt %>%
   scale_color_manual(values=c("mistyrose","lightcoral")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 68.35 (2dp); p-value < 0.001") + 
-  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
 qpi_contingency_table <- as.table(rbind(c(87,46,39,29),c(29,70,77,87)))
-dimnames(qpi_contingency_table) <- list(dichomoty=c("Present","Absent"),
+dimnames(qpi_contingency_table) <- list(dichomoty=c("Reported","Omitted"),
                                         indicators=c("Demographics","Lifestyle","Program Reception","Situational"))
 qpi_chisq_test <- chisq.test(qpi_contingency_table)
 qpi_chisq_test
@@ -1184,20 +1184,20 @@ qpi_expected_counts <- qpi_chisq_test$expected
 print(round(qpi_expected_counts,2))
 ```
 
-    ##          indicators
-    ## dichomoty Demographics Lifestyle Program Reception Situational
-    ##   Present        50.25     50.25             50.25       50.25
-    ##   Absent         65.75     65.75             65.75       65.75
+    ##           indicators
+    ## dichomoty  Demographics Lifestyle Program Reception Situational
+    ##   Reported        50.25     50.25             50.25       50.25
+    ##   Omitted         65.75     65.75             65.75       65.75
 
 ``` r
 qpi_pearson_residuals <- qpi_chisq_test$residuals
 print(round(qpi_pearson_residuals,2))
 ```
 
-    ##          indicators
-    ## dichomoty Demographics Lifestyle Program Reception Situational
-    ##   Present         5.18     -0.60             -1.59       -3.00
-    ##   Absent         -4.53      0.52              1.39        2.62
+    ##           indicators
+    ## dichomoty  Demographics Lifestyle Program Reception Situational
+    ##   Reported         5.18     -0.60             -1.59       -3.00
+    ##   Omitted         -4.53      0.52              1.39        2.62
 
 ``` r
 qpi_contributions <- (qpi_observed_counts-qpi_expected_counts)^2/qpi_expected_counts
@@ -1212,10 +1212,10 @@ print("Percentage Contributions:")
 print(round(qpi_percentage_contributions,2))
 ```
 
-    ##          indicators
-    ## dichomoty Demographics Lifestyle Program Reception Situational
-    ##   Present        39.32      0.53              3.68       13.15
-    ##   Absent         30.05      0.40              2.82       10.05
+    ##           indicators
+    ## dichomoty  Demographics Lifestyle Program Reception Situational
+    ##   Reported        39.32      0.53              3.68       13.15
+    ##   Omitted         30.05      0.40              2.82       10.05
 
 ``` r
 pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
@@ -1234,7 +1234,7 @@ accessory_indicator_plots <- ggarrange(api_frequencies_plot,
 ``` r
 combined_indicators <- ggarrange(principal_qualifying_indicator_plots,accessory_indicator_plots,
           nrow=2)
-ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=50,height=50,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=30,units="cm",dpi=150,limitsize=TRUE)
 combined_indicators
 ```
 

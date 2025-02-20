@@ -133,7 +133,7 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
 temporal_plots <- ggarrange(temporal_frequencies_plot,temporal_cumulative_frequencies_plot,
           nrow=2,
           labels=c("A","B"))
-ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=40,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-rate.png",plot=temporal_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=30,units="cm",dpi=150,limitsize=TRUE)
 temporal_plots
 ```
 
@@ -320,7 +320,7 @@ national_frequency_choros <- ggarrange(national_frequencies,
 ```{r}
 spatial_plots <- ggarrange(national_frequency_choros,subnational_frequency_choros,
           nrow=2)
-ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=48,height=48,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=40,units="cm",dpi=150,limitsize=TRUE)
 spatial_plots
 ```
 
@@ -350,14 +350,14 @@ ppi_frequencies_manual
 
 ```{r}
 ppi_contingency_table <- ppi_frequencies_manual %>%
-  rename(Present=frequency_manual) %>%
-  mutate(Absent=116-Present)
+  rename(Reported=frequency_manual) %>%
+  mutate(Omitted=116-Reported)
 ppi_contingency_table
 ```
 
 ```{r}
 ppi_contigency_table <- as.table(rbind(c(67,54,36,2),c(49,62,80,114)))
-dimnames(ppi_contigency_table) <- list(dichotomy=c("Present","Absent"),
+dimnames(ppi_contigency_table) <- list(dichotomy=c("Reported","Omitted"),
                                        indicators=c("Food Choice, Self-Reported","Food Choice, Observed","Food Choice, Intended","Food Service, Observed"))
 ppi_chisq_test <- chisq.test(ppi_contigency_table)
 ppi_chisq_test
@@ -399,16 +399,16 @@ pheatmap(ppi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cl
 ```{r}
 ppi_contingency_table_alt <- ppi_contingency_table %>%
   pivot_longer(!principal_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Present"~20.47,
-    principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Absent"~10.67,
-    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Present"~5.60,
-    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Absent"~2.92,
-    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Present"~0.39,
-    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Absent"~0.20,
-    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Present"~39.28,
-    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Absent"~20.48)) %>%
-  mutate(label_y=case_when(appearance=="Present"~118,
-                           appearance=="Absent"~-2))
+  mutate(contribution=case_when(principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Reported"~20.47,
+    principal_indicator_var_manual=="Food Choice, Self-Reported"&appearance=="Omitted"~10.67,
+    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Reported"~5.60,
+    principal_indicator_var_manual=="Food Choice, Observed"&appearance=="Omitted"~2.92,
+    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Reported"~0.39,
+    principal_indicator_var_manual=="Food Choice, Intended"&appearance=="Omitted"~0.20,
+    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Reported"~39.28,
+    principal_indicator_var_manual=="Food Service, Observed"&appearance=="Omitted"~20.48)) %>%
+  mutate(label_y=case_when(appearance=="Reported"~118,
+                           appearance=="Omitted"~-2))
 ppi_contingency_table_alt
 ```
 
@@ -426,7 +426,7 @@ ppi_frequencies_plot <- ppi_contingency_table_alt %>%
   scale_color_manual(values=c("lavender","lightslateblue")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 91.3 (3sf); p-value < 0.001") + 
-  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ### Accessory Performance Indicators
@@ -451,32 +451,32 @@ api_frequencies_manual
 
 ```{r}
 api_contigency_table <- api_frequencies_manual %>%
-  rename(Present=frequency_manual) %>%
-  mutate(Absent=116-Present)
+  rename(Reported=frequency_manual) %>%
+  mutate(Omitted=116-Reported)
 api_contigency_table
 ```
 
 ```{r}
 api_contigency_table_alt <- api_contigency_table %>%
   pivot_longer(!accessory_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="Present"~62.97,
-    accessory_indicator_var_manual=="Campus Culture"&appearance=="Absent"~13.71,
-    accessory_indicator_var_manual=="Dietary Health"&appearance=="Present"~0.66,
-    accessory_indicator_var_manual=="Dietary Health"&appearance=="Absent"~0.14,
-    accessory_indicator_var_manual=="Operating Costs"&appearance=="Present"~0.76,
-    accessory_indicator_var_manual=="Operating Costs"&appearance=="Absent"~0.17,
-    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Present"~1.00,
-    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Absent"~0.22,
-    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Present"~4.15,
-    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Absent"~0.90,
-    accessory_indicator_var_manual=="Food Pricing"&appearance=="Present"~0.16,
-    accessory_indicator_var_manual=="Food Pricing"&appearance=="Absent"~0.03,
-    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Present"~5.89,
-    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Absent"~1.28,
-    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Present"~6.53,
-    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Absent"~1.42)) %>%
-  mutate(label_y=case_when(appearance=="Present"~118,
-                           appearance=="Absent"~-2))
+  mutate(contribution=case_when(accessory_indicator_var_manual=="Campus Culture"&appearance=="Reported"~62.97,
+    accessory_indicator_var_manual=="Campus Culture"&appearance=="Omitted"~13.71,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="Reported"~0.66,
+    accessory_indicator_var_manual=="Dietary Health"&appearance=="Omitted"~0.14,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="Reported"~0.76,
+    accessory_indicator_var_manual=="Operating Costs"&appearance=="Omitted"~0.17,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Reported"~1.00,
+    accessory_indicator_var_manual=="Sustainability of Guest Food Choices"&appearance=="Omitted"~0.22,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Reported"~4.15,
+    accessory_indicator_var_manual=="Guest Dining Experience"&appearance=="Omitted"~0.90,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="Reported"~0.16,
+    accessory_indicator_var_manual=="Food Pricing"&appearance=="Omitted"~0.03,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Reported"~5.89,
+    accessory_indicator_var_manual=="Institutional Sustainability"&appearance=="Omitted"~1.28,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Reported"~6.53,
+    accessory_indicator_var_manual=="Staff Satisfaction"&appearance=="Omitted"~1.42)) %>%
+  mutate(label_y=case_when(appearance=="Reported"~118,
+                           appearance=="Omitted"~-2))
 api_contigency_table_alt
 ```
 
@@ -494,12 +494,12 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   scale_color_manual(values=c("aliceblue","lightsteelblue")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
-  theme(aspect.ratio=0.6,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ```{r}
 api_contigency_table <- as.table(rbind(c(82,27,14,13,5,4,2,1),c(34,89,102,103,111,12,114,115)))
-dimnames(api_contigency_table) <- list(dichotomy=c("Present","Absent"),
+dimnames(api_contigency_table) <- list(dichotomy=c("Reported","Omitted"),
                                        indicators=c("Campus Culture","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Guest Dining Experience","Food Pricing","Institutional Sustainability","Staff Satisfaction"))
 api_chisq_test <- chisq.test(api_contigency_table)
 api_chisq_test
@@ -606,8 +606,8 @@ qpi_frequencies_manual
 
 ```{r}
 qpi_contingency_table <- qpi_frequencies_manual %>%
-  rename(Present=frequency_manual) %>%
-  mutate(Absent=116-Present)
+  rename(Reported=frequency_manual) %>%
+  mutate(Omitted=116-Reported)
 qpi_contingency_table
 ```
 
@@ -615,16 +615,16 @@ qpi_contingency_table
 ```{r}
 qpi_contingency_table_alt <- qpi_contingency_table %>%
   pivot_longer(!qualifying_indicator_var_manual,names_to="appearance",values_to="frequency_manual") %>%
-  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="Present"~39.32,
-    qualifying_indicator_var_manual=="Demographics"&appearance=="Absent"~30.05,
-    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Present"~0.53,
-    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Absent"~0.40,
-    qualifying_indicator_var_manual=="Program Reception"&appearance=="Present"~3.68,
-    qualifying_indicator_var_manual=="Program Reception"&appearance=="Absent"~2.82,
-    qualifying_indicator_var_manual=="Situational"&appearance=="Present"~13.15,
-    qualifying_indicator_var_manual=="Situational"&appearance=="Absent"~10.05)) %>%
-  mutate(label_y=case_when(appearance=="Present"~118,
-                           appearance=="Absent"~-2))
+  mutate(contribution=case_when(qualifying_indicator_var_manual=="Demographics"&appearance=="Reported"~39.32,
+    qualifying_indicator_var_manual=="Demographics"&appearance=="Omitted"~30.05,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Reported"~0.53,
+    qualifying_indicator_var_manual=="Lifestyle"&appearance=="Omitted"~0.40,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="Reported"~3.68,
+    qualifying_indicator_var_manual=="Program Reception"&appearance=="Omitted"~2.82,
+    qualifying_indicator_var_manual=="Situational"&appearance=="Reported"~13.15,
+    qualifying_indicator_var_manual=="Situational"&appearance=="Omitted"~10.05)) %>%
+  mutate(label_y=case_when(appearance=="Reported"~118,
+                           appearance=="Omitted"~-2))
 api_contigency_table_alt
 ```
 
@@ -642,12 +642,12 @@ qpi_frequencies_plot <- qpi_contingency_table_alt %>%
   scale_color_manual(values=c("mistyrose","lightcoral")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 68.35 (2dp); p-value < 0.001") + 
-  theme(aspect.ratio=1.2,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ```{r}
 qpi_contingency_table <- as.table(rbind(c(87,46,39,29),c(29,70,77,87)))
-dimnames(qpi_contingency_table) <- list(dichomoty=c("Present","Absent"),
+dimnames(qpi_contingency_table) <- list(dichomoty=c("Reported","Omitted"),
                                         indicators=c("Demographics","Lifestyle","Program Reception","Situational"))
 qpi_chisq_test <- chisq.test(qpi_contingency_table)
 qpi_chisq_test
@@ -693,7 +693,7 @@ accessory_indicator_plots <- ggarrange(api_frequencies_plot,
 ```{r}
 combined_indicators <- ggarrange(principal_qualifying_indicator_plots,accessory_indicator_plots,
           nrow=2)
-ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=50,height=50,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=40,height=30,units="cm",dpi=150,limitsize=TRUE)
 combined_indicators
 ```
 
