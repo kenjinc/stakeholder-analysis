@@ -1,7 +1,7 @@
 ---
 title: "Cleaning Script"
 output: github_document
-date: "Last Updated: February 19, 2025"
+date: "Last Updated: February 20, 2025"
 ---
 
 ```{r setup, include=FALSE}
@@ -727,7 +727,7 @@ combined_indicators
 * `other_ranking_other`: the 
 
 ```{r}
-survey_data %>%
+survey_data <- survey_data %>%
   select(RecordedDate,Progress,DistributionChannel,Q1,Q2,Q2_4_TEXT,Q6,Q6_10_TEXT,Q3,Q5_1,Q2_1,Q2_2,Q2_3,Q2_4,Q2_5,Q2_6,Q2_7,Q2_8,Q2_9,Q2_9_TEXT) %>%
   rename(date=RecordedDate,completion=Progress,mode=DistributionChannel,consent=Q1,role=Q2,role_other=Q2_4_TEXT,stakeholder_type=Q6,stakeholder_type_other=Q6_10_TEXT,position_title=Q3,position_duration=Q5_1,dietary_health_ranking=Q2_1,dietary_sustainability_ranking=Q2_2,institutional_sustainability_ranking=Q2_3,food_pricing_ranking=Q2_4,operating_costs_ranking=Q2_5,guest_experience_ranking=Q2_6,staff_satisfaction_ranking=Q2_7,campus_culture_ranking=Q2_8,other_ranking=Q2_9,other_ranking_other=Q2_9_TEXT) %>%
   slice(3:n()) %>%
@@ -740,7 +740,118 @@ survey_data %>%
   mutate(staff_satisfaction_ranking=as.numeric(staff_satisfaction_ranking)) %>%
   mutate(campus_culture_ranking=as.numeric(campus_culture_ranking)) %>%
   mutate(other_ranking=as.numeric(other_ranking)) %>%
-  mutate(id=row_number()) 
+  mutate(id=row_number(),.before=role) %>%
+  mutate(campus_culture_ranking=case_when(id==22~8,TRUE~campus_culture_ranking)) %>%
+  mutate(staff_satisfaction_ranking=case_when(id==22~7,TRUE~staff_satisfaction_ranking)) %>%
+  mutate(operating_costs_ranking=case_when(id==22~2,TRUE~operating_costs_ranking)) %>%
+  mutate(food_pricing_ranking=case_when(id==22~3,TRUE~food_pricing_ranking)) %>%
+  mutate(institutional_sustainability_ranking=case_when(id==22~4,TRUE~institutional_sustainability_ranking)) %>%
+  mutate(dietary_sustainability_ranking=case_when(id==22~5,TRUE~dietary_sustainability_ranking)) %>%
+  mutate(dietary_health_ranking=case_when(id==22~6,TRUE~dietary_health_ranking)) %>%
+  select(-other_ranking,-other_ranking_other,-completion,-date,-mode,-consent) %>%
+  mutate(dietary_health_score=case_when(dietary_health_ranking==1~8,
+                                        dietary_health_ranking==2~7,
+                                        dietary_health_ranking==3~6,
+                                        dietary_health_ranking==4~5,
+                                        dietary_health_ranking==5~4,
+                                        dietary_health_ranking==6~3,
+                                        dietary_health_ranking==7~2,
+                                        dietary_health_ranking==8~1)) %>%
+  mutate(dietary_sustainability_score=case_when(dietary_sustainability_ranking==1~8,
+                                                dietary_sustainability_ranking==2~7,
+                                                dietary_sustainability_ranking==3~6,
+                                                dietary_sustainability_ranking==4~5,
+                                                dietary_sustainability_ranking==5~4,
+                                                dietary_sustainability_ranking==6~3,
+                                                dietary_sustainability_ranking==7~2,
+                                                dietary_sustainability_ranking==8~1)) %>%
+  mutate(institutional_sustainability_score=case_when(institutional_sustainability_ranking==1~8,
+                                                      institutional_sustainability_ranking==2~7,
+                                                      institutional_sustainability_ranking==3~6,
+                                                      institutional_sustainability_ranking==4~5,
+                                                      institutional_sustainability_ranking==5~4,
+                                                      institutional_sustainability_ranking==6~3,
+                                                      institutional_sustainability_ranking==7~2,
+                                                      institutional_sustainability_ranking==8~1)) %>%
+  mutate(food_pricing_score=case_when(food_pricing_ranking==1~8,
+                                      food_pricing_ranking==2~7,
+                                      food_pricing_ranking==3~6,
+                                      food_pricing_ranking==4~5,
+                                      food_pricing_ranking==5~4,
+                                      food_pricing_ranking==6~3,
+                                      food_pricing_ranking==7~2,
+                                      food_pricing_ranking==8~1)) %>%
+  mutate(operating_costs_score=case_when(operating_costs_ranking==1~8,
+                                         operating_costs_ranking==2~7,
+                                         operating_costs_ranking==3~6,
+                                         operating_costs_ranking==4~5,
+                                         operating_costs_ranking==5~4,
+                                         operating_costs_ranking==6~3,
+                                         operating_costs_ranking==7~2,
+                                         operating_costs_ranking==8~1)) %>%
+  mutate(guest_experience_score=case_when(guest_experience_ranking==1~8,
+                                          guest_experience_ranking==2~7,
+                                          guest_experience_ranking==3~6,
+                                          guest_experience_ranking==4~5,
+                                          guest_experience_ranking==5~4,
+                                          guest_experience_ranking==6~3,
+                                          guest_experience_ranking==7~2,
+                                          guest_experience_ranking==8~1)) %>%
+  mutate(staff_satisfaction_score=case_when(staff_satisfaction_ranking==1~8,
+                                            staff_satisfaction_ranking==2~7,
+                                            staff_satisfaction_ranking==3~6,
+                                            staff_satisfaction_ranking==4~5,
+                                            staff_satisfaction_ranking==5~4,
+                                            staff_satisfaction_ranking==6~3,
+                                            staff_satisfaction_ranking==7~2,
+                                            staff_satisfaction_ranking==8~1)) %>%
+  mutate(campus_culture_score=case_when(campus_culture_ranking==1~8,
+                                        campus_culture_ranking==2~7,
+                                        campus_culture_ranking==3~6,
+                                        campus_culture_ranking==4~5,
+                                        campus_culture_ranking==5~4,
+                                        campus_culture_ranking==6~3,
+                                        campus_culture_ranking==7~2,
+                                        campus_culture_ranking==8~1)) 
 ```
+
+```{r}
+survey_data <- survey_data %>%
+  mutate(across(role,str_replace,"I consult on best practices","Advisor")) %>%
+  mutate(across(role,str_replace,"I am a primary decision maker","Decision Maker")) %>%
+  mutate(across(role,str_replace,"I offer feedback on existing services","Auditor")) %>%
+  mutate(across(role,str_replace,"Other \\(please specify\\):","Advisor")) %>%
+  select(-role_other)
+```
+
+```{r}
+summary_rank <- survey_data %>%
+  select(id,dietary_health_ranking,dietary_sustainability_ranking,institutional_sustainability_ranking,food_pricing_ranking,operating_costs_ranking,guest_experience_ranking,staff_satisfaction_ranking,campus_culture_ranking) %>%
+  pivot_longer(!id,names_to="indicator",values_to="ranking") %>%
+  group_by(indicator) %>%
+  summarise(mean_rank=mean(ranking)) 
+summary_rank %>%
+  arrange(mean_rank)
+```
+
+```{r}
+summary_score <- survey_data %>%
+  select(id,dietary_health_score,dietary_sustainability_score,institutional_sustainability_score,food_pricing_score,operating_costs_score,guest_experience_score,staff_satisfaction_score,campus_culture_score) %>%
+  pivot_longer(!id,names_to="indicator",values_to="score") %>%
+  group_by(indicator) %>%
+  summarise(mean_score=mean(score))
+summary_score %>%
+  arrange(desc(mean_score))
+```
+
+
+```{r}
+survey_data %>% mutate(dietary_sustainability_over_dietary_health=case_when(dietary_sustainability_ranking<dietary_health_ranking ~ 1,
+                                                                                   dietary_sustainability_ranking>dietary_health_ranking ~ 0)) %>%
+  summarise(dietary_sustainability_over_dietary_health_sum=sum(dietary_sustainability_over_dietary_health))
+```
+
+
+
 
 
