@@ -16,8 +16,10 @@ library(ggpubr)
 library(ggsignif)
 library(maps)
 library(sf)
+library(RColorBrewer)
 library(rnaturalearth)
 library(rnaturalearthhires)
+library(viridis)
 ```
 
 ## Data Loading 
@@ -825,33 +827,197 @@ survey_data <- survey_data %>%
 ```
 
 ```{r}
-summary_rank <- survey_data %>%
+rank_frequencies <- survey_data %>%
   select(id,dietary_health_ranking,dietary_sustainability_ranking,institutional_sustainability_ranking,food_pricing_ranking,operating_costs_ranking,guest_experience_ranking,staff_satisfaction_ranking,campus_culture_ranking) %>%
   pivot_longer(!id,names_to="indicator",values_to="ranking") %>%
+  mutate(across(indicator,str_replace,"guest_experience_ranking","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_ranking","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_ranking","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_ranking","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_ranking","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_ranking","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_ranking","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_ranking","Staff Satisfaction")) 
+rank_frequencies %>%
   group_by(indicator) %>%
-  summarise(mean_rank=mean(ranking)) 
-summary_rank %>%
-  arrange(mean_rank)
+  summarise(mean_ranking=mean(ranking),sd_ranking=sd(ranking)) %>%
+  arrange(mean_ranking)
 ```
 
 ```{r}
-summary_score <- survey_data %>%
+score_frequencies <- survey_data %>%
   select(id,dietary_health_score,dietary_sustainability_score,institutional_sustainability_score,food_pricing_score,operating_costs_score,guest_experience_score,staff_satisfaction_score,campus_culture_score) %>%
   pivot_longer(!id,names_to="indicator",values_to="score") %>%
+  mutate(across(indicator,str_replace,"guest_experience_score","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_score","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_score","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_score","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_score","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_score","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_score","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_score","Staff Satisfaction"))
+score_frequencies %>%
   group_by(indicator) %>%
-  summarise(mean_score=mean(score))
-summary_score %>%
+  summarise(mean_score=mean(score),sd_score=sd(score)) %>%
   arrange(desc(mean_score))
 ```
 
+```{r}
+score_aov <- aov(score~indicator,data=score_frequencies)
+summary(score_aov)
+```
+
+```{r}
+TukeyHSD(score_aov)
+```
+
+guest_experience_score-food_pricing_score                       0.0228131
+guest_experience_score-dietary_sustainability_score             0.0384822
+institutional_sustainability_score-guest_experience_score       0.0016525
+guest_experience_score-campus_culture_score                     0.0008360
+staff_satisfaction_score-guest_experience_score                 0.0002535
+
+```{r}
+score_frequencies %>%
+  group_by(indicator) %>%
+  summarise(mean_score=mean(score),sd_score=sd(score)) %>%
+  arrange(desc(mean_score)) %>%
+  ggplot(aes(x=fct_reorder(indicator,mean_score),y=mean_score,fill=fct_reorder(indicator,mean_score))) + 
+  geom_col(linewidth=0.3) + 
+  geom_errorbar(aes(ymin=mean_score-sd_score,ymax=mean_score+sd_score),color="black",width=0.2,linewidth=0.3) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=10) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=9.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Institutional Sustainability")),color="black",size=0.25,annotation="**",y_position=9) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="*",y_position=8.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=8) +
+  scale_fill_viridis_d(option="mako") +
+  xlab("") + 
+  ylab("Mean Summary Score") + 
+  coord_flip() +
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+need to put anova value in caption - could also consider boxplot/violin plot
+
+percent time each was ranked first 
+
+```{r}
+score_frequencies %>%
+  group_by(indicator) %>%
+  summarise(mean_score=mean(score),sd_score=sd(score)) %>%
+  arrange(desc(mean_score)) 
+```
+
+```{r}
+first_choice_frequencies <- score_frequencies %>%
+  mutate(first_choice=case_when(indicator=="Guest Dining Experience"&score==8~1,
+                                indicator=="Dietary Health"&score==8~1,
+                                indicator=="Operating Costs"&score==8~1,
+                                indicator=="Sustainability of Guest Food Choices"&score==8~1,
+                                indicator=="Food Pricing"&score==8~1,
+                                indicator=="Institutional Sustainability"&score==8~1,
+                                indicator=="Campus Culture"&score==8~1,
+                                indicator=="Staff Satisfaction"&score==8~1)) %>%
+  mutate(first_choice=ifelse(is.na(first_choice),0,first_choice)) %>%
+  group_by(indicator) %>%
+  summarise(first_choice_frequency=sum(first_choice)) %>%
+  arrange(desc(first_choice_frequency))
+first_choice_frequencies
+```
+
+
+```{r}
+first_choice_contingency_table <- first_choice_frequencies %>%
+  rename(Initial=first_choice_frequency) %>%
+  mutate(Noninitial=32-Initial)
+first_choice_contingency_table
+```
+
+```{r}
+first_choice_contingency_table <- as.table(rbind(c(9,5,5,4,4,3,2,0),c(23,27,27,28,28,29,30,32)))
+dimnames(first_choice_contingency_table) <- list(dichotomy=c("Initial","Noninitial"),
+                                                 indicators=c("Guest Dining Experience","Dietary Health","Institutional Sustainability","Campus Culture","Operating Costs","Food Pricing","Staff Satisfaction","Sustainability of Guest Food Choices"))
+first_choice_chisq_test <- chisq.test(first_choice_contingency_table)
+print(first_choice_chisq_test)
+```
+No significant association between the type of indicator and its likelihood of being ranked first
+
+```{r}
+first_choice_observed_counts <- first_choice_chisq_test$observed
+print(first_choice_chisq_test)
+```
+
+```{r}
+first_choice_expected_counts <- first_choice_chisq_test$expected
+print(round(first_choice_expected_counts,2))
+```
+
+```{r}
+first_choice_pearson_residuals <- first_choice_chisq_test$residuals
+print(round(first_choice_pearson_residuals,2))
+```
+
+```{r}
+first_choice_contributions <- (first_choice_observed_counts-first_choice_expected_counts)^2/first_choice_expected_counts
+first_choice_total_chi_square <- first_choice_chisq_test$statistic
+first_choice_percentage_contributions <- 100*first_choice_contributions/first_choice_total_chi_square
+print("Percentage Contributions:")
+```
+
+```{r}
+print(round(first_choice_percentage_contributions,2))
+```
+
+```{r}
+pheatmap(first_choice_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
+```
+
+```{r}
+first_choice_contingency_table <- first_choice_frequencies %>%
+  rename(Initial=first_choice_frequency) %>%
+  mutate(Noninitial=32-Initial) %>%
+  pivot_longer(!indicator,names_to="selection",values_to="frequency") %>%
+  mutate(contribution=case_when(indicator=="Guest Dining Experience"&selection=="Initial"~45.57,
+    indicator=="Guest Dining Experience"&selection=="Noninitial"~6.51,
+    indicator=="Dietary Health"&selection=="Initial"~1.82,
+    indicator=="Dietary Health"&selection=="Noninitial"~0.26,
+    indicator=="Institutional Sustainability"&selection=="Initial"~1.82,
+    indicator=="Institutional Sustainability"&selection=="Noninitial"~0.26,
+    indicator=="Campus Culture"&selection=="Initial"~0,
+    indicator=="Campus Culture"&selection=="Noninitial"~0,
+    indicator=="Operating Costs"&selection=="Initial"~0,
+    indicator=="Operating Costs"&selection=="Noninitial"~0,
+    indicator=="Food Pricing"&selection=="Initial"~1.82,
+    indicator=="Food Pricing"&selection=="Noninitial"~0.26,
+    indicator=="Staff Satisfaction"&selection=="Initial"~7.29,
+    indicator=="Staff Satisfaction"&selection=="Noninitial"~1.04,
+    indicator=="Sustainability of Guest Food Choices"&selection=="Initial"~29.17,
+    indicator=="Sustainability of Guest Food Choices"&selection=="Noninitial"~4.17)) %>%
+  mutate(label_y=case_when(selection=="Initial"~34,
+                           selection=="Noninitial"~-2))
+first_choice_contingency_table
+```
+
+```{r}
+first_choice_contingency_table %>%
+  ggplot(aes(x=fct_reorder(indicator,frequency),y=frequency,fill=selection,color=selection)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Food Choice, Self-Reported","Food Service, Observed")),color="black",size=0.25,annotation="NA",y_position=34,tip_length=0.02,vjust=0) +
+  xlab("Accessory Indicator") +
+  ylab("Frequency") +
+  scale_fill_manual(values=c("lavender","lightslateblue")) +
+  scale_color_manual(values=c("lavender","lightslateblue")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 91.3 (3sf); p-value < 0.001") + 
+  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+
+
+CORRECT CAPTION VALUES
 
 ```{r}
 survey_data %>% mutate(dietary_sustainability_over_dietary_health=case_when(dietary_sustainability_ranking<dietary_health_ranking ~ 1,
                                                                                    dietary_sustainability_ranking>dietary_health_ranking ~ 0)) %>%
   summarise(dietary_sustainability_over_dietary_health_sum=sum(dietary_sustainability_over_dietary_health))
 ```
-
-
-
-
-

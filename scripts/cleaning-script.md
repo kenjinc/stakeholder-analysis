@@ -39,9 +39,19 @@ library(sf)
     ## Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
 
 ``` r
+library(RColorBrewer)
 library(rnaturalearth)
 library(rnaturalearthhires)
+library(viridis)
 ```
+
+    ## Loading required package: viridisLite
+    ## 
+    ## Attaching package: 'viridis'
+    ## 
+    ## The following object is masked from 'package:maps':
+    ## 
+    ##     unemp
 
 ## Data Loading
 
@@ -1368,48 +1378,484 @@ survey_data <- survey_data %>%
 ```
 
 ``` r
-summary_rank <- survey_data %>%
+rank_frequencies <- survey_data %>%
   select(id,dietary_health_ranking,dietary_sustainability_ranking,institutional_sustainability_ranking,food_pricing_ranking,operating_costs_ranking,guest_experience_ranking,staff_satisfaction_ranking,campus_culture_ranking) %>%
   pivot_longer(!id,names_to="indicator",values_to="ranking") %>%
+  mutate(across(indicator,str_replace,"guest_experience_ranking","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_ranking","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_ranking","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_ranking","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_ranking","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_ranking","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_ranking","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_ranking","Staff Satisfaction")) 
+rank_frequencies %>%
   group_by(indicator) %>%
-  summarise(mean_rank=mean(ranking)) 
-summary_rank %>%
-  arrange(mean_rank)
+  summarise(mean_ranking=mean(ranking),sd_ranking=sd(ranking)) %>%
+  arrange(mean_ranking)
 ```
 
-    ## # A tibble: 8 × 2
-    ##   indicator                            mean_rank
-    ##   <chr>                                    <dbl>
-    ## 1 guest_experience_ranking                  2.94
-    ## 2 dietary_health_ranking                    3.84
-    ## 3 operating_costs_ranking                   4   
-    ## 4 dietary_sustainability_ranking            4.66
-    ## 5 food_pricing_ranking                      4.75
-    ## 6 institutional_sustainability_ranking      5.16
-    ## 7 campus_culture_ranking                    5.25
-    ## 8 staff_satisfaction_ranking                5.41
+    ## # A tibble: 8 × 3
+    ##   indicator                            mean_ranking sd_ranking
+    ##   <chr>                                       <dbl>      <dbl>
+    ## 1 Guest Dining Experience                      2.94       1.74
+    ## 2 Dietary Health                               3.84       2.14
+    ## 3 Operating Costs                              4          2.11
+    ## 4 Sustainability of Guest Food Choices         4.66       1.77
+    ## 5 Food Pricing                                 4.75       2.41
+    ## 6 Institutional Sustainability                 5.16       2.44
+    ## 7 Campus Culture                               5.25       2.41
+    ## 8 Staff Satisfaction                           5.41       2.33
 
 ``` r
-summary_score <- survey_data %>%
+score_frequencies <- survey_data %>%
   select(id,dietary_health_score,dietary_sustainability_score,institutional_sustainability_score,food_pricing_score,operating_costs_score,guest_experience_score,staff_satisfaction_score,campus_culture_score) %>%
   pivot_longer(!id,names_to="indicator",values_to="score") %>%
+  mutate(across(indicator,str_replace,"guest_experience_score","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_score","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_score","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_score","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_score","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_score","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_score","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_score","Staff Satisfaction"))
+score_frequencies %>%
   group_by(indicator) %>%
-  summarise(mean_score=mean(score))
-summary_score %>%
+  summarise(mean_score=mean(score),sd_score=sd(score)) %>%
   arrange(desc(mean_score))
 ```
 
+    ## # A tibble: 8 × 3
+    ##   indicator                            mean_score sd_score
+    ##   <chr>                                     <dbl>    <dbl>
+    ## 1 Guest Dining Experience                    6.06     1.74
+    ## 2 Dietary Health                             5.16     2.14
+    ## 3 Operating Costs                            5        2.11
+    ## 4 Sustainability of Guest Food Choices       4.34     1.77
+    ## 5 Food Pricing                               4.25     2.41
+    ## 6 Institutional Sustainability               3.84     2.44
+    ## 7 Campus Culture                             3.75     2.41
+    ## 8 Staff Satisfaction                         3.59     2.33
+
+``` r
+score_aov <- aov(score~indicator,data=score_frequencies)
+summary(score_aov)
+```
+
+    ##              Df Sum Sq Mean Sq F value   Pr(>F)    
+    ## indicator     7  160.8  22.964   4.813 4.23e-05 ***
+    ## Residuals   248 1183.3   4.771                     
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+TukeyHSD(score_aov)
+```
+
+    ##   Tukey multiple comparisons of means
+    ##     95% family-wise confidence level
+    ## 
+    ## Fit: aov(formula = score ~ indicator, data = score_frequencies)
+    ## 
+    ## $indicator
+    ##                                                                       diff
+    ## Dietary Health-Campus Culture                                      1.40625
+    ## Food Pricing-Campus Culture                                        0.50000
+    ## Guest Dining Experience-Campus Culture                             2.31250
+    ## Institutional Sustainability-Campus Culture                        0.09375
+    ## Operating Costs-Campus Culture                                     1.25000
+    ## Staff Satisfaction-Campus Culture                                 -0.15625
+    ## Sustainability of Guest Food Choices-Campus Culture                0.59375
+    ## Food Pricing-Dietary Health                                       -0.90625
+    ## Guest Dining Experience-Dietary Health                             0.90625
+    ## Institutional Sustainability-Dietary Health                       -1.31250
+    ## Operating Costs-Dietary Health                                    -0.15625
+    ## Staff Satisfaction-Dietary Health                                 -1.56250
+    ## Sustainability of Guest Food Choices-Dietary Health               -0.81250
+    ## Guest Dining Experience-Food Pricing                               1.81250
+    ## Institutional Sustainability-Food Pricing                         -0.40625
+    ## Operating Costs-Food Pricing                                       0.75000
+    ## Staff Satisfaction-Food Pricing                                   -0.65625
+    ## Sustainability of Guest Food Choices-Food Pricing                  0.09375
+    ## Institutional Sustainability-Guest Dining Experience              -2.21875
+    ## Operating Costs-Guest Dining Experience                           -1.06250
+    ## Staff Satisfaction-Guest Dining Experience                        -2.46875
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      -1.71875
+    ## Operating Costs-Institutional Sustainability                       1.15625
+    ## Staff Satisfaction-Institutional Sustainability                   -0.25000
+    ## Sustainability of Guest Food Choices-Institutional Sustainability  0.50000
+    ## Staff Satisfaction-Operating Costs                                -1.40625
+    ## Sustainability of Guest Food Choices-Operating Costs              -0.65625
+    ## Sustainability of Guest Food Choices-Staff Satisfaction            0.75000
+    ##                                                                          lwr
+    ## Dietary Health-Campus Culture                                     -0.2631037
+    ## Food Pricing-Campus Culture                                       -1.1693537
+    ## Guest Dining Experience-Campus Culture                             0.6431463
+    ## Institutional Sustainability-Campus Culture                       -1.5756037
+    ## Operating Costs-Campus Culture                                    -0.4193537
+    ## Staff Satisfaction-Campus Culture                                 -1.8256037
+    ## Sustainability of Guest Food Choices-Campus Culture               -1.0756037
+    ## Food Pricing-Dietary Health                                       -2.5756037
+    ## Guest Dining Experience-Dietary Health                            -0.7631037
+    ## Institutional Sustainability-Dietary Health                       -2.9818537
+    ## Operating Costs-Dietary Health                                    -1.8256037
+    ## Staff Satisfaction-Dietary Health                                 -3.2318537
+    ## Sustainability of Guest Food Choices-Dietary Health               -2.4818537
+    ## Guest Dining Experience-Food Pricing                               0.1431463
+    ## Institutional Sustainability-Food Pricing                         -2.0756037
+    ## Operating Costs-Food Pricing                                      -0.9193537
+    ## Staff Satisfaction-Food Pricing                                   -2.3256037
+    ## Sustainability of Guest Food Choices-Food Pricing                 -1.5756037
+    ## Institutional Sustainability-Guest Dining Experience              -3.8881037
+    ## Operating Costs-Guest Dining Experience                           -2.7318537
+    ## Staff Satisfaction-Guest Dining Experience                        -4.1381037
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      -3.3881037
+    ## Operating Costs-Institutional Sustainability                      -0.5131037
+    ## Staff Satisfaction-Institutional Sustainability                   -1.9193537
+    ## Sustainability of Guest Food Choices-Institutional Sustainability -1.1693537
+    ## Staff Satisfaction-Operating Costs                                -3.0756037
+    ## Sustainability of Guest Food Choices-Operating Costs              -2.3256037
+    ## Sustainability of Guest Food Choices-Staff Satisfaction           -0.9193537
+    ##                                                                           upr
+    ## Dietary Health-Campus Culture                                      3.07560374
+    ## Food Pricing-Campus Culture                                        2.16935374
+    ## Guest Dining Experience-Campus Culture                             3.98185374
+    ## Institutional Sustainability-Campus Culture                        1.76310374
+    ## Operating Costs-Campus Culture                                     2.91935374
+    ## Staff Satisfaction-Campus Culture                                  1.51310374
+    ## Sustainability of Guest Food Choices-Campus Culture                2.26310374
+    ## Food Pricing-Dietary Health                                        0.76310374
+    ## Guest Dining Experience-Dietary Health                             2.57560374
+    ## Institutional Sustainability-Dietary Health                        0.35685374
+    ## Operating Costs-Dietary Health                                     1.51310374
+    ## Staff Satisfaction-Dietary Health                                  0.10685374
+    ## Sustainability of Guest Food Choices-Dietary Health                0.85685374
+    ## Guest Dining Experience-Food Pricing                               3.48185374
+    ## Institutional Sustainability-Food Pricing                          1.26310374
+    ## Operating Costs-Food Pricing                                       2.41935374
+    ## Staff Satisfaction-Food Pricing                                    1.01310374
+    ## Sustainability of Guest Food Choices-Food Pricing                  1.76310374
+    ## Institutional Sustainability-Guest Dining Experience              -0.54939626
+    ## Operating Costs-Guest Dining Experience                            0.60685374
+    ## Staff Satisfaction-Guest Dining Experience                        -0.79939626
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      -0.04939626
+    ## Operating Costs-Institutional Sustainability                       2.82560374
+    ## Staff Satisfaction-Institutional Sustainability                    1.41935374
+    ## Sustainability of Guest Food Choices-Institutional Sustainability  2.16935374
+    ## Staff Satisfaction-Operating Costs                                 0.26310374
+    ## Sustainability of Guest Food Choices-Operating Costs               1.01310374
+    ## Sustainability of Guest Food Choices-Staff Satisfaction            2.41935374
+    ##                                                                       p adj
+    ## Dietary Health-Campus Culture                                     0.1700716
+    ## Food Pricing-Campus Culture                                       0.9843638
+    ## Guest Dining Experience-Campus Culture                            0.0008360
+    ## Institutional Sustainability-Campus Culture                       0.9999998
+    ## Operating Costs-Campus Culture                                    0.3038151
+    ## Staff Satisfaction-Campus Culture                                 0.9999921
+    ## Sustainability of Guest Food Choices-Campus Culture               0.9590001
+    ## Food Pricing-Dietary Health                                       0.7132295
+    ## Guest Dining Experience-Dietary Health                            0.7132295
+    ## Institutional Sustainability-Dietary Health                       0.2442536
+    ## Operating Costs-Dietary Health                                    0.9999921
+    ## Staff Satisfaction-Dietary Health                                 0.0851770
+    ## Sustainability of Guest Food Choices-Dietary Health               0.8133712
+    ## Guest Dining Experience-Food Pricing                              0.0228131
+    ## Institutional Sustainability-Food Pricing                         0.9955233
+    ## Operating Costs-Food Pricing                                      0.8685241
+    ## Staff Satisfaction-Food Pricing                                   0.9308515
+    ## Sustainability of Guest Food Choices-Food Pricing                 0.9999998
+    ## Institutional Sustainability-Guest Dining Experience              0.0016525
+    ## Operating Costs-Guest Dining Experience                           0.5208908
+    ## Staff Satisfaction-Guest Dining Experience                        0.0002535
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      0.0384822
+    ## Operating Costs-Institutional Sustainability                      0.4066483
+    ## Staff Satisfaction-Institutional Sustainability                   0.9998078
+    ## Sustainability of Guest Food Choices-Institutional Sustainability 0.9843638
+    ## Staff Satisfaction-Operating Costs                                0.1700716
+    ## Sustainability of Guest Food Choices-Operating Costs              0.9308515
+    ## Sustainability of Guest Food Choices-Staff Satisfaction           0.8685241
+
+guest_experience_score-food_pricing_score 0.0228131
+guest_experience_score-dietary_sustainability_score 0.0384822
+institutional_sustainability_score-guest_experience_score 0.0016525
+guest_experience_score-campus_culture_score 0.0008360
+staff_satisfaction_score-guest_experience_score 0.0002535
+
+``` r
+score_frequencies %>%
+  group_by(indicator) %>%
+  summarise(mean_score=mean(score),sd_score=sd(score)) %>%
+  arrange(desc(mean_score)) %>%
+  ggplot(aes(x=fct_reorder(indicator,mean_score),y=mean_score,fill=fct_reorder(indicator,mean_score))) + 
+  geom_col(linewidth=0.3) + 
+  geom_errorbar(aes(ymin=mean_score-sd_score,ymax=mean_score+sd_score),color="black",width=0.2,linewidth=0.3) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=10) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=9.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Institutional Sustainability")),color="black",size=0.25,annotation="**",y_position=9) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="*",y_position=8.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=8) +
+  scale_fill_viridis_d(option="mako") +
+  xlab("") + 
+  ylab("Mean Summary Score") + 
+  coord_flip() +
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
+need to put anova value in caption - could also consider boxplot/violin
+plot
+
+percent time each was ranked first
+
+``` r
+score_frequencies %>%
+  group_by(indicator) %>%
+  summarise(mean_score=mean(score),sd_score=sd(score)) %>%
+  arrange(desc(mean_score)) 
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                            mean_score sd_score
+    ##   <chr>                                     <dbl>    <dbl>
+    ## 1 Guest Dining Experience                    6.06     1.74
+    ## 2 Dietary Health                             5.16     2.14
+    ## 3 Operating Costs                            5        2.11
+    ## 4 Sustainability of Guest Food Choices       4.34     1.77
+    ## 5 Food Pricing                               4.25     2.41
+    ## 6 Institutional Sustainability               3.84     2.44
+    ## 7 Campus Culture                             3.75     2.41
+    ## 8 Staff Satisfaction                         3.59     2.33
+
+``` r
+first_choice_frequencies <- score_frequencies %>%
+  mutate(first_choice=case_when(indicator=="Guest Dining Experience"&score==8~1,
+                                indicator=="Dietary Health"&score==8~1,
+                                indicator=="Operating Costs"&score==8~1,
+                                indicator=="Sustainability of Guest Food Choices"&score==8~1,
+                                indicator=="Food Pricing"&score==8~1,
+                                indicator=="Institutional Sustainability"&score==8~1,
+                                indicator=="Campus Culture"&score==8~1,
+                                indicator=="Staff Satisfaction"&score==8~1)) %>%
+  mutate(first_choice=ifelse(is.na(first_choice),0,first_choice)) %>%
+  group_by(indicator) %>%
+  summarise(first_choice_frequency=sum(first_choice)) %>%
+  arrange(desc(first_choice_frequency))
+first_choice_frequencies
+```
+
     ## # A tibble: 8 × 2
-    ##   indicator                          mean_score
-    ##   <chr>                                   <dbl>
-    ## 1 guest_experience_score                   6.06
-    ## 2 dietary_health_score                     5.16
-    ## 3 operating_costs_score                    5   
-    ## 4 dietary_sustainability_score             4.34
-    ## 5 food_pricing_score                       4.25
-    ## 6 institutional_sustainability_score       3.84
-    ## 7 campus_culture_score                     3.75
-    ## 8 staff_satisfaction_score                 3.59
+    ##   indicator                            first_choice_frequency
+    ##   <chr>                                                 <dbl>
+    ## 1 Guest Dining Experience                                   9
+    ## 2 Dietary Health                                            5
+    ## 3 Institutional Sustainability                              5
+    ## 4 Campus Culture                                            4
+    ## 5 Operating Costs                                           4
+    ## 6 Food Pricing                                              3
+    ## 7 Staff Satisfaction                                        2
+    ## 8 Sustainability of Guest Food Choices                      0
+
+``` r
+first_choice_contingency_table <- first_choice_frequencies %>%
+  rename(Initial=first_choice_frequency) %>%
+  mutate(Noninitial=32-Initial)
+first_choice_contingency_table
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                            Initial Noninitial
+    ##   <chr>                                  <dbl>      <dbl>
+    ## 1 Guest Dining Experience                    9         23
+    ## 2 Dietary Health                             5         27
+    ## 3 Institutional Sustainability               5         27
+    ## 4 Campus Culture                             4         28
+    ## 5 Operating Costs                            4         28
+    ## 6 Food Pricing                               3         29
+    ## 7 Staff Satisfaction                         2         30
+    ## 8 Sustainability of Guest Food Choices       0         32
+
+``` r
+first_choice_contingency_table <- as.table(rbind(c(9,5,5,4,4,3,2,0),c(23,27,27,28,28,29,30,32)))
+dimnames(first_choice_contingency_table) <- list(dichotomy=c("Initial","Noninitial"),
+                                                 indicators=c("Guest Dining Experience","Dietary Health","Institutional Sustainability","Campus Culture","Operating Costs","Food Pricing","Staff Satisfaction","Sustainability of Guest Food Choices"))
+first_choice_chisq_test <- chisq.test(first_choice_contingency_table)
+```
+
+    ## Warning in chisq.test(first_choice_contingency_table): Chi-squared
+    ## approximation may be incorrect
+
+``` r
+print(first_choice_chisq_test)
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  first_choice_contingency_table
+    ## X-squared = 13.714, df = 7, p-value = 0.0565
+
+No significant association between the type of indicator and its
+likelihood of being ranked first
+
+``` r
+first_choice_observed_counts <- first_choice_chisq_test$observed
+print(first_choice_chisq_test)
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  first_choice_contingency_table
+    ## X-squared = 13.714, df = 7, p-value = 0.0565
+
+``` r
+first_choice_expected_counts <- first_choice_chisq_test$expected
+print(round(first_choice_expected_counts,2))
+```
+
+    ##             indicators
+    ## dichotomy    Guest Dining Experience Dietary Health
+    ##   Initial                          4              4
+    ##   Noninitial                      28             28
+    ##             indicators
+    ## dichotomy    Institutional Sustainability Campus Culture Operating Costs
+    ##   Initial                               4              4               4
+    ##   Noninitial                           28             28              28
+    ##             indicators
+    ## dichotomy    Food Pricing Staff Satisfaction
+    ##   Initial               4                  4
+    ##   Noninitial           28                 28
+    ##             indicators
+    ## dichotomy    Sustainability of Guest Food Choices
+    ##   Initial                                       4
+    ##   Noninitial                                   28
+
+``` r
+first_choice_pearson_residuals <- first_choice_chisq_test$residuals
+print(round(first_choice_pearson_residuals,2))
+```
+
+    ##             indicators
+    ## dichotomy    Guest Dining Experience Dietary Health
+    ##   Initial                       2.50           0.50
+    ##   Noninitial                   -0.94          -0.19
+    ##             indicators
+    ## dichotomy    Institutional Sustainability Campus Culture Operating Costs
+    ##   Initial                            0.50           0.00            0.00
+    ##   Noninitial                        -0.19           0.00            0.00
+    ##             indicators
+    ## dichotomy    Food Pricing Staff Satisfaction
+    ##   Initial           -0.50              -1.00
+    ##   Noninitial         0.19               0.38
+    ##             indicators
+    ## dichotomy    Sustainability of Guest Food Choices
+    ##   Initial                                   -2.00
+    ##   Noninitial                                 0.76
+
+``` r
+first_choice_contributions <- (first_choice_observed_counts-first_choice_expected_counts)^2/first_choice_expected_counts
+first_choice_total_chi_square <- first_choice_chisq_test$statistic
+first_choice_percentage_contributions <- 100*first_choice_contributions/first_choice_total_chi_square
+print("Percentage Contributions:")
+```
+
+    ## [1] "Percentage Contributions:"
+
+``` r
+print(round(first_choice_percentage_contributions,2))
+```
+
+    ##             indicators
+    ## dichotomy    Guest Dining Experience Dietary Health
+    ##   Initial                      45.57           1.82
+    ##   Noninitial                    6.51           0.26
+    ##             indicators
+    ## dichotomy    Institutional Sustainability Campus Culture Operating Costs
+    ##   Initial                            1.82           0.00            0.00
+    ##   Noninitial                         0.26           0.00            0.00
+    ##             indicators
+    ## dichotomy    Food Pricing Staff Satisfaction
+    ##   Initial            1.82               7.29
+    ##   Noninitial         0.26               1.04
+    ##             indicators
+    ## dichotomy    Sustainability of Guest Food Choices
+    ##   Initial                                   29.17
+    ##   Noninitial                                 4.17
+
+``` r
+pheatmap(first_choice_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-85-1.png)<!-- -->
+
+``` r
+first_choice_contingency_table <- first_choice_frequencies %>%
+  rename(Initial=first_choice_frequency) %>%
+  mutate(Noninitial=32-Initial) %>%
+  pivot_longer(!indicator,names_to="selection",values_to="frequency") %>%
+  mutate(contribution=case_when(indicator=="Guest Dining Experience"&selection=="Initial"~45.57,
+    indicator=="Guest Dining Experience"&selection=="Noninitial"~6.51,
+    indicator=="Dietary Health"&selection=="Initial"~1.82,
+    indicator=="Dietary Health"&selection=="Noninitial"~0.26,
+    indicator=="Institutional Sustainability"&selection=="Initial"~1.82,
+    indicator=="Institutional Sustainability"&selection=="Noninitial"~0.26,
+    indicator=="Campus Culture"&selection=="Initial"~0,
+    indicator=="Campus Culture"&selection=="Noninitial"~0,
+    indicator=="Operating Costs"&selection=="Initial"~0,
+    indicator=="Operating Costs"&selection=="Noninitial"~0,
+    indicator=="Food Pricing"&selection=="Initial"~1.82,
+    indicator=="Food Pricing"&selection=="Noninitial"~0.26,
+    indicator=="Staff Satisfaction"&selection=="Initial"~7.29,
+    indicator=="Staff Satisfaction"&selection=="Noninitial"~1.04,
+    indicator=="Sustainability of Guest Food Choices"&selection=="Initial"~29.17,
+    indicator=="Sustainability of Guest Food Choices"&selection=="Noninitial"~4.17)) %>%
+  mutate(label_y=case_when(selection=="Initial"~34,
+                           selection=="Noninitial"~-2))
+first_choice_contingency_table
+```
+
+    ## # A tibble: 16 × 5
+    ##    indicator                            selection frequency contribution label_y
+    ##    <chr>                                <chr>         <dbl>        <dbl>   <dbl>
+    ##  1 Guest Dining Experience              Initial           9        45.6       34
+    ##  2 Guest Dining Experience              Noniniti…        23         6.51      -2
+    ##  3 Dietary Health                       Initial           5         1.82      34
+    ##  4 Dietary Health                       Noniniti…        27         0.26      -2
+    ##  5 Institutional Sustainability         Initial           5         1.82      34
+    ##  6 Institutional Sustainability         Noniniti…        27         0.26      -2
+    ##  7 Campus Culture                       Initial           4         0         34
+    ##  8 Campus Culture                       Noniniti…        28         0         -2
+    ##  9 Operating Costs                      Initial           4         0         34
+    ## 10 Operating Costs                      Noniniti…        28         0         -2
+    ## 11 Food Pricing                         Initial           3         1.82      34
+    ## 12 Food Pricing                         Noniniti…        29         0.26      -2
+    ## 13 Staff Satisfaction                   Initial           2         7.29      34
+    ## 14 Staff Satisfaction                   Noniniti…        30         1.04      -2
+    ## 15 Sustainability of Guest Food Choices Initial           0        29.2       34
+    ## 16 Sustainability of Guest Food Choices Noniniti…        32         4.17      -2
+
+``` r
+first_choice_contingency_table %>%
+  ggplot(aes(x=fct_reorder(indicator,frequency),y=frequency,fill=selection,color=selection)) + 
+  geom_col() +
+  geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
+  geom_signif(comparisons=list(c("Food Choice, Self-Reported","Food Service, Observed")),color="black",size=0.25,annotation="NA",y_position=34,tip_length=0.02,vjust=0) +
+  xlab("Accessory Indicator") +
+  ylab("Frequency") +
+  scale_fill_manual(values=c("lavender","lightslateblue")) +
+  scale_color_manual(values=c("lavender","lightslateblue")) +
+  guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
+  labs(caption="X-squared: 91.3 (3sf); p-value < 0.001") + 
+  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+    ## Warning: Computation failed in `stat_signif()`.
+    ## Caused by error in `if (scales$x$map(comp[1]) == data$group[1] | manual) ...`:
+    ## ! missing value where TRUE/FALSE needed
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-87-1.png)<!-- -->
+
+CORRECT CAPTION VALUES
 
 ``` r
 survey_data %>% mutate(dietary_sustainability_over_dietary_health=case_when(dietary_sustainability_ranking<dietary_health_ranking ~ 1,
