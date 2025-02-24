@@ -1,7 +1,7 @@
 ---
 title: "Cleaning Script"
 output: github_document
-date: "Last Updated: February 20, 2025"
+date: "Last Updated: February 24, 2025"
 ---
 
 ```{r setup, include=FALSE}
@@ -11,14 +11,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Package Loading
 
 ```{r}
-library(tidyverse)
 library(ggpubr)
 library(ggsignif)
 library(maps)
-library(sf)
+library(pheatmap)
 library(RColorBrewer)
 library(rnaturalearth)
 library(rnaturalearthhires)
+library(sf)
+library(tidyverse)
 library(viridis)
 ```
 
@@ -393,7 +394,6 @@ print(round(ppi_percentage_contributions,2))
 ```
 
 ```{r}
-library(pheatmap)
 pheatmap(ppi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
@@ -892,11 +892,33 @@ score_frequencies %>%
   geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=8) +
   scale_fill_viridis_d(option="mako") +
   xlab("") + 
-  ylab("Mean Summary Score") + 
+  ylab("Mean Summary Score") +
+  labs(caption="F-value: 4.81 (3sf); p-value < 0.001") + 
   coord_flip() +
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 need to put anova value in caption - could also consider boxplot/violin plot
+
+
+```{r}
+summary_score_plot <- score_frequencies %>%
+  ggplot(aes(x=fct_reorder(indicator,score,.fun="mean"),y=score,fill=fct_reorder(indicator,score,.fun="mean"),color=fct_reorder(indicator,score,.fun="mean"))) + 
+  geom_boxplot(outlier.shape=NA,color="black",size=0.25,alpha=0.8) +
+   stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=10) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=9.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Institutional Sustainability")),color="black",size=0.25,annotation="**",y_position=9) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="*",y_position=8.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=8) +
+  scale_fill_viridis_d(option="mako") +
+  scale_color_viridis_d(option="mako",alpha=1) +
+  xlab("") + 
+  ylab("Mean Summary Score") + 
+  labs(caption="F-value: 4.81 (3sf); p-value < 0.001") + 
+  coord_flip() +
+  theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
 
 percent time each was ranked first 
 
@@ -998,26 +1020,34 @@ first_choice_contingency_table
 ```
 
 ```{r}
-first_choice_contingency_table %>%
-  ggplot(aes(x=fct_reorder(indicator,frequency),y=frequency,fill=selection,color=selection)) + 
-  geom_col() +
+first_choice_frequency_plot <- ggplot(first_choice_contingency_table[order(first_choice_contingency_table$selection,decreasing=T),],aes(x=indicator,y=frequency,fill=factor(selection,levels=c("Noninitial","Initial")),color=factor(selection,levels=c("Noninitial","Initial")))) + 
+  geom_col(alpha=0.9) +
   geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
-  geom_signif(comparisons=list(c("Food Choice, Self-Reported","Food Service, Observed")),color="black",size=0.25,annotation="NA",y_position=34,tip_length=0.02,vjust=0) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="n.s.",y_position=34,tip_length=0.02,vjust=0) +
   xlab("Accessory Indicator") +
   ylab("Frequency") +
-  scale_fill_manual(values=c("lavender","lightslateblue")) +
-  scale_color_manual(values=c("lavender","lightslateblue")) +
+  scale_fill_manual(values=c("slateblue4","mediumaquamarine")) +
+  scale_color_manual(values=c("slateblue4","mediumaquamarine")) +
+  scale_x_discrete(limits=c("Sustainability of Guest Food Choices","Staff Satisfaction","Food Pricing","Operating Costs","Campus Culture","Institutional Sustainability","Dietary Health","Guest Dining Experience")) +
+  scale_y_continuous(breaks=c(0,8,16,24,32)) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
-  labs(caption="X-squared: 91.3 (3sf); p-value < 0.001") + 
-  theme(aspect.ratio=0.8,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  labs(caption="X-squared: 13.7 (3sf); p-value = 0.056") + 
+  theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
+```{r}
+preliminary_indicator_rankings <- 
+ggarrange(first_choice_frequency_plot,summary_score_plot,
+          nrow=2,
+          labels=c("A","B"))
+ggsave(filename="preliminary_indicator_rankings.png",plot=preliminary_indicator_rankings,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=35,height=28,units="cm",dpi=150,limitsize=TRUE)
+preliminary_indicator_rankings
+```
 
-
-CORRECT CAPTION VALUES
 
 ```{r}
 survey_data %>% mutate(dietary_sustainability_over_dietary_health=case_when(dietary_sustainability_ranking<dietary_health_ranking ~ 1,
                                                                                    dietary_sustainability_ranking>dietary_health_ranking ~ 0)) %>%
   summarise(dietary_sustainability_over_dietary_health_sum=sum(dietary_sustainability_over_dietary_health))
 ```
+
