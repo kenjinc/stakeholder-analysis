@@ -1374,7 +1374,7 @@ priority_frequency_table %>%
   scale_fill_viridis_d(option="mako") +
   scale_color_viridis_d(option="mako",alpha=1) +
   xlab("") + 
-  ylab("Mean Selection Frequency") + 
+  ylab("Selection Frequency") + 
   labs(caption="F-value: 2.04 (3sf); p-value = 0.0653") + 
   coord_flip() +
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
@@ -1412,7 +1412,7 @@ priority_probability_table %>%
   scale_fill_viridis_d(option="mako") +
   scale_color_viridis_d(option="mako",alpha=1) +
   xlab("") + 
-  ylab("Mean Selection Probability") + 
+  ylab("Selection Probability") + 
   labs(caption="F-value: tbd (3sf); p-value = tbd") + 
   coord_flip() +
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
@@ -1445,7 +1445,7 @@ priority_z_score_table %>%
   scale_fill_viridis_d(option="mako") +
   scale_color_viridis_d(option="mako",alpha=1) +
   xlab("") + 
-  ylab("Mean Z-Score") + 
+  ylab("Z-Score") + 
   labs(caption="F-value: tbd (3sf); p-value = tbd") + 
   coord_flip() +
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
