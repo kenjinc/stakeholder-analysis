@@ -1103,6 +1103,7 @@ guest_experience_priority_score_tabulation
 ```{r}
 priority_score_frequencies <- priority_score_frequencies %>%
   mutate(guest_dining_experience_selection_frequency=c(0,20,21,24,22,25,25,25))
+priority_score_frequencies
 ```
 
 ```{r}
@@ -1316,6 +1317,7 @@ priority_score_frequencies <- priority_score_frequencies %>%
 priority_score_frequencies
 ```
 
+
 ```{r}
 priority_score_probabilities <- priority_score_frequencies %>%
   mutate(guest_dining_experience_selection_probability=guest_dining_experience_selection_frequency/32,.after=guest_dining_experience_selection_frequency) %>%
@@ -1354,7 +1356,12 @@ priority_frequency_table <- priority_score_zscores %>%
   mutate(across(indicator,str_replace,"food_pricing_selection_frequency","Food Pricing")) %>%
   mutate(across(indicator,str_replace,"institutional_sustainability_selection_frequency","Institutional Sustainability")) %>%
   mutate(across(indicator,str_replace,"campus_culture_selection_frequency","Campus Culture")) %>%
-  mutate(across(indicator,str_replace,"staff_satisfaction_selection_frequency","Staff Satisfaction")) 
+  mutate(across(indicator,str_replace,"staff_satisfaction_selection_frequency","Staff Satisfaction")) %>%
+  filter(frequency>0)
+priority_frequency_table
+```
+
+```{r}
 priority_frequency_table %>%
   group_by(indicator) %>%
   summarise(total_selection_frequency=sum(frequency),mean_selection_frequency=mean(frequency)) %>%
@@ -1362,20 +1369,41 @@ priority_frequency_table %>%
 ```
 
 
+
 ```{r}
 selection_frequency_aov <- aov(frequency~indicator,data=priority_frequency_table)
 summary(selection_frequency_aov)
 ```
+There is a significant association between the type of accessory indicator and its selection frequency (i.e., the chance that the indicator will be selected over others) 
+
+```{r}
+TukeyHSD(selection_frequency_aov)
+```
+Dietary Health-Campus Culture                                     12.5792133 0.0346700
+Guest Dining Experience-Campus Culture                            16.7220705 0.0000454
+Staff Satisfaction-Dietary Health                                 -0.9922152 0.0127043
+Guest Dining Experience-Food Pricing                              14.4363562 0.0021892
+Institutional Sustainability-Guest Dining Experience              -3.9922152 0.0000962
+Staff Satisfaction-Guest Dining Experience                        -5.1350724 0.0000128
+Sustainability of Guest Food Choices-Guest Dining Experience      -1.7065009 0.0043134
+Staff Satisfaction-Operating Costs                                -0.2779295 0.0346700
+
+ADD THESE GEOM_SIGNIF comparisons
+
 ```{r}
 priority_frequency_table %>%
   ggplot(aes(x=fct_reorder(indicator,frequency,.fun="mean"),y=frequency,fill=fct_reorder(indicator,frequency,.fun="mean"),color=fct_reorder(indicator,frequency,.fun="mean"))) +
   geom_boxplot(outlier.shape=NA,color="black",size=0.25,alpha=0.8) +
+  geom_signif(comparisons=list(c("Dietary Health","Campus Culture")),color="black",size=0.25,annotation="*",y_position=25) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=25.5) +
+  geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=26) +
+  geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=26) +
   stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
   scale_fill_viridis_d(option="mako") +
   scale_color_viridis_d(option="mako",alpha=1) +
   xlab("") + 
   ylab("Selection Frequency") + 
-  labs(caption="F-value: 2.04 (3sf); p-value = 0.0653") + 
+  labs(caption="F-value: 7.96 (3sf); p-value < 0.001") + 
   coord_flip() +
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
@@ -1392,12 +1420,19 @@ priority_probability_table <- priority_score_zscores %>%
   mutate(across(indicator,str_replace,"food_pricing_selection_probability","Food Pricing")) %>%
   mutate(across(indicator,str_replace,"institutional_sustainability_selection_probability","Institutional Sustainability")) %>%
   mutate(across(indicator,str_replace,"campus_culture_selection_probability","Campus Culture")) %>%
-  mutate(across(indicator,str_replace,"staff_satisfaction_selection_probability","Staff Satisfaction")) 
+  mutate(across(indicator,str_replace,"staff_satisfaction_selection_probability","Staff Satisfaction")) %>%
+  filter(probability>0)
+priority_probability_table
+```
+
+```{r}
 priority_probability_table %>%
   group_by(indicator) %>%
   summarise(total_selection_probability=sum(probability),mean_selection_probability=mean(probability)) %>%
   arrange(desc(mean_selection_probability))
 ```
+
+FIND APPROPRIATE TEST HERE 
 
 ```{r}
 selection_probability_aov <- aov(probability~indicator,data=priority_probability_table)
@@ -1430,12 +1465,20 @@ priority_z_score_table <- priority_score_zscores %>%
   mutate(across(indicator,str_replace,"food_pricing_selection_zscore","Food Pricing")) %>%
   mutate(across(indicator,str_replace,"institutional_sustainability_selection_zscore","Institutional Sustainability")) %>%
   mutate(across(indicator,str_replace,"campus_culture_selection_zscore","Campus Culture")) %>%
-  mutate(across(indicator,str_replace,"staff_satisfaction_selection_zscore","Staff Satisfaction")) 
+  mutate(across(indicator,str_replace,"staff_satisfaction_selection_zscore","Staff Satisfaction")) %>%
+  filter(z_score>0)
+priority_z_score_table
+```
+
+NEED TO FIGURE OUT IF FILTERING OUT ZERO VALUES IN THIS CASE IS APPROPRIATE FOR THURSTONE'S LAW COMPARISONS
+
+```{r}
 priority_z_score_table %>%
   group_by(indicator) %>%
   summarise(total_selection_z_score=sum(z_score),mean_selection_z_score=mean(z_score)) %>%
   arrange(desc(mean_selection_z_score))
 ```
+
 
 ```{r}
 priority_z_score_table %>%
