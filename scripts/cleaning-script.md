@@ -1,6 +1,6 @@
 Cleaning Script
 ================
-Last Updated: February 24, 2025
+Last Updated: February 25, 2025
 
 ## Package Loading
 
@@ -1434,8 +1434,8 @@ score_frequencies %>%
     ## 8 Staff Satisfaction                         3.59     2.33
 
 ``` r
-score_aov <- aov(score~indicator,data=score_frequencies)
-summary(score_aov)
+summary_score_aov <- aov(score~indicator,data=score_frequencies)
+summary(summary_score_aov)
 ```
 
     ##              Df Sum Sq Mean Sq F value   Pr(>F)    
@@ -1445,7 +1445,7 @@ summary(score_aov)
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ``` r
-TukeyHSD(score_aov)
+TukeyHSD(summary_score_aov)
 ```
 
     ##   Tukey multiple comparisons of means
@@ -1863,14 +1863,36 @@ first_choice_frequency_plot <- ggplot(first_choice_contingency_table[order(first
   geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="n.s.",y_position=34,tip_length=0.02,vjust=0) +
   xlab("Accessory Indicator") +
   ylab("Frequency") +
-  scale_fill_manual(values=c("slateblue4","aquamarine4")) +
-  scale_color_manual(values=c("slateblue4","aquamarine4")) +
+  scale_fill_manual(values=c("slateblue4","aquamarine3")) +
+  scale_color_manual(values=c("slateblue4","aquamarine3")) +
   scale_x_discrete(limits=c("Sustainability of Guest Food Choices","Staff Satisfaction","Food Pricing","Operating Costs","Campus Culture","Institutional Sustainability","Dietary Health","Guest Dining Experience")) +
   scale_y_continuous(breaks=c(0,8,16,24,32)) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 13.7 (3sf); p-value = 0.056") + 
   theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
+
+``` r
+score_frequencies %>%
+  ggplot(aes(x=fct_reorder(indicator,score,.fun="mean"),y=score,fill=fct_reorder(indicator,score,.fun="mean"),color=fct_reorder(indicator,score,.fun="mean"))) + 
+  geom_violin(draw_quantiles=0.5,adjust=1,alpha=0.7) +
+  geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
+   stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=10) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=9.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Institutional Sustainability")),color="black",size=0.25,annotation="**",y_position=9) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="*",y_position=8.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=8) +
+  scale_fill_viridis_d(option="mako") +
+  scale_color_viridis_d(option="mako",alpha=1) +
+  xlab("") + 
+  ylab("Mean Summary Score") + 
+  labs(caption="F-value: 4.81 (3sf); p-value < 0.001") + 
+  coord_flip() +
+  theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-89-1.png)<!-- -->
 
 ``` r
 preliminary_indicator_rankings <- 
@@ -1881,7 +1903,7 @@ ggsave(filename="preliminary_indicator_rankings.png",plot=preliminary_indicator_
 preliminary_indicator_rankings
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-89-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
 
 ``` r
 priority_score_frequencies <- tibble(comparison_indicator=c("Guest Dining Experience","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Food Pricing","Institutional Sustainability","Campus Culture","Staff Satisfaction"),guest_dining_experience_selection_frequency=as.double(NA),dietary_health_selection_frequency=as.double(NA),operating_costs_selection_frequency=as.double(NA),dietary_sustainability_selection_frequency=as.double(NA),food_pricing_selection_frequency=as.double(NA),institutional_sustainability_selection_frequency=as.double(NA),campus_culture_selection_frequency=as.double(NA),staff_satisfaction_selection_frequency=as.double(NA))
@@ -2074,3 +2096,541 @@ priority_score_frequencies
     ## #   food_pricing_selection_frequency <dbl>,
     ## #   institutional_sustainability_selection_frequency <dbl>,
     ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+dietary_sustainability_priority_score_tabulation <- priority_score_tabulation %>%
+  mutate(dietary_sustainability_over_guest_experience=case_when(dietary_sustainability_ranking<guest_experience_ranking~1,
+                                                        dietary_sustainability_ranking>guest_experience_ranking~0)) %>%
+  mutate(dietary_sustainability_over_dietary_health=case_when(dietary_sustainability_ranking<dietary_health_ranking~1,
+                                                        dietary_sustainability_ranking>dietary_health_ranking~0)) %>%
+  mutate(dietary_sustainability_over_operating_costs=case_when(dietary_sustainability_ranking<operating_costs_ranking~1,
+                                                        dietary_sustainability_ranking>operating_costs_ranking~0)) %>%
+  mutate(dietary_sustainability_over_dietary_sustainability=0) %>%
+  mutate(dietary_sustainability_over_food_pricing=case_when(dietary_sustainability_ranking<food_pricing_ranking~1,
+                                                        dietary_sustainability_ranking>food_pricing_ranking~0)) %>%
+  mutate(dietary_sustainability_over_institutional_sustainability=case_when(dietary_sustainability_ranking<institutional_sustainability_ranking~1,
+                                                        dietary_sustainability_ranking>institutional_sustainability_ranking~0)) %>%
+  mutate(dietary_sustainability_over_campus_culture=case_when(dietary_sustainability_ranking<campus_culture_ranking~1,
+                                                        dietary_sustainability_ranking>campus_culture_ranking~0)) %>%
+  mutate(dietary_sustainability_over_staff_satisfaction=case_when(dietary_sustainability_ranking<staff_satisfaction_ranking~1,
+                                                        dietary_sustainability_ranking>staff_satisfaction_ranking~0)) %>%
+  select(id,dietary_sustainability_over_guest_experience,dietary_sustainability_over_dietary_health,dietary_sustainability_over_operating_costs,dietary_sustainability_over_dietary_sustainability,dietary_sustainability_over_food_pricing,dietary_sustainability_over_institutional_sustainability,dietary_sustainability_over_campus_culture,dietary_sustainability_over_staff_satisfaction) %>%
+  pivot_longer(!id,names_to="condition",values_to="instances") %>%
+  group_by(condition) %>%
+  summarise(instances=sum(instances))
+dietary_sustainability_priority_score_tabulation
+```
+
+    ## # A tibble: 8 × 2
+    ##   condition                                                instances
+    ##   <chr>                                                        <dbl>
+    ## 1 dietary_sustainability_over_campus_culture                      21
+    ## 2 dietary_sustainability_over_dietary_health                      10
+    ## 3 dietary_sustainability_over_dietary_sustainability               0
+    ## 4 dietary_sustainability_over_food_pricing                        17
+    ## 5 dietary_sustainability_over_guest_experience                     8
+    ## 6 dietary_sustainability_over_institutional_sustainability        17
+    ## 7 dietary_sustainability_over_operating_costs                     14
+    ## 8 dietary_sustainability_over_staff_satisfaction                  20
+
+``` r
+priority_score_frequencies <- priority_score_frequencies %>%
+  mutate(dietary_sustainability_selection_frequency=c(8,10,14,0,17,17,21,20)) 
+priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                     12
+    ## 2 Dietary Health                                       20                      0
+    ## 3 Operating Costs                                      21                     17
+    ## 4 Sustainability of Guest Food Ch…                     24                     22
+    ## 5 Food Pricing                                         22                     19
+    ## 6 Institutional Sustainability                         25                     19
+    ## 7 Campus Culture                                       25                     21
+    ## 8 Staff Satisfaction                                   25                     23
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+food_pricing_priority_score_tabulation <- priority_score_tabulation %>%
+  mutate(food_pricing_over_guest_experience=case_when(food_pricing_ranking<guest_experience_ranking~1,
+                                                        food_pricing_ranking>guest_experience_ranking~0)) %>%
+  mutate(food_pricing_over_dietary_health=case_when(food_pricing_ranking<dietary_health_ranking~1,
+                                                        food_pricing_ranking>dietary_health_ranking~0)) %>%
+  mutate(food_pricing_over_operating_costs=case_when(food_pricing_ranking<operating_costs_ranking~1,
+                                                        food_pricing_ranking>operating_costs_ranking~0)) %>%
+  mutate(food_pricing_over_dietary_sustainability=case_when(food_pricing_ranking<dietary_sustainability_ranking~1,
+                                                        food_pricing_ranking>dietary_sustainability_ranking~0)) %>%
+  mutate(food_pricing_over_food_pricing=0) %>%
+  mutate(food_pricing_over_institutional_sustainability=case_when(food_pricing_ranking<institutional_sustainability_ranking~1,
+                                                        food_pricing_ranking>institutional_sustainability_ranking~0)) %>%
+  mutate(food_pricing_over_campus_culture=case_when(food_pricing_ranking<campus_culture_ranking~1,
+                                                        food_pricing_ranking>campus_culture_ranking~0)) %>%
+  mutate(food_pricing_over_staff_satisfaction=case_when(food_pricing_ranking<staff_satisfaction_ranking~1,
+                                                        food_pricing_ranking>staff_satisfaction_ranking~0)) %>%
+  select(id,food_pricing_over_guest_experience,food_pricing_over_dietary_health,food_pricing_over_operating_costs,food_pricing_over_dietary_sustainability,food_pricing_over_food_pricing,food_pricing_over_institutional_sustainability,food_pricing_over_campus_culture,food_pricing_over_staff_satisfaction) %>%
+  pivot_longer(!id,names_to="condition",values_to="instances") %>%
+  group_by(condition) %>%
+  summarise(instances=sum(instances))
+food_pricing_priority_score_tabulation
+```
+
+    ## # A tibble: 8 × 2
+    ##   condition                                      instances
+    ##   <chr>                                              <dbl>
+    ## 1 food_pricing_over_campus_culture                      18
+    ## 2 food_pricing_over_dietary_health                      13
+    ## 3 food_pricing_over_dietary_sustainability              15
+    ## 4 food_pricing_over_food_pricing                         0
+    ## 5 food_pricing_over_guest_experience                    10
+    ## 6 food_pricing_over_institutional_sustainability        17
+    ## 7 food_pricing_over_operating_costs                     11
+    ## 8 food_pricing_over_staff_satisfaction                  20
+
+``` r
+priority_score_frequencies <- priority_score_frequencies %>%
+  mutate(food_pricing_selection_frequency=c(10,13,11,15,0,17,18,20))
+priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                     12
+    ## 2 Dietary Health                                       20                      0
+    ## 3 Operating Costs                                      21                     17
+    ## 4 Sustainability of Guest Food Ch…                     24                     22
+    ## 5 Food Pricing                                         22                     19
+    ## 6 Institutional Sustainability                         25                     19
+    ## 7 Campus Culture                                       25                     21
+    ## 8 Staff Satisfaction                                   25                     23
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+institutional_sustainability_priority_score_tabulation <- priority_score_tabulation %>%
+  mutate(institutional_sustainability_over_guest_experience=case_when(institutional_sustainability_ranking<guest_experience_ranking~1,
+                                                        institutional_sustainability_ranking>guest_experience_ranking~0)) %>%
+  mutate(institutional_sustainability_over_dietary_health=case_when(institutional_sustainability_ranking<dietary_health_ranking~1,
+                                                        institutional_sustainability_ranking>dietary_health_ranking~0)) %>%
+  mutate(institutional_sustainability_over_operating_costs=case_when(institutional_sustainability_ranking<operating_costs_ranking~1,
+                                                        institutional_sustainability_ranking>operating_costs_ranking~0)) %>%
+  mutate(institutional_sustainability_over_dietary_sustainability=case_when(institutional_sustainability_ranking<dietary_sustainability_ranking~1,
+                                                        institutional_sustainability_ranking>dietary_sustainability_ranking~0)) %>%
+  mutate(institutional_sustainability_over_food_pricing=case_when(institutional_sustainability_ranking<food_pricing_ranking~1,
+                                                        institutional_sustainability_ranking>food_pricing_ranking~0)) %>%
+  mutate(institutional_sustainability_over_institutional_sustainability=0) %>%
+  mutate(institutional_sustainability_over_campus_culture=case_when(institutional_sustainability_ranking<campus_culture_ranking~1,
+                                                        institutional_sustainability_ranking>campus_culture_ranking~0)) %>%
+  mutate(institutional_sustainability_over_staff_satisfaction=case_when(institutional_sustainability_ranking<staff_satisfaction_ranking~1,
+                                                        institutional_sustainability_ranking>staff_satisfaction_ranking~0)) %>%
+  select(id,institutional_sustainability_over_guest_experience,institutional_sustainability_over_dietary_health,institutional_sustainability_over_operating_costs,institutional_sustainability_over_dietary_sustainability,institutional_sustainability_over_food_pricing,institutional_sustainability_over_institutional_sustainability,institutional_sustainability_over_campus_culture,institutional_sustainability_over_staff_satisfaction) %>%
+  pivot_longer(!id,names_to="condition",values_to="instances") %>%
+  group_by(condition) %>%
+  summarise(instances=sum(instances))
+institutional_sustainability_priority_score_tabulation
+```
+
+    ## # A tibble: 8 × 2
+    ##   condition                                                      instances
+    ##   <chr>                                                              <dbl>
+    ## 1 institutional_sustainability_over_campus_culture                      15
+    ## 2 institutional_sustainability_over_dietary_health                      13
+    ## 3 institutional_sustainability_over_dietary_sustainability              15
+    ## 4 institutional_sustainability_over_food_pricing                        15
+    ## 5 institutional_sustainability_over_guest_experience                     7
+    ## 6 institutional_sustainability_over_institutional_sustainability         0
+    ## 7 institutional_sustainability_over_operating_costs                     10
+    ## 8 institutional_sustainability_over_staff_satisfaction                  16
+
+``` r
+priority_score_frequencies <- priority_score_frequencies %>%
+  mutate(institutional_sustainability_selection_frequency=c(7,13,10,15,15,0,15,16))
+priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                     12
+    ## 2 Dietary Health                                       20                      0
+    ## 3 Operating Costs                                      21                     17
+    ## 4 Sustainability of Guest Food Ch…                     24                     22
+    ## 5 Food Pricing                                         22                     19
+    ## 6 Institutional Sustainability                         25                     19
+    ## 7 Campus Culture                                       25                     21
+    ## 8 Staff Satisfaction                                   25                     23
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+campus_culture_priority_score_tabulation <- priority_score_tabulation %>%
+  mutate(campus_culture_over_guest_experience=case_when(campus_culture_ranking<guest_experience_ranking~1,
+                                                        campus_culture_ranking>guest_experience_ranking~0)) %>%
+  mutate(campus_culture_over_dietary_health=case_when(campus_culture_ranking<dietary_health_ranking~1,
+                                                        campus_culture_ranking>dietary_health_ranking~0)) %>%
+  mutate(campus_culture_over_operating_costs=case_when(campus_culture_ranking<operating_costs_ranking~1,
+                                                        campus_culture_ranking>operating_costs_ranking~0)) %>%
+  mutate(campus_culture_over_dietary_sustainability=case_when(campus_culture_ranking<dietary_sustainability_ranking~1,
+                                                        campus_culture_ranking>dietary_sustainability_ranking~0)) %>%
+  mutate(campus_culture_over_food_pricing=case_when(campus_culture_ranking<food_pricing_ranking~1,
+                                                        campus_culture_ranking>food_pricing_ranking~0)) %>%
+  mutate(campus_culture_over_institutional_sustainability=case_when(campus_culture_ranking<institutional_sustainability_ranking~1,
+                                                        campus_culture_ranking>institutional_sustainability_ranking~0)) %>%
+  mutate(campus_culture_over_campus_culture=0) %>%
+  mutate(campus_culture_over_staff_satisfaction=case_when(campus_culture_ranking<staff_satisfaction_ranking~1,
+                                                        campus_culture_ranking>staff_satisfaction_ranking~0)) %>%
+  select(id,campus_culture_over_guest_experience,campus_culture_over_dietary_health,campus_culture_over_operating_costs,campus_culture_over_dietary_sustainability,campus_culture_over_food_pricing,campus_culture_over_institutional_sustainability,campus_culture_over_campus_culture,campus_culture_over_staff_satisfaction) %>%
+  pivot_longer(!id,names_to="condition",values_to="instances") %>%
+  group_by(condition) %>%
+  summarise(instances=sum(instances))
+campus_culture_priority_score_tabulation
+```
+
+    ## # A tibble: 8 × 2
+    ##   condition                                        instances
+    ##   <chr>                                                <dbl>
+    ## 1 campus_culture_over_campus_culture                       0
+    ## 2 campus_culture_over_dietary_health                      11
+    ## 3 campus_culture_over_dietary_sustainability              11
+    ## 4 campus_culture_over_food_pricing                        14
+    ## 5 campus_culture_over_guest_experience                     7
+    ## 6 campus_culture_over_institutional_sustainability        17
+    ## 7 campus_culture_over_operating_costs                     12
+    ## 8 campus_culture_over_staff_satisfaction                  16
+
+``` r
+priority_score_frequencies <- priority_score_frequencies %>%
+  mutate(campus_culture_selection_frequency=c(7,11,12,11,14,17,0,16))
+priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                     12
+    ## 2 Dietary Health                                       20                      0
+    ## 3 Operating Costs                                      21                     17
+    ## 4 Sustainability of Guest Food Ch…                     24                     22
+    ## 5 Food Pricing                                         22                     19
+    ## 6 Institutional Sustainability                         25                     19
+    ## 7 Campus Culture                                       25                     21
+    ## 8 Staff Satisfaction                                   25                     23
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+staff_satisfaction_priority_score_tabulation <- priority_score_tabulation %>%
+  mutate(staff_satisfaction_over_guest_experience=case_when(staff_satisfaction_ranking<guest_experience_ranking~1,
+                                                        staff_satisfaction_ranking>guest_experience_ranking~0)) %>%
+  mutate(staff_satisfaction_over_dietary_health=case_when(staff_satisfaction_ranking<dietary_health_ranking~1,
+                                                        staff_satisfaction_ranking>dietary_health_ranking~0)) %>%
+  mutate(staff_satisfaction_over_operating_costs=case_when(staff_satisfaction_ranking<operating_costs_ranking~1,
+                                                        staff_satisfaction_ranking>operating_costs_ranking~0)) %>%
+  mutate(staff_satisfaction_over_dietary_sustainability=case_when(staff_satisfaction_ranking<dietary_sustainability_ranking~1,
+                                                        staff_satisfaction_ranking>dietary_sustainability_ranking~0)) %>%
+  mutate(staff_satisfaction_over_food_pricing=case_when(staff_satisfaction_ranking<food_pricing_ranking~1,
+                                                        staff_satisfaction_ranking>food_pricing_ranking~0)) %>%
+  mutate(staff_satisfaction_over_institutional_sustainability=case_when(staff_satisfaction_ranking<institutional_sustainability_ranking~1,
+                                                        staff_satisfaction_ranking>institutional_sustainability_ranking~0)) %>%
+  mutate(staff_satisfaction_over_campus_culture=case_when(staff_satisfaction_ranking<campus_culture_ranking~1,
+                                                        staff_satisfaction_ranking>campus_culture_ranking~0)) %>%
+  mutate(staff_satisfaction_over_staff_satisfaction=0) %>%
+  select(id,staff_satisfaction_over_guest_experience,staff_satisfaction_over_dietary_health,staff_satisfaction_over_operating_costs,staff_satisfaction_over_dietary_sustainability,staff_satisfaction_over_food_pricing,staff_satisfaction_over_institutional_sustainability,staff_satisfaction_over_campus_culture,staff_satisfaction_over_staff_satisfaction) %>%
+  pivot_longer(!id,names_to="condition",values_to="instances") %>%
+  group_by(condition) %>%
+  summarise(instances=sum(instances))
+staff_satisfaction_priority_score_tabulation
+```
+
+    ## # A tibble: 8 × 2
+    ##   condition                                            instances
+    ##   <chr>                                                    <dbl>
+    ## 1 staff_satisfaction_over_campus_culture                      16
+    ## 2 staff_satisfaction_over_dietary_health                       9
+    ## 3 staff_satisfaction_over_dietary_sustainability              12
+    ## 4 staff_satisfaction_over_food_pricing                        12
+    ## 5 staff_satisfaction_over_guest_experience                     7
+    ## 6 staff_satisfaction_over_institutional_sustainability        16
+    ## 7 staff_satisfaction_over_operating_costs                     11
+    ## 8 staff_satisfaction_over_staff_satisfaction                   0
+
+``` r
+priority_score_frequencies <- priority_score_frequencies %>%
+  mutate(staff_satisfaction_selection_frequency=c(7,9,11,12,12,16,16,0)) 
+priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                     12
+    ## 2 Dietary Health                                       20                      0
+    ## 3 Operating Costs                                      21                     17
+    ## 4 Sustainability of Guest Food Ch…                     24                     22
+    ## 5 Food Pricing                                         22                     19
+    ## 6 Institutional Sustainability                         25                     19
+    ## 7 Campus Culture                                       25                     21
+    ## 8 Staff Satisfaction                                   25                     23
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+priority_score_probabilities <- priority_score_frequencies %>%
+  mutate(guest_dining_experience_selection_probability=guest_dining_experience_selection_frequency/32,.after=guest_dining_experience_selection_frequency) %>%
+  mutate(dietary_health_selection_probability=dietary_health_selection_frequency/32,.after=dietary_health_selection_frequency) %>%
+  mutate(operating_costs_selection_probability=operating_costs_selection_frequency/32,.after=operating_costs_selection_frequency) %>%
+   mutate(dietary_sustainability_selection_probability=dietary_sustainability_selection_frequency/32,.after=dietary_sustainability_selection_frequency) %>%
+  mutate(food_pricing_selection_probability=food_pricing_selection_frequency/32,.after=food_pricing_selection_frequency) %>%
+  mutate(institutional_sustainability_selection_probability=institutional_sustainability_selection_frequency/32,.after=institutional_sustainability_selection_frequency) %>%
+  mutate(campus_culture_selection_probability=campus_culture_selection_frequency/32,.after=campus_culture_selection_frequency) %>%
+   mutate(staff_satisfaction_selection_probability=staff_satisfaction_selection_frequency/32,.after=staff_satisfaction_selection_frequency)
+priority_score_probabilities
+```
+
+    ## # A tibble: 8 × 17
+    ##   comparison_indicator             guest_dining_experie…¹ guest_dining_experie…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                  0    
+    ## 2 Dietary Health                                       20                  0.625
+    ## 3 Operating Costs                                      21                  0.656
+    ## 4 Sustainability of Guest Food Ch…                     24                  0.75 
+    ## 5 Food Pricing                                         22                  0.688
+    ## 6 Institutional Sustainability                         25                  0.781
+    ## 7 Campus Culture                                       25                  0.781
+    ## 8 Staff Satisfaction                                   25                  0.781
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​guest_dining_experience_selection_probability
+    ## # ℹ 14 more variables: dietary_health_selection_frequency <dbl>,
+    ## #   dietary_health_selection_probability <dbl>,
+    ## #   operating_costs_selection_frequency <dbl>,
+    ## #   operating_costs_selection_probability <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>, …
+
+``` r
+priority_score_zscores <- priority_score_probabilities %>%
+  mutate(guest_dining_experience_selection_zscore=scale(guest_dining_experience_selection_probability),.after=guest_dining_experience_selection_probability) %>%
+  mutate(dietary_health_selection_zscore=scale(dietary_health_selection_probability),.after=dietary_health_selection_probability) %>%
+  mutate(operating_costs_selection_zscore=scale(operating_costs_selection_probability),.after=operating_costs_selection_probability) %>%
+  mutate(dietary_sustainability_selection_zscore=scale(dietary_sustainability_selection_probability),.after=dietary_sustainability_selection_probability) %>%
+  mutate(food_pricing_selection_zscore=scale(food_pricing_selection_probability),.after=food_pricing_selection_probability) %>%
+  mutate(institutional_sustainability_selection_zscore=scale(institutional_sustainability_selection_probability),.after=institutional_sustainability_selection_probability) %>%
+  mutate(campus_culture_selection_zscore=scale(campus_culture_selection_probability),.after=campus_culture_selection_probability) %>%
+  mutate(staff_satisfaction_selection_zscore=scale(staff_satisfaction_selection_probability),.after=staff_satisfaction_selection_probability) 
+priority_score_zscores
+```
+
+    ## # A tibble: 8 × 25
+    ##   comparison_indicator             guest_dining_experie…¹ guest_dining_experie…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                  0    
+    ## 2 Dietary Health                                       20                  0.625
+    ## 3 Operating Costs                                      21                  0.656
+    ## 4 Sustainability of Guest Food Ch…                     24                  0.75 
+    ## 5 Food Pricing                                         22                  0.688
+    ## 6 Institutional Sustainability                         25                  0.781
+    ## 7 Campus Culture                                       25                  0.781
+    ## 8 Staff Satisfaction                                   25                  0.781
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​guest_dining_experience_selection_probability
+    ## # ℹ 22 more variables: guest_dining_experience_selection_zscore <dbl[,1]>,
+    ## #   dietary_health_selection_frequency <dbl>,
+    ## #   dietary_health_selection_probability <dbl>,
+    ## #   dietary_health_selection_zscore <dbl[,1]>,
+    ## #   operating_costs_selection_frequency <dbl>, …
+
+``` r
+priority_frequency_table <- priority_score_zscores %>%
+  select(comparison_indicator,guest_dining_experience_selection_frequency,dietary_health_selection_frequency,operating_costs_selection_frequency,dietary_sustainability_selection_frequency,food_pricing_selection_frequency,institutional_sustainability_selection_frequency,campus_culture_selection_frequency,staff_satisfaction_selection_frequency) %>%
+  pivot_longer(!comparison_indicator,names_to="indicator",values_to="frequency") %>%
+  select(-comparison_indicator) %>%
+  mutate(across(indicator,str_replace,"guest_dining_experience_selection_frequency","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_selection_frequency","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_selection_frequency","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_selection_frequency","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_selection_frequency","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_selection_frequency","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_selection_frequency","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_selection_frequency","Staff Satisfaction")) 
+priority_frequency_table %>%
+  group_by(indicator) %>%
+  summarise(total_selection_frequency=sum(frequency),mean_selection_frequency=mean(frequency)) %>%
+  arrange(desc(mean_selection_frequency))
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                        total_selection_freq…¹ mean_selection_frequ…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                             162                   20.2
+    ## 2 Dietary Health                                      133                   16.6
+    ## 3 Operating Costs                                     128                   16  
+    ## 4 Sustainability of Guest Food Ch…                    107                   13.4
+    ## 5 Food Pricing                                        104                   13  
+    ## 6 Institutional Sustainability                         91                   11.4
+    ## 7 Campus Culture                                       88                   11  
+    ## 8 Staff Satisfaction                                   83                   10.4
+    ## # ℹ abbreviated names: ¹​total_selection_frequency, ²​mean_selection_frequency
+
+``` r
+selection_frequency_aov <- aov(frequency~indicator,data=priority_frequency_table)
+summary(selection_frequency_aov)
+```
+
+    ##             Df Sum Sq Mean Sq F value Pr(>F)  
+    ## indicator    7    643   91.86   2.044 0.0653 .
+    ## Residuals   56   2517   44.95                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+priority_frequency_table %>%
+  ggplot(aes(x=fct_reorder(indicator,frequency,.fun="mean"),y=frequency,fill=fct_reorder(indicator,frequency,.fun="mean"),color=fct_reorder(indicator,frequency,.fun="mean"))) +
+  geom_boxplot(outlier.shape=NA,color="black",size=0.25,alpha=0.8) +
+  stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
+  scale_fill_viridis_d(option="mako") +
+  scale_color_viridis_d(option="mako",alpha=1) +
+  xlab("") + 
+  ylab("Mean Selection Frequency") + 
+  labs(caption="F-value: 2.04 (3sf); p-value = 0.0653") + 
+  coord_flip() +
+  theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-113-1.png)<!-- -->
+
+``` r
+priority_probability_table <- priority_score_zscores %>%
+  select(comparison_indicator,guest_dining_experience_selection_probability,dietary_health_selection_probability,operating_costs_selection_probability,dietary_sustainability_selection_probability,food_pricing_selection_probability,institutional_sustainability_selection_probability,campus_culture_selection_probability,staff_satisfaction_selection_probability) %>%
+  pivot_longer(!comparison_indicator,names_to="indicator",values_to="probability") %>%
+  select(-comparison_indicator) %>%
+  mutate(across(indicator,str_replace,"guest_dining_experience_selection_probability","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_selection_probability","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_selection_probability","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_selection_probability","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_selection_probability","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_selection_probability","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_selection_probability","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_selection_probability","Staff Satisfaction")) 
+priority_probability_table %>%
+  group_by(indicator) %>%
+  summarise(total_selection_probability=sum(probability),mean_selection_probability=mean(probability)) %>%
+  arrange(desc(mean_selection_probability))
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                        total_selection_prob…¹ mean_selection_proba…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                            5.06                  0.633
+    ## 2 Dietary Health                                     4.16                  0.520
+    ## 3 Operating Costs                                    4                     0.5  
+    ## 4 Sustainability of Guest Food Ch…                   3.34                  0.418
+    ## 5 Food Pricing                                       3.25                  0.406
+    ## 6 Institutional Sustainability                       2.84                  0.355
+    ## 7 Campus Culture                                     2.75                  0.344
+    ## 8 Staff Satisfaction                                 2.59                  0.324
+    ## # ℹ abbreviated names: ¹​total_selection_probability,
+    ## #   ²​mean_selection_probability
+
+``` r
+selection_probability_aov <- aov(probability~indicator,data=priority_probability_table)
+summary(priority_probability_table)
+```
+
+    ##   indicator          probability    
+    ##  Length:64          Min.   :0.0000  
+    ##  Class :character   1st Qu.:0.3359  
+    ##  Mode  :character   Median :0.4688  
+    ##                     Mean   :0.4375  
+    ##                     3rd Qu.:0.6250  
+    ##                     Max.   :0.7812
+
+``` r
+priority_probability_table %>%
+  ggplot(aes(x=fct_reorder(indicator,probability,.fun="mean"),y=probability,fill=fct_reorder(indicator,probability,.fun="mean"),color=fct_reorder(indicator,probability,.fun="mean"))) +
+  geom_boxplot(outlier.shape=NA,color="black",size=0.25,alpha=0.8) +
+  stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
+  scale_fill_viridis_d(option="mako") +
+  scale_color_viridis_d(option="mako",alpha=1) +
+  xlab("") + 
+  ylab("Mean Selection Probability") + 
+  labs(caption="F-value: tbd (3sf); p-value = tbd") + 
+  coord_flip() +
+  theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-116-1.png)<!-- -->
+
+``` r
+priority_z_score_table <- priority_score_zscores %>%
+  select(comparison_indicator,guest_dining_experience_selection_zscore,dietary_health_selection_zscore,operating_costs_selection_zscore,dietary_sustainability_selection_zscore,food_pricing_selection_zscore,institutional_sustainability_selection_zscore,campus_culture_selection_zscore,staff_satisfaction_selection_zscore) %>%
+  pivot_longer(!comparison_indicator,names_to="indicator",values_to="z_score") %>%
+  select(-comparison_indicator) %>%
+  mutate(across(indicator,str_replace,"guest_dining_experience_selection_zscore","Guest Dining Experience")) %>%
+  mutate(across(indicator,str_replace,"dietary_health_selection_zscore","Dietary Health")) %>%
+  mutate(across(indicator,str_replace,"operating_costs_selection_zscore","Operating Costs")) %>%
+  mutate(across(indicator,str_replace,"dietary_sustainability_selection_zscore","Sustainability of Guest Food Choices")) %>%
+  mutate(across(indicator,str_replace,"food_pricing_selection_zscore","Food Pricing")) %>%
+  mutate(across(indicator,str_replace,"institutional_sustainability_selection_zscore","Institutional Sustainability")) %>%
+  mutate(across(indicator,str_replace,"campus_culture_selection_zscore","Campus Culture")) %>%
+  mutate(across(indicator,str_replace,"staff_satisfaction_selection_zscore","Staff Satisfaction")) 
+priority_z_score_table %>%
+  group_by(indicator) %>%
+  summarise(total_selection_z_score=sum(z_score),mean_selection_z_score=mean(z_score)) %>%
+  arrange(desc(mean_selection_z_score))
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                        total_selection_z_sc…¹ mean_selection_z_score
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Food Pricing                                   2.22e-16               5.55e-17
+    ## 2 Guest Dining Experience                        2.22e-16               5.55e-17
+    ## 3 Institutional Sustainability                   2.22e-16               5.55e-17
+    ## 4 Dietary Health                                 4.44e-16               2.78e-17
+    ## 5 Operating Costs                                0                      0       
+    ## 6 Campus Culture                                -2.22e-16              -2.78e-17
+    ## 7 Sustainability of Guest Food Ch…              -1.11e-16              -2.78e-17
+    ## 8 Staff Satisfaction                            -2.22e-16              -5.55e-17
+    ## # ℹ abbreviated name: ¹​total_selection_z_score
+
+``` r
+priority_z_score_table %>%
+  ggplot(aes(x=fct_reorder(indicator,z_score,.fun="mean"),y=z_score,fill=fct_reorder(indicator,z_score,.fun="mean"),color=fct_reorder(indicator,z_score,.fun="mean"))) +
+  geom_boxplot(outlier.shape=NA,color="black",size=0.25,alpha=0.8) +
+  stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
+  scale_fill_viridis_d(option="mako") +
+  scale_color_viridis_d(option="mako",alpha=1) +
+  xlab("") + 
+  ylab("Mean Z-Score") + 
+  labs(caption="F-value: tbd (3sf); p-value = tbd") + 
+  coord_flip() +
+  theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-118-1.png)<!-- -->
