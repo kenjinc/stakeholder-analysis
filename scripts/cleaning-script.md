@@ -2963,7 +2963,7 @@ selection_probability_plot <- priority_probability_table %>%
   geom_signif(comparisons=list(c("Staff Satisfaction","Operating Costs")),color="black",size=0.25,annotation="*",y_position=0.77,tip_length=0.02,vjust=0.6) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=0.79,tip_length=0.02,vjust=0.6) +
   geom_signif(comparisons=list(c("Dietary Health","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.81,tip_length=0.02,vjust=0.6) +
-  stat_summary(fun.y=mean,geom="point",shape=1,size=1.75,color="black") +
+  stat_summary(fun.y=mean,geom="point",shape=4,size=1.75,color="black") +
   scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   scale_color_viridis_d(option="mako",alpha=1) +
   scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.15,0.85)) +
@@ -2977,6 +2977,10 @@ selection_probability_plot
 
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-122-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
+
+stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”) +
+stat_summary(data=decision_maker_priority_probability_table,fun.y=mean,geom=“point”,shape=19,size=1.75,color=“black”,fill=“black”)
++
 
 decomp next for advisors, decision makers
 
@@ -4168,7 +4172,7 @@ decision_maker_selection_probability_plot <- decision_maker_priority_probability
   geom_signif(comparisons=list(c("Dietary Health","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.81,tip_length=0.02,vjust=0.6) +
   geom_signif(comparisons=list(c("Operating Costs","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.79,tip_length=0.02,vjust=0.6) +
   stat_summary(fun.y=mean,geom="point",shape=19,size=1.75,color="black",fill="black") +
-  stat_summary(data=priority_probability_table,fun.y=mean,geom="point",shape=1,size=1.75,color="black") +
+  stat_summary(data=priority_probability_table,fun.y=mean,geom="point",shape=4,size=1.75,color="black") +
   scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   scale_color_viridis_d(option="mako",alpha=1) +
   scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.15,0.85)) +
@@ -4183,6 +4187,9 @@ decision_maker_selection_probability_plot
 
 ![](cleaning-script_files/figure-gfm/unnamed-chunk-153-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
+
+stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”)
++
 
 ``` r
 technical_advisor_priority_score_frequencies <- tibble(comparison_indicator=c("Guest Dining Experience","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Food Pricing","Institutional Sustainability","Campus Culture","Staff Satisfaction"),guest_dining_experience_selection_frequency=as.double(NA),dietary_health_selection_frequency=as.double(NA),operating_costs_selection_frequency=as.double(NA),dietary_sustainability_selection_frequency=as.double(NA),food_pricing_selection_frequency=as.double(NA),institutional_sustainability_selection_frequency=as.double(NA),campus_culture_selection_frequency=as.double(NA),staff_satisfaction_selection_frequency=as.double(NA))
@@ -5029,8 +5036,9 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
   geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="**",y_position=0.19,tip_length=-0.02,vjust=2.8) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Operating Costs")),color="black",size=0.25,annotation="*",y_position=0.79,tip_length=0.02,vjust=0.6) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=0.81,tip_length=0.02,vjust=0.6) +
-  stat_summary(fun.y=mean,geom="point",shape=19,size=1.75,color="black",fill="black") +
-  stat_summary(data=priority_probability_table,fun.y=mean,geom="point",shape=1,size=1.75,color="black") +
+  stat_summary(fun.y=mean,geom="point",shape=1,size=1.75,color="black") +
+  stat_summary(data=priority_probability_table,fun.y=mean,geom="point",shape=4,size=1.75,color="black") +
+  stat_summary(data=decision_maker_priority_probability_table,fun.y=mean,geom="point",shape=19,size=1.75,color="black",fill="black") +
   scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   scale_color_viridis_d(option="mako",alpha=1) +
   scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.15,0.85)) +
