@@ -5065,6 +5065,208 @@ selection_probability_distribution_plots
 could use geom_jitter more strategically to highlight asymmetries in
 stakeholder/role types
 
+build in legend calling out overall mean and subgroup mean
+
+independent groups t-test
+
+Dietary Health
+
+``` r
+guest_dining_experience_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Guest Dining Experience") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+guest_dining_experience_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Guest Dining Experience") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(guest_dining_experience_decision_maker_probabilities,guest_dining_experience_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  guest_dining_experience_decision_maker_probabilities and guest_dining_experience_technical_advisor_probabilities
+    ## t = -1.4722, df = 11.253, p-value = 0.1684
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.13082707  0.02578505
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.6785714 0.7310924
+
+``` r
+dietary_health_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Dietary Health") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+dietary_health_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Dietary Health") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(dietary_health_decision_maker_probabilities,dietary_health_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  dietary_health_decision_maker_probabilities and dietary_health_technical_advisor_probabilities
+    ## t = -1.3259, df = 11.92, p-value = 0.2097
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.22778184  0.05551293
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.5357143 0.6218487
+
+``` r
+operating_costs_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Operating Costs") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+operating_costs_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Operating Costs") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(operating_costs_decision_maker_probabilities,operating_costs_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  operating_costs_decision_maker_probabilities and operating_costs_technical_advisor_probabilities
+    ## t = -0.27589, df = 9.2394, p-value = 0.7887
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.1861663  0.1455500
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.5595238 0.5798319
+
+``` r
+dietary_sustainability_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Sustainability of Guest Food Choices") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+dietary_sustainability_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Sustainability of Guest Food Choices") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(dietary_sustainability_decision_maker_probabilities,dietary_sustainability_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  dietary_sustainability_decision_maker_probabilities and dietary_sustainability_technical_advisor_probabilities
+    ## t = -0.50536, df = 10.116, p-value = 0.6241
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.2610307  0.1643920
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.4642857 0.5126050
+
+``` r
+food_pricing_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Food Pricing") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+food_pricing_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Food Pricing") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(food_pricing_decision_maker_probabilities,food_pricing_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  food_pricing_decision_maker_probabilities and food_pricing_technical_advisor_probabilities
+    ## t = 1.581, df = 11.997, p-value = 0.1399
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.04237255  0.26646219
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.5238095 0.4117647
+
+``` r
+institutional_sustainability_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Institutional Sustainability") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+institutional_sustainability_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Institutional Sustainability") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(institutional_sustainability_decision_maker_probabilities,institutional_sustainability_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  institutional_sustainability_decision_maker_probabilities and institutional_sustainability_technical_advisor_probabilities
+    ## t = -0.058887, df = 11.285, p-value = 0.9541
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.1339682  0.1269654
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.4166667 0.4201681
+
+``` r
+campus_culture_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Campus Culture") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+campus_culture_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Campus Culture") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(campus_culture_decision_maker_probabilities,campus_culture_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  campus_culture_decision_maker_probabilities and campus_culture_technical_advisor_probabilities
+    ## t = -1.1013, df = 9.9653, p-value = 0.2967
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.1905965  0.0645461
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.3571429 0.4201681
+
+``` r
+staff_satisfaction_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Staff Satisfaction") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+staff_satisfaction_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Staff Satisfaction") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(staff_satisfaction_decision_maker_probabilities,staff_satisfaction_technical_advisor_probabilities)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  staff_satisfaction_decision_maker_probabilities and staff_satisfaction_technical_advisor_probabilities
+    ## t = 2.6756, df = 11.957, p-value = 0.02025
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  0.02998488 0.29354453
+    ## sample estimates:
+    ## mean of x mean of y 
+    ## 0.4642857 0.3025210
+
+STAFF SATISFACTION SIGNIF DIFF (\*)
+
+welch because assume unequal variance n\<30
+
 ``` r
 priority_z_score_table <- priority_score_zscores %>%
   select(comparison_indicator,guest_dining_experience_selection_zscore,dietary_health_selection_zscore,operating_costs_selection_zscore,dietary_sustainability_selection_zscore,food_pricing_selection_zscore,institutional_sustainability_selection_zscore,campus_culture_selection_zscore,staff_satisfaction_selection_zscore) %>%
@@ -5143,4 +5345,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-183-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-191-1.png)<!-- -->

@@ -2245,6 +2245,126 @@ selection_probability_distribution_plots
 
 could use geom_jitter more strategically to highlight asymmetries in stakeholder/role types
 
+build in legend calling out overall mean and subgroup mean
+
+independent groups t-test 
+
+Dietary Health
+
+```{r}
+guest_dining_experience_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Guest Dining Experience") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+guest_dining_experience_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Guest Dining Experience") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(guest_dining_experience_decision_maker_probabilities,guest_dining_experience_technical_advisor_probabilities)
+```
+
+```{r}
+dietary_health_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Dietary Health") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+dietary_health_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Dietary Health") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(dietary_health_decision_maker_probabilities,dietary_health_technical_advisor_probabilities)
+```
+
+```{r}
+operating_costs_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Operating Costs") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+operating_costs_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Operating Costs") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(operating_costs_decision_maker_probabilities,operating_costs_technical_advisor_probabilities)
+```
+
+```{r}
+dietary_sustainability_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Sustainability of Guest Food Choices") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+dietary_sustainability_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Sustainability of Guest Food Choices") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(dietary_sustainability_decision_maker_probabilities,dietary_sustainability_technical_advisor_probabilities)
+```
+
+```{r}
+food_pricing_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Food Pricing") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+food_pricing_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Food Pricing") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(food_pricing_decision_maker_probabilities,food_pricing_technical_advisor_probabilities)
+```
+
+```{r}
+institutional_sustainability_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Institutional Sustainability") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+institutional_sustainability_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Institutional Sustainability") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(institutional_sustainability_decision_maker_probabilities,institutional_sustainability_technical_advisor_probabilities)
+```
+
+```{r}
+campus_culture_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Campus Culture") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+campus_culture_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Campus Culture") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(campus_culture_decision_maker_probabilities,campus_culture_technical_advisor_probabilities)
+```
+
+```{r}
+staff_satisfaction_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
+  filter(indicator=="Staff Satisfaction") %>%
+  mutate(subgroup="Decision Maker",.before=probability) %>%
+  select(probability)
+staff_satisfaction_technical_advisor_probabilities <- technical_advisor_priority_probability_table %>%
+  filter(indicator=="Staff Satisfaction") %>%
+  mutate(subgroup="Advisor",.before=probability) %>%
+  select(probability)
+t.test(staff_satisfaction_decision_maker_probabilities,staff_satisfaction_technical_advisor_probabilities)
+```
+
+STAFF SATISFACTION SIGNIF DIFF (*)
+
+
+
+
+ welch because assume unequal variance n<30
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
