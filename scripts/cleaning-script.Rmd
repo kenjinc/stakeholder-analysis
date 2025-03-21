@@ -342,6 +342,13 @@ ppi_frequencies
 ```
 
 ```{r}
+extraction_data %>% select(study_id,accessory_indicator_var_count) %>%
+  group_by(accessory_indicator_var_count) %>%
+  summarise(count=n())
+```
+
+
+```{r}
 principal_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
 frequency_manual <- c(36,67,54,2)
 ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%

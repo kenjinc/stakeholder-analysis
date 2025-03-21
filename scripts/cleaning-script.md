@@ -566,6 +566,21 @@ ppi_frequencies
     ## 8 "Food Choice, Self-Reported"         37
 
 ``` r
+extraction_data %>% select(study_id,accessory_indicator_var_count) %>%
+  group_by(accessory_indicator_var_count) %>%
+  summarise(count=n())
+```
+
+    ## # A tibble: 5 × 2
+    ##   accessory_indicator_var_count count
+    ##                           <int> <int>
+    ## 1                             0    18
+    ## 2                             1    57
+    ## 3                             2    34
+    ## 4                             3     6
+    ## 5                             4     1
+
+``` r
 principal_indicator_var_manual <- c("Food Choice, Intended","Food Choice, Self-Reported","Food Choice, Observed","Food Service, Observed")
 frequency_manual <- c(36,67,54,2)
 ppi_frequencies_manual <- tibble(principal_indicator_var_manual,frequency_manual) %>%
@@ -678,7 +693,7 @@ print(round(ppi_percentage_contributions,2))
 pheatmap(ppi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ``` r
 ppi_contingency_table_alt <- ppi_contingency_table %>%
@@ -960,7 +975,7 @@ library(pheatmap)
 pheatmap(api_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 Rerun this using list class instead of variety class
 
@@ -1234,7 +1249,7 @@ print(round(qpi_percentage_contributions,2))
 pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
 
 ``` r
 principal_qualifying_indicator_plots <- ggarrange(ppi_frequencies_plot,qpi_frequencies_plot,
@@ -1251,7 +1266,7 @@ ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,p
 combined_indicators
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
 
 ### Gap Monitoring
 
@@ -1605,7 +1620,7 @@ score_frequencies %>%
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
 need to put anova value in caption - could also consider boxplot/violin
 plot
 
@@ -1815,7 +1830,7 @@ print(round(first_choice_percentage_contributions,2))
 pheatmap(first_choice_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-86-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-87-1.png)<!-- -->
 
 ``` r
 first_choice_contingency_table <- first_choice_frequencies %>%
@@ -1899,7 +1914,7 @@ score_frequencies %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-89-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
 
 ``` r
 preliminary_indicator_rankings <- 
@@ -1910,7 +1925,7 @@ ggsave(filename="preliminary_indicator_rankings.png",plot=preliminary_indicator_
 preliminary_indicator_rankings
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-91-1.png)<!-- -->
 
 ``` r
 priority_score_frequencies <- tibble(comparison_indicator=c("Guest Dining Experience","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Food Pricing","Institutional Sustainability","Campus Culture","Staff Satisfaction"),guest_dining_experience_selection_frequency=as.double(NA),dietary_health_selection_frequency=as.double(NA),operating_costs_selection_frequency=as.double(NA),dietary_sustainability_selection_frequency=as.double(NA),food_pricing_selection_frequency=as.double(NA),institutional_sustainability_selection_frequency=as.double(NA),campus_culture_selection_frequency=as.double(NA),staff_satisfaction_selection_frequency=as.double(NA))
@@ -2975,7 +2990,7 @@ selection_probability_plot <- priority_probability_table %>%
 selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-122-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-123-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”) +
@@ -4185,7 +4200,7 @@ decision_maker_selection_probability_plot <- decision_maker_priority_probability
 decision_maker_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-153-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-154-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”)
@@ -5051,7 +5066,7 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
 technical_advisor_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-178-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-179-1.png)<!-- -->
 geom_jitter(width=0.6,size=2,shape=21,alpha=0.5) +
 
 ``` r
@@ -5068,7 +5083,7 @@ ggsave(filename="selection_probability_distributions.png",plot=selection_probabi
 selection_probability_distribution_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-180-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-181-1.png)<!-- -->
 
 could use geom_jitter more strategically to highlight asymmetries in
 stakeholder/role types
@@ -5353,4 +5368,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-191-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-192-1.png)<!-- -->
