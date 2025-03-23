@@ -5321,12 +5321,25 @@ joint_correlation_table
     ## 8 Staff Satisfaction                               0.00862                 0.371
 
 ``` r
-joint_correlation_table %>%
+joint_correlation_plot <- joint_correlation_table %>%
   ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
-  geom_smooth(method=lm,se=FALSE,color="black") +
+  geom_smooth(method=lm,se=FALSE,color="black",linewidth=0.25) +
   geom_point() + 
+  geom_text(aes(label=indicator),hjust=0,nudge_x=0.01,size=2.5) + 
+  scale_x_continuous(limits=c(0,0.85)) + 
+  scale_y_continuous(limits=c(0,0.85)) +
   scale_color_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
-  theme(panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
+  xlab("Selection Probability") + 
+  ylab("Appearance Likelihood") +
+  labs(caption="Adjusted R-Squared: -0.114 (3sf); p-value = 0.612 (3sf)") + 
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
+ggsave(filename="joint_correlation_plot.png",plot=joint_correlation_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=20,units="cm",dpi=150,limitsize=TRUE)
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+``` r
+joint_correlation_plot
 ```
 
     ## `geom_smooth()` using formula = 'y ~ x'
