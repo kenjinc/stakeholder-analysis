@@ -1,7 +1,7 @@
 ---
 title: "Cleaning Script"
 output: github_document
-date: "Last Updated: March 13, 2025"
+date: "Last Updated: March 23, 2025"
 ---
 
 ```{r setup, include=FALSE}
@@ -2365,9 +2365,47 @@ t.test(staff_satisfaction_decision_maker_probabilities,staff_satisfaction_techni
 STAFF SATISFACTION SIGNIF DIFF (*)
 
 
-
-
  welch because assume unequal variance n<30
+ 
+ 
+ 
+ ## Joint Correlation Analysis
+ 
+```{r}
+joint_correlation_appearance_likelihood <- api_frequencies_manual %>%
+  mutate(appearance_likelihood=frequency_manual/116) %>%
+  select(accessory_indicator_var_manual,appearance_likelihood) %>%
+  rename(indicator=accessory_indicator_var_manual)
+joint_correlation_selection_probabilities <- priority_probability_table %>%
+  group_by(indicator) %>%
+  summarise(selection_probability=mean(probability)) %>%
+  arrange(desc(selection_probability))
+joint_correlation_table <- left_join(joint_correlation_appearance_likelihood,joint_correlation_selection_probabilities,by=join_by(indicator))
+```
+
+
+
+```{r}
+joint_correlation_table
+```
+
+ 
+```{r}
+joint_correlation_table %>%
+  ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
+  geom_smooth(method=lm,se=FALSE,color="black") +
+  geom_point() + 
+  scale_color_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
+  theme(panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
+```
+
+```{r}
+joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
+summary(joint_correlation_lm)
+```
+
+ 
+ 
 
 
 

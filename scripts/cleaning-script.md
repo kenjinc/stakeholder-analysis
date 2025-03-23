@@ -1,6 +1,6 @@
 Cleaning Script
 ================
-Last Updated: March 13, 2025
+Last Updated: March 23, 2025
 
 ## Package Loading
 
@@ -5290,6 +5290,71 @@ STAFF SATISFACTION SIGNIF DIFF (\*)
 
 welch because assume unequal variance n\<30
 
+\## Joint Correlation Analysis
+
+``` r
+joint_correlation_appearance_likelihood <- api_frequencies_manual %>%
+  mutate(appearance_likelihood=frequency_manual/116) %>%
+  select(accessory_indicator_var_manual,appearance_likelihood) %>%
+  rename(indicator=accessory_indicator_var_manual)
+joint_correlation_selection_probabilities <- priority_probability_table %>%
+  group_by(indicator) %>%
+  summarise(selection_probability=mean(probability)) %>%
+  arrange(desc(selection_probability))
+joint_correlation_table <- left_join(joint_correlation_appearance_likelihood,joint_correlation_selection_probabilities,by=join_by(indicator))
+```
+
+``` r
+joint_correlation_table
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                          appearance_likelihood selection_probability
+    ##   <chr>                                              <dbl>                 <dbl>
+    ## 1 Campus Culture                                   0.707                   0.393
+    ## 2 Dietary Health                                   0.233                   0.594
+    ## 3 Operating Costs                                  0.121                   0.571
+    ## 4 Sustainability of Guest Food Choi…               0.112                   0.478
+    ## 5 Guest Dining Experience                          0.0431                  0.723
+    ## 6 Food Pricing                                     0.0345                  0.464
+    ## 7 Institutional Sustainability                     0.0172                  0.406
+    ## 8 Staff Satisfaction                               0.00862                 0.371
+
+``` r
+joint_correlation_table %>%
+  ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
+  geom_smooth(method=lm,se=FALSE,color="black") +
+  geom_point() + 
+  scale_color_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
+  theme(panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-192-1.png)<!-- -->
+
+``` r
+joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
+summary(joint_correlation_lm)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = appearance_likelihood ~ selection_probability, data = joint_correlation_table)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.20408 -0.14996 -0.04061  0.02088  0.50337 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)
+    ## (Intercept)             0.3650     0.3942   0.926    0.390
+    ## selection_probability  -0.4111     0.7689  -0.535    0.612
+    ## 
+    ## Residual standard error: 0.2462 on 6 degrees of freedom
+    ## Multiple R-squared:  0.04547,    Adjusted R-squared:  -0.1136 
+    ## F-statistic: 0.2858 on 1 and 6 DF,  p-value: 0.6121
+
 ``` r
 priority_z_score_table <- priority_score_zscores %>%
   select(comparison_indicator,guest_dining_experience_selection_zscore,dietary_health_selection_zscore,operating_costs_selection_zscore,dietary_sustainability_selection_zscore,food_pricing_selection_zscore,institutional_sustainability_selection_zscore,campus_culture_selection_zscore,staff_satisfaction_selection_zscore) %>%
@@ -5368,4 +5433,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-192-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-196-1.png)<!-- -->
