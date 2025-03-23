@@ -5368,6 +5368,56 @@ summary(joint_correlation_lm)
     ## Multiple R-squared:  0.04547,    Adjusted R-squared:  -0.1136 
     ## F-statistic: 0.2858 on 1 and 6 DF,  p-value: 0.6121
 
+Re run to see what happens when you limit joint correlation analysis to
+those with significant differences only
+
+``` r
+campus_culture_limited_joint_correlation_table <- joint_correlation_table %>%
+  filter(!indicator=="Dietary Health") %>%
+  filter(!indicator=="Operating Costs") 
+```
+
+``` r
+campus_culture_limited_joint_correlation_table %>%
+  ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
+  geom_smooth(method=lm,se=FALSE,color="black",linewidth=0.25) +
+  geom_point() + 
+  geom_text(aes(label=indicator),hjust=0,nudge_x=0.01,size=2.5) + 
+  scale_x_continuous(limits=c(0,0.85)) + 
+  scale_y_continuous(limits=c(0,0.85)) +
+  scale_color_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Guest Dining Experience")) +
+  xlab("Selection Probability") + 
+  ylab("Appearance Likelihood") +
+  labs(caption="Adjusted R-Squared: -0.114 (3sf); p-value = 0.612 (3sf)") + 
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-195-1.png)<!-- -->
+
+``` r
+campus_culture_limited_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=campus_culture_limited_joint_correlation_table)
+summary(campus_culture_limited_joint_correlation_lm)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = appearance_likelihood ~ selection_probability, data = campus_culture_limited_joint_correlation_table)
+    ## 
+    ## Residuals:
+    ##        1        2        3        4        5        6 
+    ##  0.50848 -0.03874  0.03009 -0.12385 -0.17366 -0.20232 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)
+    ## (Intercept)             0.4189     0.4950   0.846    0.445
+    ## selection_probability  -0.5612     1.0163  -0.552    0.610
+    ## 
+    ## Residual standard error: 0.2947 on 4 degrees of freedom
+    ## Multiple R-squared:  0.07084,    Adjusted R-squared:  -0.1615 
+    ## F-statistic: 0.305 on 1 and 4 DF,  p-value: 0.6102
+
 ``` r
 priority_z_score_table <- priority_score_zscores %>%
   select(comparison_indicator,guest_dining_experience_selection_zscore,dietary_health_selection_zscore,operating_costs_selection_zscore,dietary_sustainability_selection_zscore,food_pricing_selection_zscore,institutional_sustainability_selection_zscore,campus_culture_selection_zscore,staff_satisfaction_selection_zscore) %>%
@@ -5446,4 +5496,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-196-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-199-1.png)<!-- -->
