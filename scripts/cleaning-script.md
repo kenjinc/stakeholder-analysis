@@ -1396,6 +1396,247 @@ survey_data <- survey_data %>%
 ```
 
 ``` r
+survey_data %>%
+  filter(role=="Decision Maker") %>%
+  select(role,position_duration)
+```
+
+    ##              role position_duration
+    ## 1  Decision Maker                 1
+    ## 2  Decision Maker                11
+    ## 3  Decision Maker                 3
+    ## 4  Decision Maker                 1
+    ## 5  Decision Maker                32
+    ## 6  Decision Maker                 3
+    ## 7  Decision Maker                 2
+    ## 8  Decision Maker                 4
+    ## 9  Decision Maker                 2
+    ## 10 Decision Maker                16
+    ## 11 Decision Maker                 2
+    ## 12 Decision Maker                 3
+
+``` r
+role <- c("Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker")
+position_duration <- c(1,11,3,1,32,3,2,4,2,16,2,3)
+dm <- tibble(role,position_duration)
+```
+
+``` r
+role <- c("Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant")
+position_duration <- c(2,1,2,6,3,1,12,3,3,20,2,1,3,1,3,10,5,2,3,1)
+c <- tibble(role,position_duration)
+```
+
+``` r
+duration_data <- bind_rows(dm,c)
+duration_data
+```
+
+    ## # A tibble: 32 × 2
+    ##    role           position_duration
+    ##    <chr>                      <dbl>
+    ##  1 Decision Maker                 1
+    ##  2 Decision Maker                11
+    ##  3 Decision Maker                 3
+    ##  4 Decision Maker                 1
+    ##  5 Decision Maker                32
+    ##  6 Decision Maker                 3
+    ##  7 Decision Maker                 2
+    ##  8 Decision Maker                 4
+    ##  9 Decision Maker                 2
+    ## 10 Decision Maker                16
+    ## # ℹ 22 more rows
+
+``` r
+duration_data %>%
+  group_by(role) %>%
+  summarise(mean(position_duration),sd(position_duration))
+```
+
+    ## # A tibble: 2 × 3
+    ##   role           `mean(position_duration)` `sd(position_duration)`
+    ##   <chr>                              <dbl>                   <dbl>
+    ## 1 Consultant                          4.2                     4.74
+    ## 2 Decision Maker                      6.67                    9.17
+
+``` r
+with(duration_data,shapiro.test(position_duration[role=="Consultant"]))
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  position_duration[role == "Consultant"]
+    ## W = 0.66847, p-value = 1.648e-05
+
+``` r
+with(duration_data,shapiro.test(position_duration[role=="Decision Maker"]))
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  position_duration[role == "Decision Maker"]
+    ## W = 0.6481, p-value = 0.0002786
+
+``` r
+res <- wilcox.test(position_duration~role,data=duration_data,
+                   exact = FALSE)
+res
+```
+
+    ## 
+    ##  Wilcoxon rank sum test with continuity correction
+    ## 
+    ## data:  position_duration by role
+    ## W = 106, p-value = 0.5912
+    ## alternative hypothesis: true location shift is not equal to 0
+
+``` r
+res <- t.test(position_duration~role,data=duration_data,var.equal=FALSE)
+res
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  position_duration by role
+    ## t = -0.86514, df = 14.596, p-value = 0.401
+    ## alternative hypothesis: true difference in means between group Consultant and group Decision Maker is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -8.558496  3.625162
+    ## sample estimates:
+    ##     mean in group Consultant mean in group Decision Maker 
+    ##                     4.200000                     6.666667
+
+``` r
+role <- c("Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant")
+stakeholder_type <- c("Chef","Chef","Dining Director","Dining Director","Dining Director","Dining Director","Dining Director","Dining Director","Sustainability Manager","University Administrator","University Administrator","University Administrator","Chef","Chef","Dining Director","Nutrition Manager","Nutrition Manager","Nutrition Manager","Nutrition Manager","Nutrition Manager","Sustainability Manager","Sustainability Manager","Sustainability Manager","Sustainability Manager","Sustainability Manager","University Administrator","Dining Advisor","Dining Advisor","Dining Manager","Dining Manager","Marketing Manager","Marketing Manager")
+tibble(stakeholder_type,role)
+```
+
+    ## # A tibble: 32 × 2
+    ##    stakeholder_type         role          
+    ##    <chr>                    <chr>         
+    ##  1 Chef                     Decision Maker
+    ##  2 Chef                     Decision Maker
+    ##  3 Dining Director          Decision Maker
+    ##  4 Dining Director          Decision Maker
+    ##  5 Dining Director          Decision Maker
+    ##  6 Dining Director          Decision Maker
+    ##  7 Dining Director          Decision Maker
+    ##  8 Dining Director          Decision Maker
+    ##  9 Sustainability Manager   Decision Maker
+    ## 10 University Administrator Decision Maker
+    ## # ℹ 22 more rows
+
+qpi_contingency_table \<- as.table(rbind(c(87,46,39,29),c(29,70,77,87)))
+dimnames(qpi_contingency_table) \<-
+list(dichomoty=c(“Reported”,“Omitted”),
+indicators=c(“Demographics”,“Lifestyle”,“Program
+Reception”,“Situational”)) qpi_chisq_test \<-
+chisq.test(qpi_contingency_table) qpi_chisq_test
+
+``` r
+dm_contingency_table <- as.table(rbind(c(2,6,1,3),c(10,6,11,9)))
+dimnames(dm_contingency_table) <- list(dichotomy=c("Present","Absent"),
+                                       role=c("Chef","Dining Director","Sustainability Manager","University Administrator"))
+dm_chisq_test <- chisq.test(dm_contingency_table)
+```
+
+    ## Warning in chisq.test(dm_contingency_table): Chi-squared approximation may be
+    ## incorrect
+
+``` r
+dm_chisq_test
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  dm_contingency_table
+    ## X-squared = 6.2222, df = 3, p-value = 0.1013
+
+``` r
+role_contingency_table <- as.table(rbind(c(2,6,0,1,3,0,0,0),c(2,1,5,5,1,2,2,2)))
+dimnames(role_contingency_table) <- list(authority=c("Decision Maker","Consultant"),
+                                         role=c("Chef","Dining Director","Nutrition Manager","Sustainability Manager","University Administrator","Dining Advisor","Dining Manager","Marketing Manager"))
+role_chisq_test <- chisq.test(role_contingency_table)
+```
+
+    ## Warning in chisq.test(role_contingency_table): Chi-squared approximation may be
+    ## incorrect
+
+``` r
+role_chisq_test
+```
+
+    ## 
+    ##  Pearson's Chi-squared test
+    ## 
+    ## data:  role_contingency_table
+    ## X-squared = 17.321, df = 7, p-value = 0.01544
+
+``` r
+fisher.test(role_contingency_table)
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  role_contingency_table
+    ## p-value = 0.007346
+    ## alternative hypothesis: two.sided
+
+``` r
+role_expected_counts <- role_chisq_test$expected
+print(round(role_expected_counts,2))
+```
+
+    ##                 role
+    ## authority        Chef Dining Director Nutrition Manager Sustainability Manager
+    ##   Decision Maker  1.5            2.62              1.88                   2.25
+    ##   Consultant      2.5            4.38              3.12                   3.75
+    ##                 role
+    ## authority        University Administrator Dining Advisor Dining Manager
+    ##   Decision Maker                      1.5           0.75           0.75
+    ##   Consultant                          2.5           1.25           1.25
+    ##                 role
+    ## authority        Marketing Manager
+    ##   Decision Maker              0.75
+    ##   Consultant                  1.25
+
+``` r
+library(rstatix)
+```
+
+    ## 
+    ## Attaching package: 'rstatix'
+
+    ## The following object is masked from 'package:stats':
+    ## 
+    ##     filter
+
+``` r
+pairwise_fisher_test(as.matrix(role_contingency_table),p.adjust.method="fdr")
+```
+
+    ## # A tibble: 28 × 6
+    ##    group1          group2                       n      p p.adj p.adj.signif
+    ##  * <chr>           <chr>                    <dbl>  <dbl> <dbl> <chr>       
+    ##  1 Chef            Dining Director             11 0.491  0.875 ns          
+    ##  2 Chef            Nutrition Manager            9 0.167  0.665 ns          
+    ##  3 Chef            Sustainability Manager      10 0.5    0.875 ns          
+    ##  4 Chef            University Administrator     8 1      1     ns          
+    ##  5 Chef            Dining Advisor               6 0.467  0.875 ns          
+    ##  6 Chef            Dining Manager               6 0.467  0.875 ns          
+    ##  7 Chef            Marketing Manager            6 0.467  0.875 ns          
+    ##  8 Dining Director Nutrition Manager           12 0.0152 0.389 ns          
+    ##  9 Dining Director Sustainability Manager      13 0.0291 0.389 ns          
+    ## 10 Dining Director University Administrator    11 1      1     ns          
+    ## # ℹ 18 more rows
+
+``` r
 rank_frequencies <- survey_data %>%
   select(id,dietary_health_ranking,dietary_sustainability_ranking,institutional_sustainability_ranking,food_pricing_ranking,operating_costs_ranking,guest_experience_ranking,staff_satisfaction_ranking,campus_culture_ranking) %>%
   pivot_longer(!id,names_to="indicator",values_to="ranking") %>%
@@ -1620,7 +1861,7 @@ score_frequencies %>%
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
 need to put anova value in caption - could also consider boxplot/violin
 plot
 
@@ -1830,7 +2071,7 @@ print(round(first_choice_percentage_contributions,2))
 pheatmap(first_choice_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-87-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-103-1.png)<!-- -->
 
 ``` r
 first_choice_contingency_table <- first_choice_frequencies %>%
@@ -1914,7 +2155,7 @@ score_frequencies %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-106-1.png)<!-- -->
 
 ``` r
 preliminary_indicator_rankings <- 
@@ -1925,7 +2166,7 @@ ggsave(filename="preliminary_indicator_rankings.png",plot=preliminary_indicator_
 preliminary_indicator_rankings
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-91-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-107-1.png)<!-- -->
 
 ``` r
 priority_score_frequencies <- tibble(comparison_indicator=c("Guest Dining Experience","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Food Pricing","Institutional Sustainability","Campus Culture","Staff Satisfaction"),guest_dining_experience_selection_frequency=as.double(NA),dietary_health_selection_frequency=as.double(NA),operating_costs_selection_frequency=as.double(NA),dietary_sustainability_selection_frequency=as.double(NA),food_pricing_selection_frequency=as.double(NA),institutional_sustainability_selection_frequency=as.double(NA),campus_culture_selection_frequency=as.double(NA),staff_satisfaction_selection_frequency=as.double(NA))
@@ -2990,7 +3231,7 @@ selection_probability_plot <- priority_probability_table %>%
 selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-123-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-139-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”) +
@@ -4200,7 +4441,7 @@ decision_maker_selection_probability_plot <- decision_maker_priority_probability
 decision_maker_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-154-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-170-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”)
@@ -5066,7 +5307,7 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
 technical_advisor_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-179-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-195-1.png)<!-- -->
 geom_jitter(width=0.6,size=2,shape=21,alpha=0.5) +
 
 ``` r
@@ -5083,7 +5324,7 @@ ggsave(filename="selection_probability_distributions.png",plot=selection_probabi
 selection_probability_distribution_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-181-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-197-1.png)<!-- -->
 
 could use geom_jitter more strategically to highlight asymmetries in
 stakeholder/role types
@@ -5344,7 +5585,7 @@ joint_correlation_plot
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-192-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-208-1.png)<!-- -->
 
 ``` r
 joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
@@ -5394,7 +5635,7 @@ campus_culture_limited_joint_correlation_table %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-195-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-211-1.png)<!-- -->
 
 ``` r
 campus_culture_limited_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=campus_culture_limited_joint_correlation_table)
@@ -5496,4 +5737,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-199-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-215-1.png)<!-- -->
