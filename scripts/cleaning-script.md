@@ -4260,6 +4260,26 @@ decision_maker_priority_probability_table %>%
 ``` r
 decision_maker_priority_probability_table %>%
   group_by(indicator) %>%
+  summarise(mean_selection_probability=mean(probability),sd_selection_probability=sd(probability)) %>%
+  arrange(desc(mean_selection_probability))
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                        mean_selection_proba…¹ sd_selection_probabi…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                           0.679                 0.0575
+    ## 2 Operating Costs                                   0.560                 0.0927
+    ## 3 Dietary Health                                    0.536                 0.116 
+    ## 4 Food Pricing                                      0.524                 0.134 
+    ## 5 Staff Satisfaction                                0.464                 0.116 
+    ## 6 Sustainability of Guest Food Ch…                  0.464                 0.135 
+    ## 7 Institutional Sustainability                      0.417                 0.0962
+    ## 8 Campus Culture                                    0.357                 0.0793
+    ## # ℹ abbreviated names: ¹​mean_selection_probability, ²​sd_selection_probability
+
+``` r
+decision_maker_priority_probability_table %>%
+  group_by(indicator) %>%
   summarise(total_selection_probability=sum(probability),mean_selection_probability=mean(probability)) %>%
   arrange(desc(mean_selection_probability)) %>%
   summarise(mean=mean(mean_selection_probability))
@@ -4441,7 +4461,7 @@ decision_maker_selection_probability_plot <- decision_maker_priority_probability
 decision_maker_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-170-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-171-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”)
@@ -4552,6 +4572,98 @@ technical_advisor_priority_score_tabulation
     ## 17                      8
 
 ``` r
+technical_advisor_priority_score_tabulation <- survey_data %>% #ADDING AUDITORS TO LARGER CONSULTANT GROUP
+  filter(role=="Advisor" | role=="Auditor") %>%
+  select(id,dietary_health_ranking,dietary_sustainability_ranking,institutional_sustainability_ranking,food_pricing_ranking,operating_costs_ranking,guest_experience_ranking,staff_satisfaction_ranking,campus_culture_ranking)
+technical_advisor_priority_score_tabulation
+```
+
+    ##    id dietary_health_ranking dietary_sustainability_ranking
+    ## 1   1                      2                              3
+    ## 2   2                      2                              3
+    ## 3   3                      3                              4
+    ## 4   8                      6                              5
+    ## 5   9                      2                              5
+    ## 6  11                      7                              3
+    ## 7  13                      6                              7
+    ## 8  15                      4                              5
+    ## 9  16                      6                              4
+    ## 10 17                      3                              6
+    ## 11 19                      1                              4
+    ## 12 20                      5                              6
+    ## 13 23                      1                              2
+    ## 14 24                      6                              2
+    ## 15 25                      2                              5
+    ## 16 26                      3                              5
+    ## 17 28                      5                              8
+    ## 18 29                      3                              5
+    ## 19 30                      2                              4
+    ## 20 32                      3                              6
+    ##    institutional_sustainability_ranking food_pricing_ranking
+    ## 1                                     7                    5
+    ## 2                                     1                    8
+    ## 3                                     8                    2
+    ## 4                                     4                    8
+    ## 5                                     7                    8
+    ## 6                                     8                    5
+    ## 7                                     5                    3
+    ## 8                                     1                    6
+    ## 9                                     8                    2
+    ## 10                                    8                    1
+    ## 11                                    8                    6
+    ## 12                                    4                    8
+    ## 13                                    6                    8
+    ## 14                                    1                    5
+    ## 15                                    6                    3
+    ## 16                                    1                    6
+    ## 17                                    6                    1
+    ## 18                                    4                    7
+    ## 19                                    3                    6
+    ## 20                                    8                    2
+    ##    operating_costs_ranking guest_experience_ranking staff_satisfaction_ranking
+    ## 1                        4                        1                          6
+    ## 2                        7                        4                          5
+    ## 3                        5                        6                          7
+    ## 4                        3                        2                          1
+    ## 5                        4                        1                          6
+    ## 6                        2                        1                          6
+    ## 7                        2                        4                          8
+    ## 8                        2                        3                          8
+    ## 9                        3                        1                          7
+    ## 10                       7                        4                          2
+    ## 11                       5                        2                          3
+    ## 12                       7                        1                          3
+    ## 13                       4                        3                          7
+    ## 14                       3                        8                          4
+    ## 15                       4                        1                          8
+    ## 16                       7                        4                          8
+    ## 17                       3                        2                          7
+    ## 18                       1                        2                          8
+    ## 19                       5                        1                          7
+    ## 20                       1                        4                          5
+    ##    campus_culture_ranking
+    ## 1                       8
+    ## 2                       6
+    ## 3                       1
+    ## 4                       7
+    ## 5                       3
+    ## 6                       4
+    ## 7                       1
+    ## 8                       7
+    ## 9                       5
+    ## 10                      5
+    ## 11                      7
+    ## 12                      2
+    ## 13                      5
+    ## 14                      7
+    ## 15                      7
+    ## 16                      2
+    ## 17                      4
+    ## 18                      6
+    ## 19                      8
+    ## 20                      7
+
+``` r
 technical_advisor_guest_experience_priority_score_tabulation <- technical_advisor_priority_score_tabulation %>%
   mutate(guest_experience_over_guest_experience=0) %>%
   mutate(guest_experience_over_dietary_health=case_when(guest_experience_ranking<dietary_health_ranking~1,
@@ -4578,14 +4690,14 @@ technical_advisor_guest_experience_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                          instances
     ##   <chr>                                                  <dbl>
-    ## 1 guest_experience_over_campus_culture                      13
-    ## 2 guest_experience_over_dietary_health                      10
-    ## 3 guest_experience_over_dietary_sustainability              13
-    ## 4 guest_experience_over_food_pricing                        12
+    ## 1 guest_experience_over_campus_culture                      16
+    ## 2 guest_experience_over_dietary_health                      12
+    ## 3 guest_experience_over_dietary_sustainability              16
+    ## 4 guest_experience_over_food_pricing                        14
     ## 5 guest_experience_over_guest_experience                     0
-    ## 6 guest_experience_over_institutional_sustainability        13
-    ## 7 guest_experience_over_operating_costs                     12
-    ## 8 guest_experience_over_staff_satisfaction                  14
+    ## 6 guest_experience_over_institutional_sustainability        16
+    ## 7 guest_experience_over_operating_costs                     14
+    ## 8 guest_experience_over_staff_satisfaction                  17
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4604,6 +4716,31 @@ technical_advisor_priority_score_frequencies
     ## 6 Institutional Sustainability                         13                     NA
     ## 7 Campus Culture                                       13                     NA
     ## 8 Staff Satisfaction                                   14                     NA
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #MANUALLY INPUTTING NEW VALUES
+  mutate(guest_dining_experience_selection_frequency=c(0,12,14,16,14,16,16,17))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                     NA
+    ## 2 Dietary Health                                       12                     NA
+    ## 3 Operating Costs                                      14                     NA
+    ## 4 Sustainability of Guest Food Ch…                     16                     NA
+    ## 5 Food Pricing                                         14                     NA
+    ## 6 Institutional Sustainability                         16                     NA
+    ## 7 Campus Culture                                       16                     NA
+    ## 8 Staff Satisfaction                                   17                     NA
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -4639,14 +4776,14 @@ technical_advisor_dietary_health_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                        instances
     ##   <chr>                                                <dbl>
-    ## 1 dietary_health_over_campus_culture                      11
+    ## 1 dietary_health_over_campus_culture                      13
     ## 2 dietary_health_over_dietary_health                       0
-    ## 3 dietary_health_over_dietary_sustainability              13
-    ## 4 dietary_health_over_food_pricing                        10
-    ## 5 dietary_health_over_guest_experience                     7
-    ## 6 dietary_health_over_institutional_sustainability        11
-    ## 7 dietary_health_over_operating_costs                      9
-    ## 8 dietary_health_over_staff_satisfaction                  13
+    ## 3 dietary_health_over_dietary_sustainability              16
+    ## 4 dietary_health_over_food_pricing                        12
+    ## 5 dietary_health_over_guest_experience                     8
+    ## 6 dietary_health_over_institutional_sustainability        13
+    ## 7 dietary_health_over_operating_costs                     11
+    ## 8 dietary_health_over_staff_satisfaction                  15
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4658,13 +4795,38 @@ technical_advisor_priority_score_frequencies
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
     ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                      9
+    ## 4 Sustainability of Guest Food Ch…                     16                     13
+    ## 5 Food Pricing                                         14                     10
+    ## 6 Institutional Sustainability                         16                     11
+    ## 7 Campus Culture                                       16                     11
+    ## 8 Staff Satisfaction                                   17                     13
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #MANUALLY INPUTTING NEW VALUES
+  mutate(dietary_health_selection_frequency=c(8,0,11,16,12,13,13,15))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -4700,14 +4862,14 @@ technical_advisor_operating_costs_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                         instances
     ##   <chr>                                                 <dbl>
-    ## 1 operating_costs_over_campus_culture                      11
-    ## 2 operating_costs_over_dietary_health                       8
-    ## 3 operating_costs_over_dietary_sustainability               8
-    ## 4 operating_costs_over_food_pricing                        12
-    ## 5 operating_costs_over_guest_experience                     5
-    ## 6 operating_costs_over_institutional_sustainability        12
+    ## 1 operating_costs_over_campus_culture                      13
+    ## 2 operating_costs_over_dietary_health                       9
+    ## 3 operating_costs_over_dietary_sustainability              10
+    ## 4 operating_costs_over_food_pricing                        14
+    ## 5 operating_costs_over_guest_experience                     6
+    ## 6 operating_costs_over_institutional_sustainability        14
     ## 7 operating_costs_over_operating_costs                      0
-    ## 8 operating_costs_over_staff_satisfaction                  13
+    ## 8 operating_costs_over_staff_satisfaction                  15
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4718,14 +4880,39 @@ technical_advisor_priority_score_frequencies
     ## # A tibble: 8 × 9
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #Manually inputting new values
+  mutate(operating_costs_selection_frequency=c(6,9,0,10,14,14,13,15))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -4761,14 +4948,14 @@ technical_advisor_dietary_sustainability_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                                instances
     ##   <chr>                                                        <dbl>
-    ## 1 dietary_sustainability_over_campus_culture                      11
+    ## 1 dietary_sustainability_over_campus_culture                      13
     ## 2 dietary_sustainability_over_dietary_health                       4
     ## 3 dietary_sustainability_over_dietary_sustainability               0
-    ## 4 dietary_sustainability_over_food_pricing                        12
+    ## 4 dietary_sustainability_over_food_pricing                        13
     ## 5 dietary_sustainability_over_guest_experience                     4
-    ## 6 dietary_sustainability_over_institutional_sustainability         8
-    ## 7 dietary_sustainability_over_operating_costs                      9
-    ## 8 dietary_sustainability_over_staff_satisfaction                  13
+    ## 6 dietary_sustainability_over_institutional_sustainability        10
+    ## 7 dietary_sustainability_over_operating_costs                     10
+    ## 8 dietary_sustainability_over_staff_satisfaction                  14
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4779,14 +4966,39 @@ technical_advisor_priority_score_frequencies
     ## # A tibble: 8 × 9
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #MANUALLY ADDING NEW VALUES 
+  mutate(dietary_sustainability_selection_frequency=c(4,4,10,0,13,10,13,14))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -4822,14 +5034,14 @@ technical_advisor_food_pricing_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                      instances
     ##   <chr>                                              <dbl>
-    ## 1 food_pricing_over_campus_culture                       8
-    ## 2 food_pricing_over_dietary_health                       7
-    ## 3 food_pricing_over_dietary_sustainability               5
+    ## 1 food_pricing_over_campus_culture                      10
+    ## 2 food_pricing_over_dietary_health                       8
+    ## 3 food_pricing_over_dietary_sustainability               7
     ## 4 food_pricing_over_food_pricing                         0
-    ## 5 food_pricing_over_guest_experience                     5
-    ## 6 food_pricing_over_institutional_sustainability         8
-    ## 7 food_pricing_over_operating_costs                      5
-    ## 8 food_pricing_over_staff_satisfaction                  11
+    ## 5 food_pricing_over_guest_experience                     6
+    ## 6 food_pricing_over_institutional_sustainability        10
+    ## 7 food_pricing_over_operating_costs                      6
+    ## 8 food_pricing_over_staff_satisfaction                  13
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4840,14 +5052,39 @@ technical_advisor_priority_score_frequencies
     ## # A tibble: 8 × 9
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #Manually adding new values
+  mutate(food_pricing_selection_frequency=c(6,8,6,7,0,10,10,13))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -4883,14 +5120,14 @@ technical_advisor_institutional_sustainability_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                                      instances
     ##   <chr>                                                              <dbl>
-    ## 1 institutional_sustainability_over_campus_culture                       8
-    ## 2 institutional_sustainability_over_dietary_health                       6
-    ## 3 institutional_sustainability_over_dietary_sustainability               9
-    ## 4 institutional_sustainability_over_food_pricing                         9
+    ## 1 institutional_sustainability_over_campus_culture                       9
+    ## 2 institutional_sustainability_over_dietary_health                       7
+    ## 3 institutional_sustainability_over_dietary_sustainability              10
+    ## 4 institutional_sustainability_over_food_pricing                        10
     ## 5 institutional_sustainability_over_guest_experience                     4
     ## 6 institutional_sustainability_over_institutional_sustainability         0
-    ## 7 institutional_sustainability_over_operating_costs                      5
-    ## 8 institutional_sustainability_over_staff_satisfaction                   9
+    ## 7 institutional_sustainability_over_operating_costs                      6
+    ## 8 institutional_sustainability_over_staff_satisfaction                  10
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4901,14 +5138,39 @@ technical_advisor_priority_score_frequencies
     ## # A tibble: 8 × 9
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #manually adding new values
+  mutate(institutional_sustainability_selection_frequency=c(4,7,6,10,10,0,9,10))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -4945,13 +5207,13 @@ technical_advisor_campus_culture_priority_score_tabulation
     ##   condition                                        instances
     ##   <chr>                                                <dbl>
     ## 1 campus_culture_over_campus_culture                       0
-    ## 2 campus_culture_over_dietary_health                       6
-    ## 3 campus_culture_over_dietary_sustainability               6
-    ## 4 campus_culture_over_food_pricing                         9
+    ## 2 campus_culture_over_dietary_health                       7
+    ## 3 campus_culture_over_dietary_sustainability               7
+    ## 4 campus_culture_over_food_pricing                        10
     ## 5 campus_culture_over_guest_experience                     4
-    ## 6 campus_culture_over_institutional_sustainability         9
-    ## 7 campus_culture_over_operating_costs                      6
-    ## 8 campus_culture_over_staff_satisfaction                  10
+    ## 6 campus_culture_over_institutional_sustainability        11
+    ## 7 campus_culture_over_operating_costs                      7
+    ## 8 campus_culture_over_staff_satisfaction                  12
 
 ``` r
 technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>%
@@ -4962,14 +5224,39 @@ technical_advisor_priority_score_frequencies
     ## # A tibble: 8 × 9
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #manually adding new values
+  mutate(campus_culture_selection_frequency=c(4,7,7,7,10,11,0,12))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -5005,13 +5292,13 @@ technical_advisor_staff_satisfaction_priority_score_tabulation
     ## # A tibble: 8 × 2
     ##   condition                                            instances
     ##   <chr>                                                    <dbl>
-    ## 1 staff_satisfaction_over_campus_culture                       7
-    ## 2 staff_satisfaction_over_dietary_health                       4
-    ## 3 staff_satisfaction_over_dietary_sustainability               4
-    ## 4 staff_satisfaction_over_food_pricing                         6
+    ## 1 staff_satisfaction_over_campus_culture                       8
+    ## 2 staff_satisfaction_over_dietary_health                       5
+    ## 3 staff_satisfaction_over_dietary_sustainability               6
+    ## 4 staff_satisfaction_over_food_pricing                         7
     ## 5 staff_satisfaction_over_guest_experience                     3
-    ## 6 staff_satisfaction_over_institutional_sustainability         8
-    ## 7 staff_satisfaction_over_operating_costs                      4
+    ## 6 staff_satisfaction_over_institutional_sustainability        10
+    ## 7 staff_satisfaction_over_operating_costs                      5
     ## 8 staff_satisfaction_over_staff_satisfaction                   0
 
 ``` r
@@ -5023,14 +5310,39 @@ technical_advisor_priority_score_frequencies
     ## # A tibble: 8 × 9
     ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                               0                      7
-    ## 2 Dietary Health                                       10                      0
-    ## 3 Operating Costs                                      12                      9
-    ## 4 Sustainability of Guest Food Ch…                     13                     13
-    ## 5 Food Pricing                                         12                     10
-    ## 6 Institutional Sustainability                         13                     11
-    ## 7 Campus Culture                                       13                     11
-    ## 8 Staff Satisfaction                                   14                     13
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​dietary_health_selection_frequency
+    ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>,
+    ## #   food_pricing_selection_frequency <dbl>,
+    ## #   institutional_sustainability_selection_frequency <dbl>,
+    ## #   campus_culture_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_frequencies <- technical_advisor_priority_score_frequencies %>% #manually adding new values
+  mutate(staff_satisfaction_selection_frequency=c(3,5,5,6,7,10,8,0))
+technical_advisor_priority_score_frequencies
+```
+
+    ## # A tibble: 8 × 9
+    ##   comparison_indicator             guest_dining_experie…¹ dietary_health_selec…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                      8
+    ## 2 Dietary Health                                       12                      0
+    ## 3 Operating Costs                                      14                     11
+    ## 4 Sustainability of Guest Food Ch…                     16                     16
+    ## 5 Food Pricing                                         14                     12
+    ## 6 Institutional Sustainability                         16                     13
+    ## 7 Campus Culture                                       16                     13
+    ## 8 Staff Satisfaction                                   17                     15
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​dietary_health_selection_frequency
     ## # ℹ 6 more variables: operating_costs_selection_frequency <dbl>,
@@ -5056,13 +5368,45 @@ technical_advisor_priority_score_probabilities
     ##   comparison_indicator             guest_dining_experie…¹ guest_dining_experie…²
     ##   <chr>                                             <dbl>                  <dbl>
     ## 1 Guest Dining Experience                               0                  0    
-    ## 2 Dietary Health                                       10                  0.588
-    ## 3 Operating Costs                                      12                  0.706
-    ## 4 Sustainability of Guest Food Ch…                     13                  0.765
-    ## 5 Food Pricing                                         12                  0.706
-    ## 6 Institutional Sustainability                         13                  0.765
-    ## 7 Campus Culture                                       13                  0.765
-    ## 8 Staff Satisfaction                                   14                  0.824
+    ## 2 Dietary Health                                       12                  0.706
+    ## 3 Operating Costs                                      14                  0.824
+    ## 4 Sustainability of Guest Food Ch…                     16                  0.941
+    ## 5 Food Pricing                                         14                  0.824
+    ## 6 Institutional Sustainability                         16                  0.941
+    ## 7 Campus Culture                                       16                  0.941
+    ## 8 Staff Satisfaction                                   17                  1    
+    ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
+    ## #   ²​guest_dining_experience_selection_probability
+    ## # ℹ 14 more variables: dietary_health_selection_frequency <dbl>,
+    ## #   dietary_health_selection_probability <dbl>,
+    ## #   operating_costs_selection_frequency <dbl>,
+    ## #   operating_costs_selection_probability <dbl>,
+    ## #   dietary_sustainability_selection_frequency <dbl>, …
+
+``` r
+technical_advisor_priority_score_probabilities <- technical_advisor_priority_score_frequencies %>% # changing denominator to reflect change in subsample size
+  mutate(guest_dining_experience_selection_probability=guest_dining_experience_selection_frequency/20,.after=guest_dining_experience_selection_frequency) %>%
+  mutate(dietary_health_selection_probability=dietary_health_selection_frequency/20,.after=dietary_health_selection_frequency) %>%
+  mutate(operating_costs_selection_probability=operating_costs_selection_frequency/20,.after=operating_costs_selection_frequency) %>%
+   mutate(dietary_sustainability_selection_probability=dietary_sustainability_selection_frequency/20,.after=dietary_sustainability_selection_frequency) %>%
+  mutate(food_pricing_selection_probability=food_pricing_selection_frequency/20,.after=food_pricing_selection_frequency) %>%
+  mutate(institutional_sustainability_selection_probability=institutional_sustainability_selection_frequency/20,.after=institutional_sustainability_selection_frequency) %>%
+  mutate(campus_culture_selection_probability=campus_culture_selection_frequency/20,.after=campus_culture_selection_frequency) %>%
+   mutate(staff_satisfaction_selection_probability=staff_satisfaction_selection_frequency/20,.after=staff_satisfaction_selection_frequency)
+technical_advisor_priority_score_probabilities
+```
+
+    ## # A tibble: 8 × 17
+    ##   comparison_indicator             guest_dining_experie…¹ guest_dining_experie…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                               0                   0   
+    ## 2 Dietary Health                                       12                   0.6 
+    ## 3 Operating Costs                                      14                   0.7 
+    ## 4 Sustainability of Guest Food Ch…                     16                   0.8 
+    ## 5 Food Pricing                                         14                   0.7 
+    ## 6 Institutional Sustainability                         16                   0.8 
+    ## 7 Campus Culture                                       16                   0.8 
+    ## 8 Staff Satisfaction                                   17                   0.85
     ## # ℹ abbreviated names: ¹​guest_dining_experience_selection_frequency,
     ## #   ²​guest_dining_experience_selection_probability
     ## # ℹ 14 more variables: dietary_health_selection_frequency <dbl>,
@@ -5091,16 +5435,16 @@ technical_advisor_priority_probability_table
     ## # A tibble: 56 × 2
     ##    indicator                            probability
     ##    <chr>                                      <dbl>
-    ##  1 Dietary Health                             0.412
-    ##  2 Operating Costs                            0.294
-    ##  3 Sustainability of Guest Food Choices       0.235
-    ##  4 Food Pricing                               0.294
-    ##  5 Institutional Sustainability               0.235
-    ##  6 Campus Culture                             0.235
-    ##  7 Staff Satisfaction                         0.176
-    ##  8 Guest Dining Experience                    0.588
-    ##  9 Operating Costs                            0.471
-    ## 10 Sustainability of Guest Food Choices       0.235
+    ##  1 Dietary Health                              0.4 
+    ##  2 Operating Costs                             0.3 
+    ##  3 Sustainability of Guest Food Choices        0.2 
+    ##  4 Food Pricing                                0.3 
+    ##  5 Institutional Sustainability                0.2 
+    ##  6 Campus Culture                              0.2 
+    ##  7 Staff Satisfaction                          0.15
+    ##  8 Guest Dining Experience                     0.6 
+    ##  9 Operating Costs                             0.45
+    ## 10 Sustainability of Guest Food Choices        0.2 
     ## # ℹ 46 more rows
 
 ``` r
@@ -5113,16 +5457,36 @@ technical_advisor_priority_probability_table %>%
     ## # A tibble: 8 × 3
     ##   indicator                        total_selection_prob…¹ mean_selection_proba…²
     ##   <chr>                                             <dbl>                  <dbl>
-    ## 1 Guest Dining Experience                            5.12                  0.731
-    ## 2 Dietary Health                                     4.35                  0.622
-    ## 3 Operating Costs                                    4.06                  0.580
-    ## 4 Sustainability of Guest Food Ch…                   3.59                  0.513
-    ## 5 Campus Culture                                     2.94                  0.420
-    ## 6 Institutional Sustainability                       2.94                  0.420
-    ## 7 Food Pricing                                       2.88                  0.412
-    ## 8 Staff Satisfaction                                 2.12                  0.303
+    ## 1 Guest Dining Experience                            5.25                  0.75 
+    ## 2 Dietary Health                                     4.4                   0.629
+    ## 3 Operating Costs                                    4.05                  0.579
+    ## 4 Sustainability of Guest Food Ch…                   3.4                   0.486
+    ## 5 Food Pricing                                       3                     0.429
+    ## 6 Campus Culture                                     2.9                   0.414
+    ## 7 Institutional Sustainability                       2.8                   0.4  
+    ## 8 Staff Satisfaction                                 2.2                   0.314
     ## # ℹ abbreviated names: ¹​total_selection_probability,
     ## #   ²​mean_selection_probability
+
+``` r
+technical_advisor_priority_probability_table %>%
+  group_by(indicator) %>%
+  summarise(mean_selection_probability=mean(probability),sd_selection_probability=sd(probability)) %>%
+  arrange(desc(mean_selection_probability))
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                        mean_selection_proba…¹ sd_selection_probabi…²
+    ##   <chr>                                             <dbl>                  <dbl>
+    ## 1 Guest Dining Experience                           0.75                  0.0866
+    ## 2 Dietary Health                                    0.629                 0.132 
+    ## 3 Operating Costs                                   0.579                 0.165 
+    ## 4 Sustainability of Guest Food Ch…                  0.486                 0.210 
+    ## 5 Food Pricing                                      0.429                 0.129 
+    ## 6 Campus Culture                                    0.414                 0.141 
+    ## 7 Institutional Sustainability                      0.4                   0.119 
+    ## 8 Staff Satisfaction                                0.314                 0.114 
+    ## # ℹ abbreviated names: ¹​mean_selection_probability, ²​sd_selection_probability
 
 ``` r
 technical_advisor_priority_probability_table %>%
@@ -5142,9 +5506,9 @@ technical_advisor_selection_probability_aov <- aov(probability~indicator,data=te
 summary(technical_advisor_selection_probability_aov)
 ```
 
-    ##             Df Sum Sq Mean Sq F value   Pr(>F)    
-    ## indicator    7 0.9402 0.13431   6.793 1.31e-05 ***
-    ## Residuals   48 0.9491 0.01977                     
+    ##             Df Sum Sq Mean Sq F value  Pr(>F)    
+    ## indicator    7 0.9964 0.14235   7.128 7.7e-06 ***
+    ## Residuals   48 0.9586 0.01997                    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -5158,122 +5522,122 @@ TukeyHSD(technical_advisor_selection_probability_aov)
     ## Fit: aov(formula = probability ~ indicator, data = technical_advisor_priority_probability_table)
     ## 
     ## $indicator
-    ##                                                                            diff
-    ## Dietary Health-Campus Culture                                      2.016807e-01
-    ## Food Pricing-Campus Culture                                       -8.403361e-03
-    ## Guest Dining Experience-Campus Culture                             3.109244e-01
-    ## Institutional Sustainability-Campus Culture                       -1.110223e-16
-    ## Operating Costs-Campus Culture                                     1.596639e-01
-    ## Staff Satisfaction-Campus Culture                                 -1.176471e-01
-    ## Sustainability of Guest Food Choices-Campus Culture                9.243697e-02
-    ## Food Pricing-Dietary Health                                       -2.100840e-01
-    ## Guest Dining Experience-Dietary Health                             1.092437e-01
-    ## Institutional Sustainability-Dietary Health                       -2.016807e-01
-    ## Operating Costs-Dietary Health                                    -4.201681e-02
-    ## Staff Satisfaction-Dietary Health                                 -3.193277e-01
-    ## Sustainability of Guest Food Choices-Dietary Health               -1.092437e-01
-    ## Guest Dining Experience-Food Pricing                               3.193277e-01
-    ## Institutional Sustainability-Food Pricing                          8.403361e-03
-    ## Operating Costs-Food Pricing                                       1.680672e-01
-    ## Staff Satisfaction-Food Pricing                                   -1.092437e-01
-    ## Sustainability of Guest Food Choices-Food Pricing                  1.008403e-01
-    ## Institutional Sustainability-Guest Dining Experience              -3.109244e-01
-    ## Operating Costs-Guest Dining Experience                           -1.512605e-01
-    ## Staff Satisfaction-Guest Dining Experience                        -4.285714e-01
-    ## Sustainability of Guest Food Choices-Guest Dining Experience      -2.184874e-01
-    ## Operating Costs-Institutional Sustainability                       1.596639e-01
-    ## Staff Satisfaction-Institutional Sustainability                   -1.176471e-01
-    ## Sustainability of Guest Food Choices-Institutional Sustainability  9.243697e-02
-    ## Staff Satisfaction-Operating Costs                                -2.773109e-01
-    ## Sustainability of Guest Food Choices-Operating Costs              -6.722689e-02
-    ## Sustainability of Guest Food Choices-Staff Satisfaction            2.100840e-01
+    ##                                                                          diff
+    ## Dietary Health-Campus Culture                                      0.21428571
+    ## Food Pricing-Campus Culture                                        0.01428571
+    ## Guest Dining Experience-Campus Culture                             0.33571429
+    ## Institutional Sustainability-Campus Culture                       -0.01428571
+    ## Operating Costs-Campus Culture                                     0.16428571
+    ## Staff Satisfaction-Campus Culture                                 -0.10000000
+    ## Sustainability of Guest Food Choices-Campus Culture                0.07142857
+    ## Food Pricing-Dietary Health                                       -0.20000000
+    ## Guest Dining Experience-Dietary Health                             0.12142857
+    ## Institutional Sustainability-Dietary Health                       -0.22857143
+    ## Operating Costs-Dietary Health                                    -0.05000000
+    ## Staff Satisfaction-Dietary Health                                 -0.31428571
+    ## Sustainability of Guest Food Choices-Dietary Health               -0.14285714
+    ## Guest Dining Experience-Food Pricing                               0.32142857
+    ## Institutional Sustainability-Food Pricing                         -0.02857143
+    ## Operating Costs-Food Pricing                                       0.15000000
+    ## Staff Satisfaction-Food Pricing                                   -0.11428571
+    ## Sustainability of Guest Food Choices-Food Pricing                  0.05714286
+    ## Institutional Sustainability-Guest Dining Experience              -0.35000000
+    ## Operating Costs-Guest Dining Experience                           -0.17142857
+    ## Staff Satisfaction-Guest Dining Experience                        -0.43571429
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      -0.26428571
+    ## Operating Costs-Institutional Sustainability                       0.17857143
+    ## Staff Satisfaction-Institutional Sustainability                   -0.08571429
+    ## Sustainability of Guest Food Choices-Institutional Sustainability  0.08571429
+    ## Staff Satisfaction-Operating Costs                                -0.26428571
+    ## Sustainability of Guest Food Choices-Operating Costs              -0.09285714
+    ## Sustainability of Guest Food Choices-Staff Satisfaction            0.17142857
     ##                                                                           lwr
-    ## Dietary Health-Campus Culture                                     -0.03645380
-    ## Food Pricing-Campus Culture                                       -0.24653783
-    ## Guest Dining Experience-Campus Culture                             0.07278990
-    ## Institutional Sustainability-Campus Culture                       -0.23813447
-    ## Operating Costs-Campus Culture                                    -0.07847060
-    ## Staff Satisfaction-Campus Culture                                 -0.35578153
-    ## Sustainability of Guest Food Choices-Campus Culture               -0.14569749
-    ## Food Pricing-Dietary Health                                       -0.44821850
-    ## Guest Dining Experience-Dietary Health                            -0.12889077
-    ## Institutional Sustainability-Dietary Health                       -0.43981514
-    ## Operating Costs-Dietary Health                                    -0.28015127
-    ## Staff Satisfaction-Dietary Health                                 -0.55746220
-    ## Sustainability of Guest Food Choices-Dietary Health               -0.34737817
-    ## Guest Dining Experience-Food Pricing                               0.08119326
-    ## Institutional Sustainability-Food Pricing                         -0.22973111
-    ## Operating Costs-Food Pricing                                      -0.07006724
-    ## Staff Satisfaction-Food Pricing                                   -0.34737817
-    ## Sustainability of Guest Food Choices-Food Pricing                 -0.13729413
-    ## Institutional Sustainability-Guest Dining Experience              -0.54905884
-    ## Operating Costs-Guest Dining Experience                           -0.38939497
-    ## Staff Satisfaction-Guest Dining Experience                        -0.66670590
-    ## Sustainability of Guest Food Choices-Guest Dining Experience      -0.45662186
-    ## Operating Costs-Institutional Sustainability                      -0.07847060
-    ## Staff Satisfaction-Institutional Sustainability                   -0.35578153
-    ## Sustainability of Guest Food Choices-Institutional Sustainability -0.14569749
-    ## Staff Satisfaction-Operating Costs                                -0.51544539
-    ## Sustainability of Guest Food Choices-Operating Costs              -0.30536136
-    ## Sustainability of Guest Food Choices-Staff Satisfaction           -0.02805043
+    ## Dietary Health-Campus Culture                                     -0.02503585
+    ## Food Pricing-Campus Culture                                       -0.22503585
+    ## Guest Dining Experience-Campus Culture                             0.09639272
+    ## Institutional Sustainability-Campus Culture                       -0.25360728
+    ## Operating Costs-Campus Culture                                    -0.07503585
+    ## Staff Satisfaction-Campus Culture                                 -0.33932156
+    ## Sustainability of Guest Food Choices-Campus Culture               -0.16789299
+    ## Food Pricing-Dietary Health                                       -0.43932156
+    ## Guest Dining Experience-Dietary Health                            -0.11789299
+    ## Institutional Sustainability-Dietary Health                       -0.46789299
+    ## Operating Costs-Dietary Health                                    -0.28932156
+    ## Staff Satisfaction-Dietary Health                                 -0.55360728
+    ## Sustainability of Guest Food Choices-Dietary Health               -0.38217870
+    ## Guest Dining Experience-Food Pricing                               0.08210701
+    ## Institutional Sustainability-Food Pricing                         -0.26789299
+    ## Operating Costs-Food Pricing                                      -0.08932156
+    ## Staff Satisfaction-Food Pricing                                   -0.35360728
+    ## Sustainability of Guest Food Choices-Food Pricing                 -0.18217870
+    ## Institutional Sustainability-Guest Dining Experience              -0.58932156
+    ## Operating Costs-Guest Dining Experience                           -0.41075013
+    ## Staff Satisfaction-Guest Dining Experience                        -0.67503585
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      -0.50360728
+    ## Operating Costs-Institutional Sustainability                      -0.06075013
+    ## Staff Satisfaction-Institutional Sustainability                   -0.32503585
+    ## Sustainability of Guest Food Choices-Institutional Sustainability -0.15360728
+    ## Staff Satisfaction-Operating Costs                                -0.50360728
+    ## Sustainability of Guest Food Choices-Operating Costs              -0.33217870
+    ## Sustainability of Guest Food Choices-Staff Satisfaction           -0.06789299
     ##                                                                           upr
-    ## Dietary Health-Campus Culture                                      0.43981514
-    ## Food Pricing-Campus Culture                                        0.22973111
-    ## Guest Dining Experience-Campus Culture                             0.54905884
-    ## Institutional Sustainability-Campus Culture                        0.23813447
-    ## Operating Costs-Campus Culture                                     0.39779833
-    ## Staff Satisfaction-Campus Culture                                  0.12048741
-    ## Sustainability of Guest Food Choices-Campus Culture                0.33057144
-    ## Food Pricing-Dietary Health                                        0.02805043
-    ## Guest Dining Experience-Dietary Health                             0.34737817
-    ## Institutional Sustainability-Dietary Health                        0.03645380
-    ## Operating Costs-Dietary Health                                     0.19611766
-    ## Staff Satisfaction-Dietary Health                                 -0.08119326
-    ## Sustainability of Guest Food Choices-Dietary Health                0.12889077
-    ## Guest Dining Experience-Food Pricing                               0.55746220
-    ## Institutional Sustainability-Food Pricing                          0.24653783
-    ## Operating Costs-Food Pricing                                       0.40620169
-    ## Staff Satisfaction-Food Pricing                                    0.12889077
-    ## Sustainability of Guest Food Choices-Food Pricing                  0.33897480
-    ## Institutional Sustainability-Guest Dining Experience              -0.07278990
-    ## Operating Costs-Guest Dining Experience                            0.08687396
-    ## Staff Satisfaction-Guest Dining Experience                        -0.19043696
-    ## Sustainability of Guest Food Choices-Guest Dining Experience       0.01964707
-    ## Operating Costs-Institutional Sustainability                       0.39779833
-    ## Staff Satisfaction-Institutional Sustainability                    0.12048741
-    ## Sustainability of Guest Food Choices-Institutional Sustainability  0.33057144
-    ## Staff Satisfaction-Operating Costs                                -0.03917646
-    ## Sustainability of Guest Food Choices-Operating Costs               0.17090758
-    ## Sustainability of Guest Food Choices-Staff Satisfaction            0.44821850
+    ## Dietary Health-Campus Culture                                      0.45360728
+    ## Food Pricing-Campus Culture                                        0.25360728
+    ## Guest Dining Experience-Campus Culture                             0.57503585
+    ## Institutional Sustainability-Campus Culture                        0.22503585
+    ## Operating Costs-Campus Culture                                     0.40360728
+    ## Staff Satisfaction-Campus Culture                                  0.13932156
+    ## Sustainability of Guest Food Choices-Campus Culture                0.31075013
+    ## Food Pricing-Dietary Health                                        0.03932156
+    ## Guest Dining Experience-Dietary Health                             0.36075013
+    ## Institutional Sustainability-Dietary Health                        0.01075013
+    ## Operating Costs-Dietary Health                                     0.18932156
+    ## Staff Satisfaction-Dietary Health                                 -0.07496415
+    ## Sustainability of Guest Food Choices-Dietary Health                0.09646442
+    ## Guest Dining Experience-Food Pricing                               0.56075013
+    ## Institutional Sustainability-Food Pricing                          0.21075013
+    ## Operating Costs-Food Pricing                                       0.38932156
+    ## Staff Satisfaction-Food Pricing                                    0.12503585
+    ## Sustainability of Guest Food Choices-Food Pricing                  0.29646442
+    ## Institutional Sustainability-Guest Dining Experience              -0.11067844
+    ## Operating Costs-Guest Dining Experience                            0.06789299
+    ## Staff Satisfaction-Guest Dining Experience                        -0.19639272
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      -0.02496415
+    ## Operating Costs-Institutional Sustainability                       0.41789299
+    ## Staff Satisfaction-Institutional Sustainability                    0.15360728
+    ## Sustainability of Guest Food Choices-Institutional Sustainability  0.32503585
+    ## Staff Satisfaction-Operating Costs                                -0.02496415
+    ## Sustainability of Guest Food Choices-Operating Costs               0.14646442
+    ## Sustainability of Guest Food Choices-Staff Satisfaction            0.41075013
     ##                                                                       p adj
-    ## Dietary Health-Campus Culture                                     0.1528445
-    ## Food Pricing-Campus Culture                                       1.0000000
-    ## Guest Dining Experience-Campus Culture                            0.0032856
-    ## Institutional Sustainability-Campus Culture                       1.0000000
-    ## Operating Costs-Campus Culture                                    0.4147456
-    ## Staff Satisfaction-Campus Culture                                 0.7679348
-    ## Sustainability of Guest Food Choices-Campus Culture               0.9188210
-    ## Food Pricing-Dietary Health                                       0.1203383
-    ## Guest Dining Experience-Dietary Health                            0.8273974
-    ## Institutional Sustainability-Dietary Health                       0.1528445
-    ## Operating Costs-Dietary Health                                    0.9991908
-    ## Staff Satisfaction-Dietary Health                                 0.0023267
-    ## Sustainability of Guest Food Choices-Dietary Health               0.8273974
-    ## Guest Dining Experience-Food Pricing                              0.0023267
-    ## Institutional Sustainability-Food Pricing                         1.0000000
-    ## Operating Costs-Food Pricing                                      0.3495185
-    ## Staff Satisfaction-Food Pricing                                   0.8273974
-    ## Sustainability of Guest Food Choices-Food Pricing                 0.8780359
-    ## Institutional Sustainability-Guest Dining Experience              0.0032856
-    ## Operating Costs-Guest Dining Experience                           0.4845807
-    ## Staff Satisfaction-Guest Dining Experience                        0.0000188
-    ## Sustainability of Guest Food Choices-Guest Dining Experience      0.0936550
-    ## Operating Costs-Institutional Sustainability                      0.4147456
-    ## Staff Satisfaction-Institutional Sustainability                   0.7679348
-    ## Sustainability of Guest Food Choices-Institutional Sustainability 0.9188210
-    ## Staff Satisfaction-Operating Costs                                0.0123439
-    ## Sustainability of Guest Food Choices-Operating Costs              0.9852021
-    ## Sustainability of Guest Food Choices-Staff Satisfaction           0.1203383
+    ## Dietary Health-Campus Culture                                     0.1097264
+    ## Food Pricing-Campus Culture                                       0.9999995
+    ## Guest Dining Experience-Campus Culture                            0.0012565
+    ## Institutional Sustainability-Campus Culture                       0.9999995
+    ## Operating Costs-Campus Culture                                    0.3845351
+    ## Staff Satisfaction-Campus Culture                                 0.8851947
+    ## Sustainability of Guest Food Choices-Campus Culture               0.9796692
+    ## Food Pricing-Dietary Health                                       0.1645044
+    ## Guest Dining Experience-Dietary Health                            0.7434933
+    ## Institutional Sustainability-Dietary Health                       0.0708543
+    ## Operating Costs-Dietary Health                                    0.9976123
+    ## Staff Satisfaction-Dietary Health                                 0.0030525
+    ## Sustainability of Guest Food Choices-Dietary Health               0.5633889
+    ## Guest Dining Experience-Food Pricing                              0.0022784
+    ## Institutional Sustainability-Food Pricing                         0.9999397
+    ## Operating Costs-Food Pricing                                      0.5017300
+    ## Staff Satisfaction-Food Pricing                                   0.7967298
+    ## Sustainability of Guest Food Choices-Food Pricing                 0.9945322
+    ## Institutional Sustainability-Guest Dining Experience              0.0006844
+    ## Operating Costs-Guest Dining Experience                           0.3311279
+    ## Staff Satisfaction-Guest Dining Experience                        0.0000149
+    ## Sustainability of Guest Food Choices-Guest Dining Experience      0.0210175
+    ## Operating Costs-Institutional Sustainability                      0.2821483
+    ## Staff Satisfaction-Institutional Sustainability                   0.9456488
+    ## Sustainability of Guest Food Choices-Institutional Sustainability 0.9456488
+    ## Staff Satisfaction-Operating Costs                                0.0210175
+    ## Sustainability of Guest Food Choices-Operating Costs              0.9189929
+    ## Sustainability of Guest Food Choices-Staff Satisfaction           0.3311279
 
 Guest Dining Experience-Campus Culture 0.0032856 ** Guest Dining
 Experience-Food Pricing 0.0023267 ** Institutional Sustainability-Guest
@@ -5281,15 +5645,26 @@ Dining Experience 0.0032856 ** Staff Satisfaction-Guest Dining
 Experience 0.0000188 **\* Staff Satisfaction-Dietary Health 0.0023267
 \*\* Staff Satisfaction-Operating Costs 0.0123439 \*
 
+HERE ARE THE NEW VALUES - ONE ADDITIONAL FOUND!
+
+Guest Dining Experience-Campus Culture 0.0012565 ** Staff
+Satisfaction-Dietary Health 0.0030525 ** Guest Dining Experience-Food
+Pricing 0.0022784 ** Institutional Sustainability-Guest Dining
+Experience 0.0006844 **\* \<- this is diff Staff Satisfaction-Guest
+Dining Experience 0.0000149 \*\** Sustainability of Guest Food
+Choices-Guest Dining Experience 0.0210175 * \<- this is the new one
+Staff Satisfaction-Operating Costs 0.0210175 \*
+
 ``` r
 technical_advisor_selection_probability_plot <- technical_advisor_priority_probability_table %>%
   ggplot(aes(x=fct_reorder(indicator,probability,.fun="mean"),y=probability,fill=fct_reorder(indicator,probability,.fun="mean"),color=fct_reorder(indicator,probability,.fun="mean"))) +
   geom_violin(color="black",draw_quantiles=0.5,alpha=0.6,size=0.2,adjust=1) +
   geom_hline(yintercept=0.5,linetype="dashed",size=0.3) +
-  geom_signif(comparisons=list(c("Guest Dining Experience","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=0.13,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="**",y_position=0.15,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Guest Dining Experience","Institutional Sustainability")),color="black",size=0.25,annotation="**",y_position=0.17,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="**",y_position=0.19,tip_length=-0.02,vjust=2.8) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=0.05,tip_length=-0.02,vjust=2.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="**",y_position=0.07,tip_length=-0.02,vjust=2.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Institutional Sustainability")),color="black",size=0.25,annotation="***",y_position=0.09,tip_length=-0.02,vjust=2.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="**",y_position=0.11,tip_length=-0.02,vjust=2.5) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=0.13,tip_length=-0.02,vjust=2.5) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Operating Costs")),color="black",size=0.25,annotation="*",y_position=0.79,tip_length=0.02,vjust=0.6) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=0.81,tip_length=0.02,vjust=0.6) +
   stat_summary(fun.y=mean,geom="point",shape=1,size=1.75,color="black") +
@@ -5297,17 +5672,17 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
   stat_summary(data=decision_maker_priority_probability_table,fun.y=mean,geom="point",shape=19,size=1.75,color="black",fill="black") +
   scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   scale_color_viridis_d(option="mako",alpha=1) +
-  scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.15,0.85)) +
+  scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.08,0.85)) +
   scale_x_discrete(limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   xlab("") + 
   ylab("Selection Probability") + 
-  labs(caption="F-value: 6.79 (3sf); p-value < 0.001",subtitle="Advisors (n=17)") + 
+  labs(caption="F-value: 7.13 (2dp); p-value < 0.001",subtitle="Consultants (n=20)") + 
   coord_flip() +
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
 technical_advisor_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-195-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-207-1.png)<!-- -->
 geom_jitter(width=0.6,size=2,shape=21,alpha=0.5) +
 
 ``` r
@@ -5324,7 +5699,7 @@ ggsave(filename="selection_probability_distributions.png",plot=selection_probabi
 selection_probability_distribution_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-197-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-209-1.png)<!-- -->
 
 could use geom_jitter more strategically to highlight asymmetries in
 stakeholder/role types
@@ -5351,13 +5726,13 @@ t.test(guest_dining_experience_decision_maker_probabilities,guest_dining_experie
     ##  Welch Two Sample t-test
     ## 
     ## data:  guest_dining_experience_decision_maker_probabilities and guest_dining_experience_technical_advisor_probabilities
-    ## t = -1.4722, df = 11.253, p-value = 0.1684
+    ## t = -1.8179, df = 10.43, p-value = 0.09788
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.13082707  0.02578505
+    ##  -0.15848941  0.01563227
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.6785714 0.7310924
+    ## 0.6785714 0.7500000
 
 ``` r
 dietary_health_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5375,13 +5750,13 @@ t.test(dietary_health_decision_maker_probabilities,dietary_health_technical_advi
     ##  Welch Two Sample t-test
     ## 
     ## data:  dietary_health_decision_maker_probabilities and dietary_health_technical_advisor_probabilities
-    ## t = -1.3259, df = 11.92, p-value = 0.2097
+    ## t = -1.3967, df = 11.82, p-value = 0.1882
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.22778184  0.05551293
+    ##  -0.23795499  0.05224071
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.5357143 0.6218487
+    ## 0.5357143 0.6285714
 
 ``` r
 operating_costs_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5399,13 +5774,13 @@ t.test(operating_costs_decision_maker_probabilities,operating_costs_technical_ad
     ##  Welch Two Sample t-test
     ## 
     ## data:  operating_costs_decision_maker_probabilities and operating_costs_technical_advisor_probabilities
-    ## t = -0.27589, df = 9.2394, p-value = 0.7887
+    ## t = -0.26568, df = 9.4299, p-value = 0.7962
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.1861663  0.1455500
+    ##  -0.1801075  0.1420123
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.5595238 0.5798319
+    ## 0.5595238 0.5785714
 
 ``` r
 dietary_sustainability_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5423,13 +5798,13 @@ t.test(dietary_sustainability_decision_maker_probabilities,dietary_sustainabilit
     ##  Welch Two Sample t-test
     ## 
     ## data:  dietary_sustainability_decision_maker_probabilities and dietary_sustainability_technical_advisor_probabilities
-    ## t = -0.50536, df = 10.116, p-value = 0.6241
+    ## t = -0.22748, df = 10.241, p-value = 0.8245
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.2610307  0.1643920
+    ##  -0.2306523  0.1877952
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.4642857 0.5126050
+    ## 0.4642857 0.4857143
 
 ``` r
 food_pricing_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5447,13 +5822,13 @@ t.test(food_pricing_decision_maker_probabilities,food_pricing_technical_advisor_
     ##  Welch Two Sample t-test
     ## 
     ## data:  food_pricing_decision_maker_probabilities and food_pricing_technical_advisor_probabilities
-    ## t = 1.581, df = 11.997, p-value = 0.1399
+    ## t = 1.3585, df = 11.983, p-value = 0.1993
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.04237255  0.26646219
+    ##  -0.05753609  0.24801228
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.5238095 0.4117647
+    ## 0.5238095 0.4285714
 
 ``` r
 institutional_sustainability_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5471,13 +5846,13 @@ t.test(institutional_sustainability_decision_maker_probabilities,institutional_s
     ##  Welch Two Sample t-test
     ## 
     ## data:  institutional_sustainability_decision_maker_probabilities and institutional_sustainability_technical_advisor_probabilities
-    ## t = -0.058887, df = 11.285, p-value = 0.9541
+    ## t = 0.2881, df = 11.496, p-value = 0.7784
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.1339682  0.1269654
+    ##  -0.1099927  0.1433260
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.4166667 0.4201681
+    ## 0.4166667 0.4000000
 
 ``` r
 campus_culture_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5495,13 +5870,13 @@ t.test(campus_culture_decision_maker_probabilities,campus_culture_technical_advi
     ##  Welch Two Sample t-test
     ## 
     ## data:  campus_culture_decision_maker_probabilities and campus_culture_technical_advisor_probabilities
-    ## t = -1.1013, df = 9.9653, p-value = 0.2967
+    ## t = -0.9368, df = 9.465, p-value = 0.3721
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.1905965  0.0645461
+    ##  -0.19410259  0.07981687
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.3571429 0.4201681
+    ## 0.3571429 0.4142857
 
 ``` r
 staff_satisfaction_decision_maker_probabilities <- decision_maker_priority_probability_table %>%
@@ -5519,13 +5894,13 @@ t.test(staff_satisfaction_decision_maker_probabilities,staff_satisfaction_techni
     ##  Welch Two Sample t-test
     ## 
     ## data:  staff_satisfaction_decision_maker_probabilities and staff_satisfaction_technical_advisor_probabilities
-    ## t = 2.6756, df = 11.957, p-value = 0.02025
+    ## t = 2.4309, df = 11.996, p-value = 0.03169
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  0.02998488 0.29354453
+    ##  0.01554961 0.28445039
     ## sample estimates:
     ## mean of x mean of y 
-    ## 0.4642857 0.3025210
+    ## 0.4642857 0.3142857
 
 STAFF SATISFACTION SIGNIF DIFF (\*)
 
@@ -5562,6 +5937,56 @@ joint_correlation_table
     ## 8 Staff Satisfaction                               0.00862                 0.371
 
 ``` r
+shapiro.test(joint_correlation_table$appearance_likelihood)
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  joint_correlation_table$appearance_likelihood
+    ## W = 0.68186, p-value = 0.001402
+
+``` r
+shapiro.test(joint_correlation_table$selection_probability)
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  joint_correlation_table$selection_probability
+    ## W = 0.91703, p-value = 0.4062
+
+``` r
+res <- cor.test(joint_correlation_table$appearance_likelihood,joint_correlation_table$selection_probability,method="kendall")
+res
+```
+
+    ## 
+    ##  Kendall's rank correlation tau
+    ## 
+    ## data:  joint_correlation_table$appearance_likelihood and joint_correlation_table$selection_probability
+    ## T = 19, p-value = 0.2751
+    ## alternative hypothesis: true tau is not equal to 0
+    ## sample estimates:
+    ##       tau 
+    ## 0.3571429
+
+``` r
+res <- cor.test(joint_correlation_table$appearance_likelihood,joint_correlation_table$selection_probability,method="spearman")
+res
+```
+
+    ## 
+    ##  Spearman's rank correlation rho
+    ## 
+    ## data:  joint_correlation_table$appearance_likelihood and joint_correlation_table$selection_probability
+    ## S = 54, p-value = 0.3894
+    ## alternative hypothesis: true rho is not equal to 0
+    ## sample estimates:
+    ##       rho 
+    ## 0.3571429
+
+``` r
 joint_correlation_plot <- joint_correlation_table %>%
   ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
   geom_smooth(method=lm,se=FALSE,color="black",linewidth=0.25) +
@@ -5585,7 +6010,7 @@ joint_correlation_plot
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-208-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-224-1.png)<!-- -->
 
 ``` r
 joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
@@ -5635,7 +6060,7 @@ campus_culture_limited_joint_correlation_table %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-211-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-227-1.png)<!-- -->
 
 ``` r
 campus_culture_limited_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=campus_culture_limited_joint_correlation_table)
@@ -5737,4 +6162,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-215-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-231-1.png)<!-- -->
