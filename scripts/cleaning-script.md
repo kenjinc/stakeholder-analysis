@@ -1,6 +1,6 @@
 Cleaning Script
 ================
-Last Updated: March 23, 2025
+Last Updated: May 13, 2025
 
 ## Package Loading
 
@@ -5937,6 +5937,122 @@ joint_correlation_table
     ## 8 Staff Satisfaction                               0.00862                 0.371
 
 ``` r
+indicator <- c("Organizational Culture","Dietary Health","Operating Costs","Dietary Sustainability","Diner Experience","Food Prices","Institutional Sustainability","Staff Satisfaction")
+appearance_likelihood <- c(8,7,6,5,4,3,2,1)
+selection_probability <- c(2,7,6,5,8,4,3,1) 
+ordinal_joint_correlation_table <- tibble(indicator,appearance_likelihood,selection_probability)
+ordinal_joint_correlation_table
+```
+
+    ## # A tibble: 8 × 3
+    ##   indicator                    appearance_likelihood selection_probability
+    ##   <chr>                                        <dbl>                 <dbl>
+    ## 1 Organizational Culture                           8                     2
+    ## 2 Dietary Health                                   7                     7
+    ## 3 Operating Costs                                  6                     6
+    ## 4 Dietary Sustainability                           5                     5
+    ## 5 Diner Experience                                 4                     8
+    ## 6 Food Prices                                      3                     4
+    ## 7 Institutional Sustainability                     2                     3
+    ## 8 Staff Satisfaction                               1                     1
+
+``` r
+ordinal_joint_correlation_plot <- ordinal_joint_correlation_table %>%
+  ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
+  geom_smooth(method=loess,se=FALSE,linewidth=0.25,color="black") +
+  geom_point(aes(fill=indicator),shape=21,color="black") + 
+  geom_text(aes(label=indicator),hjust=0,nudge_x=0.1,size=2.5,color="black") + 
+  scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Organizational Culture","Institutional Sustainability","Food Prices","Dietary Sustainability","Operating Costs","Dietary Health","Diner Experience")) +
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8),limits=c(0.5,8.5)) +
+  scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8),limits=c(0.5,8.5)) +
+  xlab("Selection Probability Ranking") + 
+  ylab("Appearance Likelihood Ranking") +
+  labs(caption="Spearman's rho: 0.36 (2dp); p-value: 0.39 (2dp)") + 
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
+ggsave(filename="ordinal_joint_correlation_plot.png",plot=ordinal_joint_correlation_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=24,height=12,units="cm",dpi=150,limitsize=TRUE)
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+``` r
+ordinal_joint_correlation_plot
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-221-1.png)<!-- -->
+
+``` r
+shapiro.test(ordinal_joint_correlation_table$appearance_likelihood)
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  ordinal_joint_correlation_table$appearance_likelihood
+    ## W = 0.97486, p-value = 0.9332
+
+``` r
+shapiro.test(ordinal_joint_correlation_table$selection_probability)
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  ordinal_joint_correlation_table$selection_probability
+    ## W = 0.97486, p-value = 0.9332
+
+``` r
+cor.test(ordinal_joint_correlation_table$appearance_likelihood,ordinal_joint_correlation_table$selection_probability,method="kendall")
+```
+
+    ## 
+    ##  Kendall's rank correlation tau
+    ## 
+    ## data:  ordinal_joint_correlation_table$appearance_likelihood and ordinal_joint_correlation_table$selection_probability
+    ## T = 19, p-value = 0.2751
+    ## alternative hypothesis: true tau is not equal to 0
+    ## sample estimates:
+    ##       tau 
+    ## 0.3571429
+
+``` r
+cor.test(ordinal_joint_correlation_table$appearance_likelihood,ordinal_joint_correlation_table$selection_probability,method="spearman")
+```
+
+    ## 
+    ##  Spearman's rank correlation rho
+    ## 
+    ## data:  ordinal_joint_correlation_table$appearance_likelihood and ordinal_joint_correlation_table$selection_probability
+    ## S = 54, p-value = 0.3894
+    ## alternative hypothesis: true rho is not equal to 0
+    ## sample estimates:
+    ##       rho 
+    ## 0.3571429
+
+``` r
+ordinal_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=ordinal_joint_correlation_table)
+summary(ordinal_joint_correlation_lm)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = appearance_likelihood ~ selection_probability, data = ordinal_joint_correlation_table)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q    Max 
+    ## -2.250 -1.804 -0.500  1.125  4.393 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)
+    ## (Intercept)             2.8929     1.9256   1.502    0.184
+    ## selection_probability   0.3571     0.3813   0.937    0.385
+    ## 
+    ## Residual standard error: 2.471 on 6 degrees of freedom
+    ## Multiple R-squared:  0.1276, Adjusted R-squared:  -0.01786 
+    ## F-statistic: 0.8772 on 1 and 6 DF,  p-value: 0.3851
+
+``` r
 shapiro.test(joint_correlation_table$appearance_likelihood)
 ```
 
@@ -5991,7 +6107,7 @@ joint_correlation_plot <- joint_correlation_table %>%
   ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
   geom_smooth(method=lm,se=FALSE,color="black",linewidth=0.25) +
   geom_point() + 
-  geom_text(aes(label=indicator),hjust=0,nudge_x=0.01,size=2.5) + 
+  geom_text(aes(label=indicator),hjust=0,nudge_x=0.01,size=2.5,color="black") + 
   scale_x_continuous(limits=c(0,0.85)) + 
   scale_y_continuous(limits=c(0,0.85)) +
   scale_color_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
@@ -6010,7 +6126,7 @@ joint_correlation_plot
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-224-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-231-1.png)<!-- -->
 
 ``` r
 joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
@@ -6060,7 +6176,7 @@ campus_culture_limited_joint_correlation_table %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-227-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-234-1.png)<!-- -->
 
 ``` r
 campus_culture_limited_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=campus_culture_limited_joint_correlation_table)
@@ -6162,4 +6278,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-231-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-238-1.png)<!-- -->
