@@ -1397,34 +1397,65 @@ survey_data <- survey_data %>%
 
 ``` r
 survey_data %>%
-  filter(role=="Decision Maker") %>%
-  select(role,position_duration)
+  filter(role=="Advisor" | role=="Auditor") %>%
+  select(role,position_duration,stakeholder_type,stakeholder_type_other)
 ```
 
-    ##              role position_duration
-    ## 1  Decision Maker                 1
-    ## 2  Decision Maker                11
-    ## 3  Decision Maker                 3
-    ## 4  Decision Maker                 1
-    ## 5  Decision Maker                32
-    ## 6  Decision Maker                 3
-    ## 7  Decision Maker                 2
-    ## 8  Decision Maker                 4
-    ## 9  Decision Maker                 2
-    ## 10 Decision Maker                16
-    ## 11 Decision Maker                 2
-    ## 12 Decision Maker                 3
+    ##       role position_duration           stakeholder_type
+    ## 1  Advisor                 2       Nutrition specialist
+    ## 2  Advisor                 1 Sustainability coordinator
+    ## 3  Advisor                 2    Other (please specify):
+    ## 4  Advisor         5.5 years Sustainability coordinator
+    ## 5  Advisor                 3       Nutrition specialist
+    ## 6  Advisor                 1    Other (please specify):
+    ## 7  Advisor                12       Nutrition specialist
+    ## 8  Advisor                 3 Sustainability coordinator
+    ## 9  Advisor                 3                       Chef
+    ## 10 Advisor          20 years   University administrator
+    ## 11 Advisor                 2    Other (please specify):
+    ## 12 Auditor                 1                       Chef
+    ## 13 Advisor                 3       Nutrition specialist
+    ## 14 Advisor                .1 Sustainability coordinator
+    ## 15 Auditor                 3       Nutrition specialist
+    ## 16 Advisor                10 Sustainability coordinator
+    ## 17 Advisor                 5            Dining director
+    ## 18 Advisor                 2    Other (please specify):
+    ## 19 Advisor                 3    Other (please specify):
+    ## 20 Auditor                      Other (please specify):
+    ##            stakeholder_type_other
+    ## 1                                
+    ## 2                                
+    ## 3                    NGO employee
+    ## 4                                
+    ## 5                                
+    ## 6                        Advisor 
+    ## 7                                
+    ## 8                                
+    ## 9                                
+    ## 10                               
+    ## 11             Dining management 
+    ## 12                               
+    ## 13                               
+    ## 14                               
+    ## 15                               
+    ## 16                               
+    ## 17                               
+    ## 18 Manager of residential dining 
+    ## 19              Dining marketing 
+    ## 20                      marketing
 
 ``` r
 role <- c("Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker","Decision Maker")
 position_duration <- c(1,11,3,1,32,3,2,4,2,16,2,3)
-dm <- tibble(role,position_duration)
+position_type <- c("Dining Director","Dining Director","Chef","Dining Director","Dining Director","Chef","University Administrator","University Administrator","Dining Director","University Administrator","Sustainability Manager","Dining Director")
+dm <- tibble(role,position_duration,position_type)
 ```
 
 ``` r
 role <- c("Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant")
 position_duration <- c(2,1,2,6,3,1,12,3,3,20,2,1,3,1,3,10,5,2,3,1)
-c <- tibble(role,position_duration)
+position_type <- c("Nutrition Manager","Sustainability Manager","Dining Advisor","Sustainability Manager","Nutrition Manager","Dining Advisor","Nutrition Manager","Sustainability Manager","Chef","University Administrator","Dining Manager","Chef","Nutrition Manager","Sustainability Manager","Nutrition Manager","Sustainability Manager","Dining Director","Dining Manager","Marketing Manager","Marketing Manager")
+c <- tibble(role,position_duration,position_type)
 ```
 
 ``` r
@@ -1432,20 +1463,71 @@ duration_data <- bind_rows(dm,c)
 duration_data
 ```
 
-    ## # A tibble: 32 × 2
-    ##    role           position_duration
-    ##    <chr>                      <dbl>
-    ##  1 Decision Maker                 1
-    ##  2 Decision Maker                11
-    ##  3 Decision Maker                 3
-    ##  4 Decision Maker                 1
-    ##  5 Decision Maker                32
-    ##  6 Decision Maker                 3
-    ##  7 Decision Maker                 2
-    ##  8 Decision Maker                 4
-    ##  9 Decision Maker                 2
-    ## 10 Decision Maker                16
+    ## # A tibble: 32 × 3
+    ##    role           position_duration position_type           
+    ##    <chr>                      <dbl> <chr>                   
+    ##  1 Decision Maker                 1 Dining Director         
+    ##  2 Decision Maker                11 Dining Director         
+    ##  3 Decision Maker                 3 Chef                    
+    ##  4 Decision Maker                 1 Dining Director         
+    ##  5 Decision Maker                32 Dining Director         
+    ##  6 Decision Maker                 3 Chef                    
+    ##  7 Decision Maker                 2 University Administrator
+    ##  8 Decision Maker                 4 University Administrator
+    ##  9 Decision Maker                 2 Dining Director         
+    ## 10 Decision Maker                16 University Administrator
     ## # ℹ 22 more rows
+
+``` r
+duration_data %>% ggplot(aes(x=role,y=position_duration,fill=position_type)) +
+  geom_col() 
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
+
+``` r
+authority <- c("Decision Maker","Decision Maker","Decision Maker","Decision Maker","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant")
+role <- c("Chef","Dining Director","Sustainability Manager","University Administrator","Chef","Dining Advisor","Dining Director","Dining Manager","Marketing Manager","Nutrition Manager","Sustainability Manager","University Administrator")
+frequency <- c(2,6,1,3,2,2,1,2,2,5,5,1)
+sample_comp <- tibble(authority,role,frequency)
+sample_comp
+```
+
+    ## # A tibble: 12 × 3
+    ##    authority      role                     frequency
+    ##    <chr>          <chr>                        <dbl>
+    ##  1 Decision Maker Chef                             2
+    ##  2 Decision Maker Dining Director                  6
+    ##  3 Decision Maker Sustainability Manager           1
+    ##  4 Decision Maker University Administrator         3
+    ##  5 Consultant     Chef                             2
+    ##  6 Consultant     Dining Advisor                   2
+    ##  7 Consultant     Dining Director                  1
+    ##  8 Consultant     Dining Manager                   2
+    ##  9 Consultant     Marketing Manager                2
+    ## 10 Consultant     Nutrition Manager                5
+    ## 11 Consultant     Sustainability Manager           5
+    ## 12 Consultant     University Administrator         1
+
+``` r
+sample_composition_plot <- sample_comp %>%
+  ggplot(aes(x=authority,y=frequency,fill=role)) +
+  geom_col(position="fill") + 
+  geom_signif(comparisons=list(c("Consultant","Decision Maker")),color="black",size=0.25,annotation="n.s.",y_position=0.875,tip_length=0.005,vjust=0) +
+  geom_signif(comparisons=list(c("Consultant","Decision Maker")),color="black",size=0.25,annotation="**",y_position=-0.3,tip_length=-0.005,vjust=3) +
+  scale_fill_viridis_d(name="Role Type",alpha=0.8) +
+  scale_y_continuous(labels=scales::percent,breaks=c(0,0.2,0.4,0.6,0.8,1)) +
+  xlab("Authority Level") + 
+  ylab("Relative Frequency") + 
+  labs(caption="W-value: 106.00 (2dp); p-value: 0.59 (2dp)") +
+  annotate("text",x="Consultant",y=1.05,label="4.20 (4.74)",size=3.5) +
+  annotate("text",x="Decision Maker",y=1.05,label="6.67 (9.17)",size=3.5) +
+  theme(panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+ggsave(filename="sample_composition.png",plot=sample_composition_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=22,height=16,units="cm",dpi=150,limitsize=TRUE)
+sample_composition_plot
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
 
 ``` r
 duration_data %>%
@@ -1861,7 +1943,7 @@ score_frequencies %>%
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-95-1.png)<!-- -->
 need to put anova value in caption - could also consider boxplot/violin
 plot
 
@@ -2071,7 +2153,7 @@ print(round(first_choice_percentage_contributions,2))
 pheatmap(first_choice_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-103-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-106-1.png)<!-- -->
 
 ``` r
 first_choice_contingency_table <- first_choice_frequencies %>%
@@ -2155,7 +2237,7 @@ score_frequencies %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-106-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-109-1.png)<!-- -->
 
 ``` r
 preliminary_indicator_rankings <- 
@@ -2166,7 +2248,7 @@ ggsave(filename="preliminary_indicator_rankings.png",plot=preliminary_indicator_
 preliminary_indicator_rankings
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-107-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-110-1.png)<!-- -->
 
 ``` r
 priority_score_frequencies <- tibble(comparison_indicator=c("Guest Dining Experience","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Food Pricing","Institutional Sustainability","Campus Culture","Staff Satisfaction"),guest_dining_experience_selection_frequency=as.double(NA),dietary_health_selection_frequency=as.double(NA),operating_costs_selection_frequency=as.double(NA),dietary_sustainability_selection_frequency=as.double(NA),food_pricing_selection_frequency=as.double(NA),institutional_sustainability_selection_frequency=as.double(NA),campus_culture_selection_frequency=as.double(NA),staff_satisfaction_selection_frequency=as.double(NA))
@@ -3231,7 +3313,7 @@ selection_probability_plot <- priority_probability_table %>%
 selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-139-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-142-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”) +
@@ -4461,7 +4543,7 @@ decision_maker_selection_probability_plot <- decision_maker_priority_probability
 decision_maker_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-171-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-174-1.png)<!-- -->
 geom_jitter(width=0.33,size=2,shape=21,alpha=0.5) +
 
 stat_summary(data=technical_advisor_priority_probability_table,fun.y=mean,geom=“point”,shape=1,size=1.75,color=“black”)
@@ -5682,7 +5764,7 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
 technical_advisor_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-207-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-210-1.png)<!-- -->
 geom_jitter(width=0.6,size=2,shape=21,alpha=0.5) +
 
 ``` r
@@ -5699,7 +5781,7 @@ ggsave(filename="selection_probability_distributions.png",plot=selection_probabi
 selection_probability_distribution_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-209-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-212-1.png)<!-- -->
 
 could use geom_jitter more strategically to highlight asymmetries in
 stakeholder/role types
@@ -5980,7 +6062,7 @@ ordinal_joint_correlation_plot
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-221-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-224-1.png)<!-- -->
 
 ``` r
 shapiro.test(ordinal_joint_correlation_table$appearance_likelihood)
@@ -6105,7 +6187,7 @@ res
 ``` r
 joint_correlation_plot <- joint_correlation_table %>%
   ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
-  geom_smooth(method=lm,se=FALSE,color="black",linewidth=0.25) +
+  geom_smooth(method=loess,se=FALSE,color="black",linewidth=0.25) +
   geom_point() + 
   geom_text(aes(label=indicator),hjust=0,nudge_x=0.01,size=2.5,color="black") + 
   scale_x_continuous(limits=c(0,0.85)) + 
@@ -6120,13 +6202,19 @@ ggsave(filename="joint_correlation_plot.png",plot=joint_correlation_plot,path="/
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_smooth()`).
+
 ``` r
 joint_correlation_plot
 ```
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-231-1.png)<!-- -->
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_smooth()`).
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-234-1.png)<!-- -->
 
 ``` r
 joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
@@ -6176,7 +6264,7 @@ campus_culture_limited_joint_correlation_table %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-234-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-237-1.png)<!-- -->
 
 ``` r
 campus_culture_limited_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=campus_culture_limited_joint_correlation_table)
@@ -6278,4 +6366,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-238-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-241-1.png)<!-- -->
