@@ -312,6 +312,7 @@ ggplot(aes(fill=frequency,group=geonunit)) +
 ```{r}
 subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
                                          ncol=2,
+                                         widths=c(1,0.5),
                                          labels=c("B","C"))
 national_frequency_choros <- ggarrange(national_frequencies,
                                        labels="A")
@@ -321,7 +322,7 @@ national_frequency_choros <- ggarrange(national_frequencies,
 ```{r}
 spatial_plots <- ggarrange(national_frequency_choros,subnational_frequency_choros,
           nrow=2)
-ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=32,units="cm",dpi=150,limitsize=TRUE)
+ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=27,units="cm",dpi=150,limitsize=TRUE)
 spatial_plots
 ```
 
@@ -495,7 +496,7 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   geom_signif(comparisons=list(c("Campus Culture","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
   xlab("Accessory Indicator") +
   ylab("Frequency") +
-  scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture")) + 
+  scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture"),labels=c("Staff Satisfaction","Institutional Sustainability","Food Prices","Diner Experience","Dietary Sustainability","Operating Costs","Dietary Health","Organizational Culture")) + 
   scale_y_continuous(breaks=c(0,29,58,87,116)) +
   scale_fill_manual(values=c("aliceblue","lightsteelblue")) +
   scale_color_manual(values=c("aliceblue","lightsteelblue")) +
