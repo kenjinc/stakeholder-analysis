@@ -2721,16 +2721,16 @@ ordinal_joint_correlation_table
 ordinal_joint_correlation_plot <- ordinal_joint_correlation_table %>%
   ggplot(aes(x=selection_probability,y=appearance_likelihood,color=indicator)) +
   geom_smooth(method=loess,se=FALSE,linewidth=0.25,color="black") +
-  geom_point(aes(fill=indicator),shape=21,color="black") + 
-  geom_text(aes(label=indicator),hjust=0,nudge_x=0.1,size=2.5,color="black") + 
+  geom_point(aes(fill=indicator),shape=21,color="black",size=3) + 
+  geom_text(aes(label=indicator),hjust=0,nudge_x=0.1,size=3,color="black") + 
   scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Organizational Culture","Institutional Sustainability","Food Prices","Dietary Sustainability","Operating Costs","Dietary Health","Diner Experience")) +
   scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8),limits=c(0.5,8.5)) +
   scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8),limits=c(0.5,8.5)) +
   xlab("Selection Probability Ranking") + 
   ylab("Appearance Likelihood Ranking") +
   labs(caption="Spearman's rho: 0.36 (2dp); p-value: 0.39 (2dp)") + 
-  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=8),axis.title=element_text(size=10),axis.text=element_text(size=8))
-ggsave(filename="ordinal_joint_correlation_plot.png",plot=ordinal_joint_correlation_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=24,height=12,units="cm",dpi=150,limitsize=TRUE)
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=10),axis.title=element_text(size=10),axis.text=element_text(size=10))
+ggsave(filename="ordinal_joint_correlation_plot.png",plot=ordinal_joint_correlation_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=20,units="cm",dpi=150,limitsize=TRUE)
 ordinal_joint_correlation_plot
 ```
 
