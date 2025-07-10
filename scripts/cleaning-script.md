@@ -1259,9 +1259,9 @@ pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cl
 ``` r
 principal_qualifying_indicator_plots <- ggarrange(ppi_frequencies_plot,qpi_frequencies_plot,
           ncol=2,
-          labels=c("A","C"))
+          labels=c("A","B"))
 accessory_indicator_plots <- ggarrange(api_frequencies_plot,
-          labels="B")
+          labels="C")
 ```
 
 ``` r
