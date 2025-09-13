@@ -522,7 +522,7 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   geom_col(color="black",size=0.2) + 
   geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
   geom_signif(comparisons=list(c("Campus Culture","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
-  xlab("Accessory Indicator") +
+  xlab("Acceptability Metric Theme") +
   ylab("Frequency") +
   scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture"),labels=c("Staff Satisfaction","Institutional Sustainability","Food Prices","Diner Experience","Dietary Sustainability","Operating Costs","Dietary Health","Organizational Culture")) + 
   scale_y_continuous(breaks=c(0,29,58,87,116)) +
@@ -531,6 +531,10 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
   theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+api_frequencies_plot
+```
+```{r}
+ggsave(filename="acceptability-theme-frequencies.png",plot=api_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=15,units="cm",dpi=150,limitsize=TRUE)
 ```
 
 ```{r}

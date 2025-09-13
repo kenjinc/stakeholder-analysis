@@ -5,10 +5,18 @@ Last Updated: May 13, 2025
 ## Package Loading
 
 ``` r
+library(cowplot)
 library(ggpubr)
 ```
 
     ## Loading required package: ggplot2
+
+    ## 
+    ## Attaching package: 'ggpubr'
+
+    ## The following object is masked from 'package:cowplot':
+    ## 
+    ##     get_legend
 
 ``` r
 library(ggsignif)
@@ -33,9 +41,10 @@ library(tidyverse)
     ## ✔ purrr     1.0.2     ✔ tidyr     1.3.1
 
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-    ## ✖ purrr::map()    masks maps::map()
+    ## ✖ dplyr::filter()    masks stats::filter()
+    ## ✖ dplyr::lag()       masks stats::lag()
+    ## ✖ purrr::map()       masks maps::map()
+    ## ✖ lubridate::stamp() masks cowplot::stamp()
     ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 
 ``` r
@@ -232,7 +241,7 @@ temporal_frequencies_plot <- temporal_frequencies %>%
   scale_y_continuous(limits=c(0,120),breaks=c(0,29,58,87,116)) +
   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
   labs(caption="   ",fill="Frequency") + 
-  theme(legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
@@ -251,7 +260,7 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   scale_y_continuous(limits=c(0,120),breaks=c(0,29,58,87,116)) +
   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
   labs(caption="Adjusted R-Squared: 0.985 (3sf); p-value < 0.001",fill="Frequency") + 
-  theme(legend.title.position="none",legend.position="none",legend.justification="center",legend.box.spacing=unit(0,"pt"),legend.key.width=unit(50,"pt"),legend.key.height=unit(7.5,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
@@ -411,8 +420,10 @@ national_frequencies <- spatial_frequencies_joined %>%
   ylab("") +
   scale_y_continuous(limits=c(-55,85)) +
   labs(fill="Count") +
-  theme(aspect.ratio=.48,legend.position="bottom",legend.title.position="top",legend.box.spacing=unit(-10,"pt"),legend.key.width=unit(100,"pt"),legend.key.height=unit(5,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=.48,legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
+
+theme(legend.position=“bottom”,legend.title.position=“top”,legend.key.width=unit(80,“pt”),legend.key.height=unit(8,“pt”),panel.grid=element_blank(),panel.background=element_rect(fill=“white”),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 
 ``` r
 usa_shapefile <- map_data("county") %>%
@@ -468,9 +479,9 @@ usa_frequencies <- state_frequencies_joined %>%
   scale_fill_gradient(low="lavender",high="lightslateblue",na.value="white",limits=c(1,55)) +
   xlab("") + 
   ylab("") +
-  labs(caption="") +
+  labs(fill="Count",caption="") +
   coord_map("albers",lat0=45.5,lat1=29.5) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(aspect.ratio=.48,legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
@@ -521,26 +532,60 @@ uk_frequencies <- subnational_frequencies_joined %>%
 ggplot(aes(fill=frequency,group=geonunit)) + 
   geom_sf(aes(fill=frequency),color="black",linewidth=0.1) +
   scale_fill_gradient(low="lavender",high="lightslateblue",na.value="white",limits=c(1,55)) +
-  theme(legend.key.width=unit(3,"lines"),legend.position="none",legend.justification="center",legend.box.spacing=unit(-15,"pt"),legend.key.size=unit(10,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  labs(fill="Count") +
+  theme(aspect.ratio=1.3,legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="aliceblue"),panel.border=element_rect(fill=NA),axis.text=element_blank(),axis.ticks=element_blank(),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
+
+``` r
+dummy_legend <- temporal_frequencies_plot
+choro_legend <- cowplot::get_legend(dummy_legend)
+```
+
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_col()`).
+
+    ## Warning in get_plot_component(plot, "guide-box"): Multiple components found;
+    ## returning the first one. To return all, use `return_all = TRUE`.
+
+``` r
+choro_legend
+```
+
+    ## zeroGrob[NULL]
 
 ``` r
 subnational_frequency_choros <- ggarrange(usa_frequencies,uk_frequencies,
                                          ncol=2,
-                                         widths=c(1,0.5),
-                                         labels=c("B","C"))
+                                         widths=c(1,1),
+                                         heights=c(1.2,1),
+                                         labels=c("B","C"),
+                                         common.legend=TRUE,
+                                         legend="bottom")
 national_frequency_choros <- ggarrange(national_frequencies,
-                                       labels="A")
+                                       labels=c("A"),
+                                       ncol=1,
+                                       legend="none")
 ```
 
 ``` r
+ggarrange(national_frequencies,usa_frequencies,uk_frequencies,
+          nrows=2,
+          labels=c("A","B","C"),
+          common.legend=TRUE,
+          legend="bottom")
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+``` r
 spatial_plots <- ggarrange(national_frequency_choros,subnational_frequency_choros,
-          nrow=2)
+          nrow=2,
+          heights=c(1,1))
 ggsave(filename="publication-distribution.png",plot=spatial_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=27,units="cm",dpi=150,limitsize=TRUE)
 spatial_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ### Primary Performance Indicators
 
@@ -698,7 +743,7 @@ print(round(ppi_percentage_contributions,2))
 pheatmap(ppi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ``` r
 ppi_contingency_table_alt <- ppi_contingency_table %>%
@@ -867,7 +912,7 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   geom_col(color="black",size=0.2) + 
   geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
   geom_signif(comparisons=list(c("Campus Culture","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
-  xlab("Accessory Indicator") +
+  xlab("Acceptability Metric Theme") +
   ylab("Frequency") +
   scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture"),labels=c("Staff Satisfaction","Institutional Sustainability","Food Prices","Diner Experience","Dietary Sustainability","Operating Costs","Dietary Health","Organizational Culture")) + 
   scale_y_continuous(breaks=c(0,29,58,87,116)) +
@@ -876,6 +921,13 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
   labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
   theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+api_frequencies_plot
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+
+``` r
+ggsave(filename="acceptability-theme-frequencies.png",plot=api_frequencies_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=30,height=15,units="cm",dpi=150,limitsize=TRUE)
 ```
 
 ``` r
@@ -980,7 +1032,7 @@ library(pheatmap)
 pheatmap(api_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 Rerun this using list class instead of variety class
 
@@ -1254,7 +1306,7 @@ print(round(qpi_percentage_contributions,2))
 pheatmap(qpi_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
 
 ``` r
 principal_qualifying_indicator_plots <- ggarrange(ppi_frequencies_plot,qpi_frequencies_plot,
@@ -1271,7 +1323,7 @@ ggsave(filename="combined-performance-indicators.png",plot=combined_indicators,p
 combined_indicators
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-72-1.png)<!-- -->
 
 ### Gap Monitoring
 
@@ -1488,7 +1540,7 @@ duration_data %>% ggplot(aes(x=role,y=position_duration,fill=position_type)) +
   geom_col() 
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
 
 ``` r
 authority <- c("Decision Maker","Decision Maker","Decision Maker","Decision Maker","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant","Consultant")
@@ -1558,7 +1610,7 @@ ggsave(filename="predictors-of-authority.png",plot=duration_roletype_plots,path=
 duration_roletype_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-83-1.png)<!-- -->
 
 ``` r
 duration_data %>%
@@ -1974,7 +2026,7 @@ score_frequencies %>%
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-97-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-100-1.png)<!-- -->
 need to put anova value in caption - could also consider boxplot/violin
 plot
 
@@ -2178,7 +2230,7 @@ print(round(first_choice_percentage_contributions,2))
 pheatmap(first_choice_percentage_contributions,display_numbers=TRUE,cluster_rows=FALSE,cluster_cols=FALSE,main="Percentage Contributions to Chi-Square Statistic")
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-108-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-111-1.png)<!-- -->
 
 ``` r
 first_choice_contingency_table <- first_choice_frequencies %>%
@@ -2262,7 +2314,7 @@ score_frequencies %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-111-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-114-1.png)<!-- -->
 
 ``` r
 preliminary_indicator_rankings <- 
@@ -2273,7 +2325,7 @@ ggsave(filename="preliminary_indicator_rankings.png",plot=preliminary_indicator_
 preliminary_indicator_rankings
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-112-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-115-1.png)<!-- -->
 
 ``` r
 priority_score_frequencies <- tibble(comparison_indicator=c("Guest Dining Experience","Dietary Health","Operating Costs","Sustainability of Guest Food Choices","Food Pricing","Institutional Sustainability","Campus Culture","Staff Satisfaction"),guest_dining_experience_selection_frequency=as.double(NA),dietary_health_selection_frequency=as.double(NA),operating_costs_selection_frequency=as.double(NA),dietary_sustainability_selection_frequency=as.double(NA),food_pricing_selection_frequency=as.double(NA),institutional_sustainability_selection_frequency=as.double(NA),campus_culture_selection_frequency=as.double(NA),staff_satisfaction_selection_frequency=as.double(NA))
@@ -3341,7 +3393,7 @@ selection_probability_plot <- priority_probability_table %>%
 selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-144-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-147-1.png)<!-- -->
 
 selection_frequency_plot
 geom_violin(color=“black”,draw_quantiles=0.5,alpha=0.6,size=0.2,adjust=1)
@@ -4582,7 +4634,7 @@ decision_maker_selection_probability_plot <- decision_maker_priority_probability
 decision_maker_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-176-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-179-1.png)<!-- -->
 
 scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.15,0.85)) +
 scale_x_discrete(label=c(“Staff Satisfaction (8th)”,“Organizational
@@ -5815,7 +5867,7 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
 technical_advisor_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-212-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-215-1.png)<!-- -->
 Guest Dining Experience 0.7500000 0.08660254  
 Dietary Health 0.6285714 0.13183684  
 Operating Costs 0.5785714 0.16547191  
@@ -5826,21 +5878,6 @@ Institutional Sustainability 0.4000000 0.11902381
 Staff Satisfaction 0.3142857 0.11443443
 
 geom_jitter(width=0.6,size=2,shape=21,alpha=0.5) +
-
-``` r
-library(cowplot)
-```
-
-    ## 
-    ## Attaching package: 'cowplot'
-
-    ## The following object is masked from 'package:lubridate':
-    ## 
-    ##     stamp
-
-    ## The following object is masked from 'package:ggpubr':
-    ## 
-    ##     get_legend
 
 ``` r
 mean_category <- c("Aggregate Sample (n=32)","Primary Decision Makers (n=12)","Technical Advisors (n=20)")
@@ -5873,7 +5910,7 @@ ggsave(filename="selection_probability_distributions.png",plot=selection_probabi
 selection_probability_distribution_plots
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-215-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-218-1.png)<!-- -->
 
 could use geom_jitter more strategically to highlight asymmetries in
 stakeholder/role types
@@ -6154,7 +6191,7 @@ ordinal_joint_correlation_plot
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-227-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-230-1.png)<!-- -->
 
 ``` r
 shapiro.test(ordinal_joint_correlation_table$appearance_likelihood)
@@ -6306,7 +6343,7 @@ joint_correlation_plot
     ## Warning: Removed 2 rows containing missing values or values outside the scale range
     ## (`geom_smooth()`).
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-237-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-240-1.png)<!-- -->
 
 ``` r
 joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=joint_correlation_table)
@@ -6356,7 +6393,7 @@ campus_culture_limited_joint_correlation_table %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-240-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-243-1.png)<!-- -->
 
 ``` r
 campus_culture_limited_joint_correlation_lm <- lm(appearance_likelihood~selection_probability,data=campus_culture_limited_joint_correlation_table)
@@ -6458,4 +6495,4 @@ priority_z_score_table %>%
   theme(aspect.ratio=0.8,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-244-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-247-1.png)<!-- -->
