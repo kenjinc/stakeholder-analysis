@@ -244,6 +244,12 @@ usa_shapefile <- map_data("county") %>%
 ```
 
 ```{r}
+usa_shapefile <- map_data("state") %>%
+  rename(state=region)
+```
+
+
+```{r}
 state_frequencies <- extraction_data %>%
   select(study,us_state_var) %>%
   separate_longer_delim(c(us_state_var),delim=";") %>%
