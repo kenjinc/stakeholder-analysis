@@ -241,7 +241,7 @@ temporal_frequencies_plot <- temporal_frequencies %>%
   scale_y_continuous(limits=c(0,120),breaks=c(0,29,58,87,116)) +
   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
   labs(caption="   ",fill="Frequency") + 
-  theme(legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.position="none",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
@@ -260,20 +260,17 @@ temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   scale_y_continuous(limits=c(0,120),breaks=c(0,29,58,87,116)) +
   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020,2024),limits=c(2000,2025)) +
   labs(caption="Adjusted R-Squared: 0.985 (3sf); p-value < 0.001",fill="Frequency") + 
-  theme(legend.position="bottom",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
+  theme(legend.position="none",legend.title.position="top",legend.key.width=unit(80,"pt"),legend.key.height=unit(8,"pt"),panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
 ``` r
 temporal_plots <- ggarrange(temporal_frequencies_plot,temporal_cumulative_frequencies_plot,
           nrow=2,
           labels=c("A","B"),
-          common.legend=TRUE,
-          legend="bottom")
+          legend="none")
 ```
 
     ## Warning: Removed 1 row containing missing values or values outside the scale range
-    ## (`geom_col()`).
-    ## Removed 1 row containing missing values or values outside the scale range
     ## (`geom_col()`).
     ## Removed 1 row containing missing values or values outside the scale range
     ## (`geom_col()`).
@@ -971,14 +968,14 @@ api_frequencies_plot <- api_contigency_table_alt %>%
   geom_col(color="black",size=0.2) + 
   geom_text(aes(y=label_y,label=paste(format(contribution,nsmall=2),"%")),color="black",size=3) +
   geom_signif(comparisons=list(c("Campus Culture","Staff Satisfaction")),color="black",size=0.25,annotation="***",y_position=116,tip_length=0.02,vjust=0) +
-  xlab("Acceptability Metric Theme") +
+  xlab("Acceptability Indicator") +
   ylab("Frequency") +
   scale_x_discrete(limits=c("Staff Satisfaction","Institutional Sustainability","Food Pricing","Guest Dining Experience","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Campus Culture"),labels=c("Staff Satisfaction","Institutional Sustainability","Food Prices","Diner Experience","Dietary Sustainability","Operating Costs","Dietary Health","Organizational Culture")) + 
   scale_y_continuous(breaks=c(0,29,58,87,116)) +
-  scale_fill_manual(values=c("aliceblue","lightsteelblue")) +
-  scale_color_manual(values=c("aliceblue","lightsteelblue")) +
+  scale_fill_manual(values=c("lavender","lightslateblue")) +
+  scale_color_manual(values=c("lavender","lightslateblue")) +
   guides(fill=guide_legend(title="Mode"),color=guide_legend(title="Mode")) +
-  labs(caption="X-squared: 287 (3sf); p-value < 0.001") + 
+  labs(caption="X-squared: 287 (3sf); p-value < 0.001\nPercentage labels indicate the  proportion of the test statistic that can be attributed to the absence (top) and presence (bottom) of each indicator across the 116 included studies") + 
   theme(aspect.ratio=0.4,legend.position="right",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 api_frequencies_plot
 ```
@@ -1632,9 +1629,9 @@ sample_composition_plot <- sample_comp %>%
   geom_signif(comparisons=list(c("Consultant","Decision Maker")),color="black",size=0.25,annotation="**",y_position=0.80,tip_length=0.002,vjust=0) +
   scale_fill_viridis_d(option="mako",name="Role Type",alpha=0.8) +
   scale_y_continuous(labels=scales::percent,breaks=c(0,0.2,0.4,0.6,0.8,1)) +
-  scale_x_discrete(label=c("Technical Advisor (n=20)","Primary Decision Maker (n=12)")) +
+  scale_x_discrete(label=c("Low (n=20)","High (n=12)")) +
   xlab("Authority Level") + 
-  ylab("Relative Frequency") + 
+  ylab("Relative Frequency (%)") + 
   labs(caption="Fisher's exact test, p-value:0.01 (2dp)") +
   theme(aspect.ratio=0.8,panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ggsave(filename="sample_composition.png",plot=sample_composition_plot,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=22,height=16,units="cm",dpi=150,limitsize=TRUE)
@@ -1646,11 +1643,11 @@ duraation_authority_plot <- duration_data %>%
   geom_violin(draw_quantiles=0.5,adjust=1,size=0.2,color="black",alpha=0.8) +
   stat_summary(fun.y=mean,geom="point",shape=20,size=2,color="black",fill="white") +
   geom_signif(comparisons=list(c("Consultant","Decision Maker")),color="black",size=0.25,annotation="n.s.",y_position=32,tip_length=0.01,vjust=0) +
-  labs(caption="W-value: 106.00 (2dp); p-value: 0.59 (2dp)") +
-  scale_x_discrete(label=c("Technical Advisor (n=20)","Primary Decision Maker (n=12)")) +
+  labs(caption="W-value: 106.00 (2dp); p-value: 0.59 (2dp)") +        
+  scale_x_discrete(label=c("Low (n=20)","High (n=12)")) +
   scale_fill_manual(values=c("aquamarine2","darkslateblue"),name="Authority Level") +
+  xlab("Authority Level") +
   ylab("Role Duration (Years)") + 
-  xlab("") +
   theme(aspect.ratio=0.94,legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10))
 ```
 
@@ -3425,35 +3422,6 @@ Food Choices-Guest Dining Experience -0.24553571 -0.437743274
 -0.053328155 0.0043134 Staff Satisfaction-Operating Costs -0.20089286
 -0.393100417 -0.008685297 0.0346700
 
-``` r
-selection_probability_plot <- priority_probability_table %>%
-  ggplot(aes(x=fct_reorder(indicator,probability,.fun="mean"),y=probability,fill=fct_reorder(indicator,probability,.fun="mean"),color=fct_reorder(indicator,probability,.fun="mean"))) +
-  geom_violin(color="black",draw_quantiles=0.5,alpha=0.7,size=0.2,adjust=1) +
-  geom_hline(yintercept=0.5,linetype="dashed",size=0.3) +
-  geom_signif(comparisons=list(c("Staff Satisfaction","Guest Dining Experience")),color="black",size=0.25,annotation="***",y_position=0.13,tip_length=-0.02,vjust=2.6) +
-  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=0.15,tip_length=-0.02,vjust=2.6) +
-  geom_signif(comparisons=list(c("Institutional Sustainability","Guest Dining Experience")),color="black",size=0.25,annotation="***",y_position=0.17,tip_length=-.02,vjust=2.6) +
-
-  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="**",y_position=0.19,tip_length=-0.02,vjust=2.6) +
-  geom_signif(comparisons=list(c("Sustainability of Guest Food Choices","Guest Dining Experience")),color="black",size=0.25,annotation="**",y_position=0.21,tip_length=-0.02,vjust=2.6) +
-  geom_signif(comparisons=list(c("Staff Satisfaction","Operating Costs")),color="black",size=0.25,annotation="*",y_position=0.77,tip_length=0.02,vjust=0.6) +
-  geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=0.79,tip_length=0.02,vjust=0.6) +
-  geom_signif(comparisons=list(c("Dietary Health","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.81,tip_length=0.02,vjust=0.6) +
-  stat_summary(fun.y=mean,geom="point",shape=16,size=1.75,color="black") +
-  scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
-  scale_color_viridis_d(option="mako") +
-  scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.08,0.92)) +
-  scale_x_discrete(label=c("Staff Satisfaction (8th)","Organizational Culture (7th)","Institutional Sustainability (6th)","Food Prices (5th)","Dietary Sustainability (4th)","Operating Costs (3rd)","Dietary Health (2nd)","Diner Experience (1st)")) +
-  xlab("") + 
-  ylab("Selection Probability") + 
-  labs(caption="F-value: 7.96 (3sf); p-value < 0.001",subtitle="Aggregate Sample (n=32)") + 
-  coord_flip() +
-  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=10),axis.title=element_text(size=10),axis.text=element_text(size=10))
-selection_probability_plot
-```
-
-![](cleaning-script_files/figure-gfm/unnamed-chunk-150-1.png)<!-- -->
-
 selection_frequency_plot
 geom_violin(color=“black”,draw_quantiles=0.5,alpha=0.6,size=0.2,adjust=1)
 +
@@ -4668,32 +4636,6 @@ Costs-Campus Culture 0.0178745 * Institutional Sustainability-Guest
 Dining Experience 0.0007530 **\* Staff Satisfaction-Guest Dining
 Experience 0.0098869 ** Sustainability of Guest Food Choices-Guest
 Dining Experience 0.0098869 **
-
-``` r
-decision_maker_selection_probability_plot <- decision_maker_priority_probability_table %>%
-  ggplot(aes(x=fct_reorder(indicator,probability,.fun="mean"),y=probability,fill=fct_reorder(indicator,probability,.fun="mean"),color=fct_reorder(indicator,probability,.fun="mean"))) +
-  geom_violin(color="black",draw_quantiles=0.5,alpha=0.7,size=0.2,adjust=1) +
-  geom_hline(yintercept=0.5,linetype="dashed",size=0.3) +
-  geom_signif(comparisons=list(c("Staff Satisfaction","Guest Dining Experience")),color="black",size=0.25,annotation="**",y_position=0.16,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=0.18,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Institutional Sustainability","Guest Dining Experience")),color="black",size=0.25,annotation="***",y_position=0.20,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Sustainability of Guest Food Choices","Guest Dining Experience")),color="black",size=0.25,annotation="**",y_position=0.22,tip_length=-0.02,vjust=2.8) +
-  geom_signif(comparisons=list(c("Operating Costs","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.66,tip_length=0.02,vjust=0.6) +
-  stat_summary(fun.y=mean,geom="point",shape=21,size=1.75,color="black",fill="white") +
-  stat_summary(data=priority_probability_table,fun.y=mean,geom="point",shape=16,size=1.75,color="black") +
-  scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
-  scale_color_viridis_d(option="mako") +
-  scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.08,0.92)) +
-  scale_x_discrete(label=c("Staff Satisfaction (6th)","Organizational Culture (8th)","Institutional Sustainability (7th)","Food Prices (4th)","Dietary Sustainability (6th)","Operating Costs (2nd)","Dietary Health (3rd)","Diner Experience (1st)"),limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
-  xlab("") + 
-  ylab("Selection Probability") + 
-  labs(caption="F-value: 5.93 (2dp); p-value < 0.001",subtitle="Primary Decision Makers (n=12)") + 
-  coord_flip() +
-  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=10),axis.title=element_text(size=10),axis.text=element_text(size=10))
-decision_maker_selection_probability_plot
-```
-
-![](cleaning-script_files/figure-gfm/unnamed-chunk-182-1.png)<!-- -->
 
 scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.15,0.85)) +
 scale_x_discrete(label=c(“Staff Satisfaction (8th)”,“Organizational
@@ -5911,22 +5853,20 @@ technical_advisor_selection_probability_plot <- technical_advisor_priority_proba
   geom_signif(comparisons=list(c("Guest Dining Experience","Sustainability of Guest Food Choices")),color="black",size=0.25,annotation="*",y_position=0.14,tip_length=-0.02,vjust=2.5) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Operating Costs")),color="black",size=0.25,annotation="*",y_position=0.77,tip_length=0.02,vjust=0.6) +
   geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=0.79,tip_length=0.02,vjust=0.6) +
-  stat_summary(fun.y=mean,geom="point",shape=21,size=1.75,color="black",fill="gray") +
-  stat_summary(data=priority_probability_table,fun.y=mean,geom="point",shape=16,size=1.75,color="black") +
-  stat_summary(data=decision_maker_priority_probability_table,fun.y=mean,geom="point",shape=21,size=1.75,color="black",fill="white") +
+  stat_summary(fun.y=mean,geom="point",shape=16,size=1.75,color="black") +
   scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   scale_color_viridis_d(option="mako",alpha=1) +
   scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.08,0.92)) +
   scale_x_discrete(label=c("Staff Satisfaction (8th)","Organizational Culture (6th)","Institutional Sustainability (7th)","Food Prices (5th)","Dietary Sustainability (4th)","Operating Costs (3rd)","Dietary Health (2nd)","Diner Experience (1st)"),limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
   xlab("") + 
   ylab("Selection Probability") + 
-  labs(caption="F-value: 7.13 (2dp); p-value < 0.001",subtitle="Technical Advisors (n=20)") + 
+  labs(caption="F-value: 7.13 (2dp); p-value < 0.001",subtitle="Low-Authority Subgroup (n=20)") + 
   coord_flip() +
   theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=10),axis.title=element_text(size=10),axis.text=element_text(size=10))
 technical_advisor_selection_probability_plot
 ```
 
-![](cleaning-script_files/figure-gfm/unnamed-chunk-218-1.png)<!-- -->
+![](cleaning-script_files/figure-gfm/unnamed-chunk-216-1.png)<!-- -->
 Guest Dining Experience 0.7500000 0.08660254  
 Dietary Health 0.6285714 0.13183684  
 Operating Costs 0.5785714 0.16547191  
@@ -5937,6 +5877,31 @@ Institutional Sustainability 0.4000000 0.11902381
 Staff Satisfaction 0.3142857 0.11443443
 
 geom_jitter(width=0.6,size=2,shape=21,alpha=0.5) +
+
+``` r
+decision_maker_selection_probability_plot <- decision_maker_priority_probability_table %>%
+  ggplot(aes(x=fct_reorder(indicator,probability,.fun="mean"),y=probability,fill=fct_reorder(indicator,probability,.fun="mean"),color=fct_reorder(indicator,probability,.fun="mean"))) +
+  geom_violin(color="black",draw_quantiles=0.5,alpha=0.7,size=0.2,adjust=1) +
+  geom_hline(yintercept=0.5,linetype="dashed",size=0.3) +
+  geom_signif(comparisons=list(c("Staff Satisfaction","Guest Dining Experience")),color="black",size=0.25,annotation="**",y_position=0.16,tip_length=-0.02,vjust=2.8) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=0.18,tip_length=-0.02,vjust=2.8) +
+  geom_signif(comparisons=list(c("Institutional Sustainability","Guest Dining Experience")),color="black",size=0.25,annotation="***",y_position=0.20,tip_length=-0.02,vjust=2.8) +
+  geom_signif(comparisons=list(c("Sustainability of Guest Food Choices","Guest Dining Experience")),color="black",size=0.25,annotation="**",y_position=0.22,tip_length=-0.02,vjust=2.8) +
+  geom_signif(comparisons=list(c("Operating Costs","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.66,tip_length=0.02,vjust=0.6) +
+  stat_summary(fun.y=mean,geom="point",shape=16,size=1.75,color="black") +
+  scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
+  scale_color_viridis_d(option="mako") +
+  scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.08,0.92)) +
+  scale_x_discrete(label=c("Staff Satisfaction (6th)","Organizational Culture (8th)","Institutional Sustainability (7th)","Food Prices (4th)","Dietary Sustainability (6th)","Operating Costs (2nd)","Dietary Health (3rd)","Diner Experience (1st)"),limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
+  xlab("") + 
+  ylab("Selection Probability") + 
+  labs(caption="F-value: 5.93 (2dp); p-value < 0.001",subtitle="High-Authority Subgroup (n=12)") + 
+  coord_flip() +
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=10),axis.title=element_text(size=10),axis.text=element_text(size=10))
+decision_maker_selection_probability_plot
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-217-1.png)<!-- -->
 
 ``` r
 mean_category <- c("Aggregate Sample (n=32)","Primary Decision Makers (n=12)","Technical Advisors (n=20)")
@@ -5955,16 +5920,44 @@ legend <- cowplot::get_legend(violin_plot_array_legend)
     ## returning the first one. To return all, use `return_all = TRUE`.
 
 ``` r
+selection_probability_plot <- priority_probability_table %>%
+  ggplot(aes(x=fct_reorder(indicator,probability,.fun="mean"),y=probability,fill=fct_reorder(indicator,probability,.fun="mean"),color=fct_reorder(indicator,probability,.fun="mean"))) +
+  geom_violin(color="black",draw_quantiles=0.5,alpha=0.7,size=0.2,adjust=1) +
+  geom_hline(yintercept=0.5,linetype="dashed",size=0.3) +
+  geom_signif(comparisons=list(c("Staff Satisfaction","Guest Dining Experience")),color="black",size=0.25,annotation="***",y_position=0.13,tip_length=-0.02,vjust=2.6) +
+  geom_signif(comparisons=list(c("Guest Dining Experience","Campus Culture")),color="black",size=0.25,annotation="***",y_position=0.15,tip_length=-0.02,vjust=2.6) +
+  geom_signif(comparisons=list(c("Institutional Sustainability","Guest Dining Experience")),color="black",size=0.25,annotation="***",y_position=0.17,tip_length=-.02,vjust=2.6) +
+
+  geom_signif(comparisons=list(c("Guest Dining Experience","Food Pricing")),color="black",size=0.25,annotation="**",y_position=0.19,tip_length=-0.02,vjust=2.6) +
+  geom_signif(comparisons=list(c("Sustainability of Guest Food Choices","Guest Dining Experience")),color="black",size=0.25,annotation="**",y_position=0.21,tip_length=-0.02,vjust=2.6) +
+  geom_signif(comparisons=list(c("Staff Satisfaction","Operating Costs")),color="black",size=0.25,annotation="*",y_position=0.77,tip_length=0.02,vjust=0.6) +
+  geom_signif(comparisons=list(c("Staff Satisfaction","Dietary Health")),color="black",size=0.25,annotation="**",y_position=0.79,tip_length=0.02,vjust=0.6) +
+  geom_signif(comparisons=list(c("Dietary Health","Campus Culture")),color="black",size=0.25,annotation="*",y_position=0.81,tip_length=0.02,vjust=0.6) +
+  stat_summary(fun.y=mean,geom="point",shape=16,size=1.75,color="black") +
+  scale_fill_viridis_d(option="mako",limits=c("Staff Satisfaction","Campus Culture","Institutional Sustainability","Food Pricing","Sustainability of Guest Food Choices","Operating Costs","Dietary Health","Guest Dining Experience")) +
+  scale_color_viridis_d(option="mako") +
+  scale_y_continuous(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),limits=c(0.08,0.92)) +
+  scale_x_discrete(label=c("Staff Satisfaction (8th)","Organizational Culture (7th)","Institutional Sustainability (6th)","Food Prices (5th)","Dietary Sustainability (4th)","Operating Costs (3rd)","Dietary Health (2nd)","Diner Experience (1st)")) +
+  xlab("") + 
+  ylab("Selection Probability") + 
+  labs(caption="F-value: 7.96 (3sf); p-value < 0.001",subtitle="Aggregate Sample (N=32)") + 
+  coord_flip() +
+  theme(legend.position="none",panel.grid=element_blank(),panel.background=element_rect(fill="white"),panel.border=element_rect(fill=NA),legend.title=element_text(size=10),legend.text=element_text(size=10),plot.title=element_text(size=10),plot.subtitle=element_text(size=10,hjust=1),plot.caption=element_text(size=10),axis.title=element_text(size=10),axis.text=element_text(size=10))
+selection_probability_plot
+```
+
+![](cleaning-script_files/figure-gfm/unnamed-chunk-219-1.png)<!-- -->
+
+``` r
 decomposed_selection_probability_distribution_plots <- ggarrange(decision_maker_selection_probability_plot,technical_advisor_selection_probability_plot,
           ncol=2,
           labels=c("B","C"))
 ```
 
 ``` r
-selection_probability_distribution_plots <- ggarrange(selection_probability_plot,decision_maker_selection_probability_plot,technical_advisor_selection_probability_plot,legend,
-                                                      labels=c("A","B","C",""),
-                                                      nrow=4,
-                                                      heights=c(1,1,1,0.2))
+selection_probability_distribution_plots <- ggarrange(selection_probability_plot,decision_maker_selection_probability_plot,technical_advisor_selection_probability_plot,
+                                                      labels=c("A","B","C"),
+                                                      nrow=3) 
 ggsave(filename="selection_probability_distributions.png",plot=selection_probability_distribution_plots,path="/Users/kenjinchang/github/stakeholder-analysis/figures",width=20,height=34,units="cm",dpi=150,limitsize=TRUE)
 selection_probability_distribution_plots
 ```
