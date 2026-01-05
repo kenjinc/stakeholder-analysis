@@ -234,8 +234,8 @@ summary(exponential_model)
 ``` r
 temporal_frequencies_plot <- temporal_frequencies %>%
   ggplot(aes(x=pub_year,y=frequency,fill=frequency)) + 
-  geom_col(color="black",size=0.2) + 
-  scale_fill_gradient(name="Count",low="lavender",high="lightslateblue",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
+  geom_col(color="black",size=0.2,fill="lightslateblue") + 
+  scale_fill_manual(name="Count",breaks=c(1,29,58,87,116)) +
   xlab("Publication Year") + 
   ylab("Frequency") + 
   scale_y_continuous(limits=c(0,120),breaks=c(0,29,58,87,116)) +
@@ -253,8 +253,8 @@ temporal_frequencies_plot <- temporal_frequencies %>%
 ``` r
 temporal_cumulative_frequencies_plot <- temporal_frequencies %>%
   ggplot(aes(x=pub_year,y=cumulative_frequency,fill=cumulative_frequency)) +
-  scale_fill_gradient(name="Count",low="lavender",high="lightslateblue",limits=c(1,116),na.value="lavender",breaks=c(1,29,58,87,116)) +
-  geom_col(color="black",size=0.2) + 
+  scale_fill_manual(name="Count",breaks=c(1,29,58,87,116)) +
+  geom_col(color="black",size=0.2,fill="lightslateblue") + 
   xlab("Publication Year") + 
   ylab("Cumulative Frequency") + 
   scale_y_continuous(limits=c(0,120),breaks=c(0,29,58,87,116)) +
